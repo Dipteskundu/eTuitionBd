@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { FcGoogle } from 'react-icons/fc';
 import toast from 'react-hot-toast';
@@ -8,19 +8,24 @@ const Login = () => {
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [loading, setLoading] = useState(false);
-    const { login, googleLogin } = useAuth();
+    const { user, login, googleLogin } = useAuth();
     const navigate = useNavigate();
+
+    useEffect(() => {
+        if (user?.role) {
+            navigate(`/dashboard/${user.role}`);
+        }
+    }, [user, navigate]);
 
     const handleLogin = async (e) => {
         e.preventDefault();
         setLoading(true);
 
         try {
-            const result = await login(email, password);
+            await login(email, password);
             toast.success('Logged in successfully!');
-            navigate(`/dashboard/${result.user.role}`);
         } catch (error) {
-            toast.error(error.response?.data?.message || 'Login failed');
+            toast.error(error.response?.data?.message || error.message || 'Login failed');
         } finally {
             setLoading(false);
         }
@@ -28,11 +33,10 @@ const Login = () => {
 
     const handleGoogleLogin = async () => {
         try {
-            const result = await googleLogin();
+            await googleLogin();
             toast.success('Logged in with Google!');
-            navigate(`/dashboard/${result.user.role}`);
         } catch (error) {
-            toast.error('Google login failed');
+            toast.error(error.response?.data?.message || error.message || 'Google login failed');
         }
     };
 

@@ -8,7 +8,7 @@ import {
     onAuthStateChanged
 } from 'firebase/auth';
 import { auth } from '../firebase/config';
-import axios from 'axios';
+import api from '../utils/api';
 
 export const AuthContext = createContext();
 
@@ -37,7 +37,7 @@ const AuthProvider = ({ children }) => {
                 photoURL
             };
 
-            await axios.post(`${import.meta.env.VITE_API_URL}/user`, userData);
+            await api.post('/user', userData);
 
             // Store token
             localStorage.setItem('token', idToken);
@@ -64,7 +64,7 @@ const AuthProvider = ({ children }) => {
             // Sync login time with backend
             // For login, we just send email so backend finds and updates 'last_loggedIn'
             // But backend expects req.body.email to find query
-            await axios.post(`${import.meta.env.VITE_API_URL}/user`, { email });
+            await api.post('/user', { email });
 
             // Store token
             localStorage.setItem('token', idToken);
@@ -92,7 +92,7 @@ const AuthProvider = ({ children }) => {
                 role: 'student' // Default role for Google Login, or backend handles it
             };
 
-            await axios.post(`${import.meta.env.VITE_API_URL}/user`, userData);
+            await api.post('/user', userData);
 
             // Store token
             localStorage.setItem('token', idToken);
@@ -129,17 +129,16 @@ const AuthProvider = ({ children }) => {
 
                     // Fetch full user profile (role) from backend
                     console.log("[AuthContext] Fetching user role from backend...");
-                    const res = await axios.get(`${import.meta.env.VITE_API_URL}/user/role`, {
-                        headers: { Authorization: `Bearer ${idToken}` }
-                    });
+                    const res = await api.get('/user/role');
 
                     console.log("[AuthContext] Backend Role Response:", res.data);
 
-                    // Update user with role
+                    // Update user with role and normalized name
                     setUser({
                         uid: firebaseUser.uid,
                         email: firebaseUser.email,
                         displayName: firebaseUser.displayName,
+                        name: firebaseUser.displayName || (firebaseUser.email ? firebaseUser.email.split('@')[0] : ''),
                         photoURL: firebaseUser.photoURL,
                         role: res.data.role
                     });
@@ -149,7 +148,8 @@ const AuthProvider = ({ children }) => {
                     // Fallback using just firebase data if backend fails
                     setUser({
                         ...firebaseUser,
-                        role: 'student' // Default fallback to prevent crash
+                        role: 'student',
+                        name: firebaseUser.displayName || (firebaseUser.email ? firebaseUser.email.split('@')[0] : '')
                     });
                 }
             } else {

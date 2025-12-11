@@ -85,11 +85,11 @@ const Navbar = () => {
                                 <div className="dropdown dropdown-end">
                                     <label tabIndex={0} className="btn btn-ghost btn-circle avatar">
                                         <div className="w-10 rounded-full">
-                                            <img src={user.photoURL || 'https://via.placeholder.com/150'} alt={user.name} />
+                                            <img src={user.photoURL || 'https://via.placeholder.com/150'} alt={user.displayName || user.name || 'User'} />
                                         </div>
                                     </label>
                                     <ul tabIndex={0} className="mt-3 z-[1] p-2 shadow menu menu-sm dropdown-content bg-base-100 rounded-box w-52">
-                                        <li><span className="font-semibold">{user.name}</span></li>
+                                        <li><span className="font-semibold">{user.displayName || user.name || user.email}</span></li>
                                         <li><span className="text-xs text-gray-500">{user.email}</span></li>
                                         <li><Link to={`/dashboard/${user.role}/profile`}>Profile Settings</Link></li>
                                         <li><button onClick={handleLogout} className="text-red-600">Logout</button></li>

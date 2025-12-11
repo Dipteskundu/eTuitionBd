@@ -177,7 +177,7 @@ const TuitionDetails = () => {
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="form-control">
                   <label className="label font-semibold">Name</label>
-                  <input type="text" value={user.name} className="input input-bordered bg-base-200" readOnly />
+                  <input type="text" value={user.displayName || user.name || ''} className="input input-bordered bg-base-200" readOnly />
                 </div>
                 <div className="form-control">
                   <label className="label font-semibold">Email</label>

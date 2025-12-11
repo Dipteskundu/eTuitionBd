@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { FcGoogle } from 'react-icons/fc';
 import toast from 'react-hot-toast';
@@ -14,8 +14,14 @@ const Register = () => {
         phone: ''
     });
     const [loading, setLoading] = useState(false);
-    const { register: registerUser, googleLogin } = useAuth();
+    const { user, register: registerUser, googleLogin } = useAuth();
     const navigate = useNavigate();
+
+    useEffect(() => {
+        if (user?.role) {
+            navigate(`/dashboard/${user.role}`);
+        }
+    }, [user, navigate]);
 
     const handleChange = (e) => {
         setFormData({
@@ -38,9 +44,8 @@ const Register = () => {
                 'https://via.placeholder.com/150'
             );
             toast.success('Registered successfully!');
-            navigate(`/dashboard/${result.user.role}`);
         } catch (error) {
-            toast.error(error.response?.data?.message || 'Registration failed');
+            toast.error(error.response?.data?.message || error.message || 'Registration failed');
         } finally {
             setLoading(false);
         }
@@ -48,11 +53,10 @@ const Register = () => {
 
     const handleGoogleRegister = async () => {
         try {
-            const result = await googleLogin();
+            await googleLogin();
             toast.success('Registered with Google!');
-            navigate(`/dashboard/${result.user.role}`);
         } catch (error) {
-            toast.error('Google registration failed');
+            toast.error(error.response?.data?.message || error.message || 'Google registration failed');
         }
     };
 
