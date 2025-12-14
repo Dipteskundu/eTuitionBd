@@ -1,31 +1,39 @@
-import { useState, useEffect } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
-import { FcGoogle } from 'react-icons/fc';
-import toast from 'react-hot-toast';
+import React, { useState } from 'react';
+import { Link, useNavigate, useLocation } from 'react-router-dom';
+import { motion } from 'framer-motion';
+import { Mail, Lock, LogIn, Chrome, AlertCircle } from 'lucide-react';
 import useAuth from '../../hooks/useAuth';
+import useToast from '../../hooks/useToast';
+import Input from '../../components/ui/Input';
+import Button from '../../components/ui/Button';
 
 const Login = () => {
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [loading, setLoading] = useState(false);
-    const { user, login, googleLogin } = useAuth();
+
+    const { signIn, signInGoogle } = useAuth();
+    const toast = useToast();
     const navigate = useNavigate();
+    const location = useLocation();
 
-    useEffect(() => {
-        if (user?.role) {
-            navigate(`/dashboard/${user.role}`);
-        }
-    }, [user, navigate]);
+    const from = location.state?.from?.pathname || '/';
 
-    const handleLogin = async (e) => {
+    const handleSubmit = async (e) => {
         e.preventDefault();
         setLoading(true);
 
         try {
-            await login(email, password);
-            toast.success('Logged in successfully!');
+            await signIn(email, password);
+            toast.success('Login successful! Welcome back.');
+            navigate(from, { replace: true });
         } catch (error) {
-            toast.error(error.response?.data?.message || error.message || 'Login failed');
+            console.error(error);
+            let msg = 'Failed to login';
+            if (error.code === 'auth/wrong-password') msg = 'Incorrect password';
+            if (error.code === 'auth/user-not-found') msg = 'No user found with this email';
+            if (error.code === 'auth/invalid-credential') msg = 'Invalid credentials';
+            toast.error(msg);
         } finally {
             setLoading(false);
         }
@@ -33,72 +41,110 @@ const Login = () => {
 
     const handleGoogleLogin = async () => {
         try {
-            await googleLogin();
-            toast.success('Logged in with Google!');
+            const result = await signInGoogle();
+            const user = result.user;
+
+            // Prepare User Data for DB
+            const userData = {
+                name: user.displayName,
+                email: user.email,
+                photoURL: user.photoURL,
+                role: 'student', // Default role for Google Login
+                phone: '', // Google does not imply phone
+            };
+
+            // Save user to backend (If exists, backend handles it gracefully)
+            await axiosInstance.post('/user', userData);
+            localStorage.setItem('userRole', 'student'); // Default role assumption for immediate UI
+
+            toast.success('Logged in with Google successfully!');
+            navigate(from, { replace: true });
         } catch (error) {
-            toast.error(error.response?.data?.message || error.message || 'Google login failed');
+            console.error(error);
+            toast.error('Google login failed. Please try again.');
         }
     };
 
     return (
-        <div className="min-h-[80vh] flex items-center justify-center bg-gradient-to-br from-primary/10 to-secondary/10 section-padding">
-            <div className="card w-full max-w-md shadow-2xl bg-white">
-                <form onSubmit={handleLogin} className="card-body">
-                    <h2 className="text-3xl font-bold text-center text-primary mb-4">Login</h2>
+        <div className="min-h-[calc(100vh-64px)] flex items-center justify-center p-4 bg-base-200/30">
+            <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.5 }}
+                className="card w-full max-w-md bg-base-100 shadow-2xl border border-base-200"
+            >
+                <div className="card-body p-8">
+                    <div className="text-center mb-6">
+                        <h2 className="text-3xl font-bold bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">Welcome Back</h2>
+                        <p className="text-gray-500 mt-2">Enter your credentials to access your account</p>
+                    </div>
 
-                    <div className="form-control">
-                        <label className="label">
-                            <span className="label-text font-semibold">Email</span>
-                        </label>
-                        <input
+                    <form onSubmit={handleSubmit} className="space-y-4">
+                        <Input
+                            label="Email Address"
                             type="email"
-                            placeholder="your@email.com"
-                            className="input input-bordered"
+                            placeholder="you@example.com"
+                            icon={<Mail size={20} />}
                             value={email}
                             onChange={(e) => setEmail(e.target.value)}
                             required
                         />
-                    </div>
 
-                    <div className="form-control">
-                        <label className="label">
-                            <span className="label-text font-semibold">Password</span>
-                        </label>
-                        <input
-                            type="password"
-                            placeholder="••••••••"
-                            className="input input-bordered"
-                            value={password}
-                            onChange={(e) => setPassword(e.target.value)}
-                            required
-                        />
-                    </div>
+                        <div className="form-control w-full">
+                            <Input
+                                label="Password"
+                                type="password"
+                                placeholder="••••••••"
+                                icon={<Lock size={20} />}
+                                value={password}
+                                onChange={(e) => setPassword(e.target.value)}
+                                required
+                            />
+                            <label className="label">
+                                <span className="label-text-alt"></span>
+                                <a href="#" className="label-text-alt link link-hover text-primary">Forgot password?</a>
+                            </label>
+                        </div>
 
-                    <div className="form-control mt-6">
-                        <button type="submit" className="btn btn-primary" disabled={loading}>
-                            {loading ? <span className="loading loading-spinner"></span> : 'Login'}
-                        </button>
-                    </div>
+                        <Button
+                            type="submit"
+                            variant="primary"
+                            className="w-full mt-2"
+                            loading={loading}
+                            disabled={loading}
+                        >
+                            Sign In <LogIn size={18} className="ml-2" />
+                        </Button>
+                    </form>
 
-                    <div className="divider">OR</div>
+                    <div className="divider text-sm text-gray-500">OR</div>
 
-                    <button
-                        type="button"
+                    <Button
+                        variant="outline"
+                        className="w-full"
                         onClick={handleGoogleLogin}
-                        className="btn btn-outline gap-2"
+                        disabled={loading}
                     >
-                        <FcGoogle size={24} />
-                        Continue with Google
-                    </button>
+                        <Chrome size={20} className="mr-2 text-primary" /> Continue with Google
+                    </Button>
 
-                    <p className="text-center mt-4">
-                        Don't have an account?{' '}
-                        <Link to="/register" className="text-primary font-semibold hover:underline">
-                            Register here
+                    <p className="text-center mt-6 text-sm text-gray-600">
+                        Don't have an account?
+                        <Link to="/register" className="text-primary font-bold hover:underline ml-1">
+                            Register Now
                         </Link>
                     </p>
-                </form>
-            </div>
+
+                    <div className="alert alert-info bg-blue-50 text-blue-800 text-xs mt-6 flex items-start gap-2 border-blue-100">
+                        <AlertCircle size={16} className="shrink-0 mt-0.5" />
+                        <span>
+                            <strong>Note:</strong> These are example credentials.
+                            <br />
+                            Please <strong>Register</strong> first to create these accounts if they don't exist.
+                        </span>
+                    </div>
+                </div>
+            </motion.div>
         </div>
     );
 };

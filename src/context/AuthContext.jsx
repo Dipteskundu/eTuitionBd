@@ -1,184 +1,137 @@
-import { createContext, useState, useEffect } from 'react';
+import { createContext, useEffect, useState } from 'react';
 import {
     createUserWithEmailAndPassword,
     signInWithEmailAndPassword,
     signInWithPopup,
-    GoogleAuthProvider,
     signOut,
-    onAuthStateChanged
+    onAuthStateChanged,
+    updateProfile,
+    updatePassword
 } from 'firebase/auth';
-import { auth } from '../firebase/config';
-import api from '../utils/api';
+import { auth, googleProvider } from '../services/firebase';
+import axiosInstance from '../utils/axiosInstance';
 
-export const AuthContext = createContext();
+export const AuthContext = createContext(null);
 
-const AuthProvider = ({ children }) => {
+export const AuthProvider = ({ children }) => {
     const [user, setUser] = useState(null);
     const [loading, setLoading] = useState(true);
-    const [token, setToken] = useState(localStorage.getItem('token'));
+    const [role, setRole] = useState(null);
+    const [dbUser, setDbUser] = useState(null);
 
-    const googleProvider = new GoogleAuthProvider();
-
-    // Register with email and password
-    const register = async (name, email, password, role, phone, photoURL) => {
+    // Sync with backend to get user role and details
+    const fetchUserRole = async (email) => {
         try {
-            const userCredential = await createUserWithEmailAndPassword(auth, email, password);
-            const firebaseUser = userCredential.user;
-
-            // Get Token
-            const idToken = await firebaseUser.getIdToken();
-
-            // Send user data to backend for syncing
-            const userData = {
-                name,
-                email,
-                role, // Backend sets 'student' if missing, but we pass it if we have it
-                phone,
-                photoURL
-            };
-
-            await api.post('/user', userData);
-
-            // Store token
-            localStorage.setItem('token', idToken);
-            setToken(idToken);
-
-            // We can optimistic update user or fetch it
-            // For now, let's wait for onAuthStateChanged or set it manually with basic info
-            setUser({ ...userData, uid: firebaseUser.uid });
-
-            return userCredential;
-        } catch (error) {
-            throw error;
-        }
-    };
-
-    // Login with email and password
-    const login = async (email, password) => {
-        try {
-            const userCredential = await signInWithEmailAndPassword(auth, email, password);
-            const firebaseUser = userCredential.user;
-
-            const idToken = await firebaseUser.getIdToken();
-
-            // Sync login time with backend
-            // For login, we just send email so backend finds and updates 'last_loggedIn'
-            // But backend expects req.body.email to find query
-            await api.post('/user', { email });
-
-            // Store token
-            localStorage.setItem('token', idToken);
-            setToken(idToken);
-            // User state will be updated by onAuthStateChanged fetching full profile
-
-            return userCredential;
-        } catch (error) {
-            throw error;
-        }
-    };
-
-    // Google login
-    const googleLogin = async () => {
-        try {
-            const result = await signInWithPopup(auth, googleProvider);
-            const firebaseUser = result.user;
-            const idToken = await firebaseUser.getIdToken();
-
-            // Send to backend to create user if not exists or update login time
-            const userData = {
-                name: firebaseUser.displayName,
-                email: firebaseUser.email,
-                photoURL: firebaseUser.photoURL,
-                role: 'student' // Default role for Google Login, or backend handles it
-            };
-
-            await api.post('/user', userData);
-
-            // Store token
-            localStorage.setItem('token', idToken);
-            setToken(idToken);
-
-            return result;
-        } catch (error) {
-            throw error;
-        }
-    };
-
-    // Logout
-    const logout = async () => {
-        try {
-            await signOut(auth);
-            localStorage.removeItem('token');
-            setToken(null);
-            setUser(null);
-        } catch (error) {
-            throw error;
-        }
-    };
-
-    // Monitor auth state
-    useEffect(() => {
-        const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
-            if (firebaseUser) {
-                console.log("[AuthContext] Firebase User detected:", firebaseUser.email);
-                try {
-                    const idToken = await firebaseUser.getIdToken();
-                    console.log("[AuthContext] ID Token retrieved");
-                    setToken(idToken);
-                    localStorage.setItem('token', idToken);
-
-                    // Fetch full user profile (role) from backend
-                    console.log("[AuthContext] Fetching user role from backend...");
-                    const res = await api.get('/user/role');
-
-                    console.log("[AuthContext] Backend Role Response:", res.data);
-
-                    // Update user with role and normalized name
-                    setUser({
-                        uid: firebaseUser.uid,
-                        email: firebaseUser.email,
-                        displayName: firebaseUser.displayName,
-                        name: firebaseUser.displayName || (firebaseUser.email ? firebaseUser.email.split('@')[0] : ''),
-                        photoURL: firebaseUser.photoURL,
-                        role: res.data.role
-                    });
-
-                } catch (error) {
-                    console.error('[AuthContext] Error fetching user data:', error);
-                    // Fallback using just firebase data if backend fails
-                    setUser({
-                        ...firebaseUser,
-                        role: 'student',
-                        name: firebaseUser.displayName || (firebaseUser.email ? firebaseUser.email.split('@')[0] : '')
-                    });
-                }
-            } else {
-                console.log("[AuthContext] No User");
-                setToken(null);
-                localStorage.removeItem('token');
-                setUser(null);
+            // Check localStorage first for immediate UI update if available
+            const cachedRole = localStorage.getItem('userRole');
+            if (cachedRole) {
+                setRole(cachedRole);
             }
+
+            // Allow role fetching even if no token yet (public endpoint or user just logged in)
+            const res = await axiosInstance.get(`/users/${email}`);
+            if (res.data) {
+                const backendRole = res.data.role;
+                if (backendRole) {
+                    setRole(backendRole);
+                    setDbUser(res.data);
+                    localStorage.setItem('userRole', backendRole);
+                } else {
+                    // Backend returned user but no role? Or user not found but res.data exists?
+                    // Fallback to localStorage if available to salvage the session
+                    const cachedRole = localStorage.getItem('userRole');
+                    if (cachedRole) {
+                        setRole(cachedRole);
+                        // Ideally we should sync back to DB here, but for now we trust cache
+                    }
+                    setDbUser(res.data);
+                }
+            }
+        } catch (error) {
+            console.error("Error fetching user role:", error);
+            // Fallback to localStorage if backend fails
+            const cachedRole = localStorage.getItem('userRole');
+            if (cachedRole) {
+                setRole(cachedRole);
+            }
+        }
+    };
+
+    const createUser = (email, password) => {
+        setLoading(true);
+        return createUserWithEmailAndPassword(auth, email, password);
+    };
+
+    const signIn = (email, password) => {
+        setLoading(true);
+        return signInWithEmailAndPassword(auth, email, password);
+    };
+
+    const signInGoogle = () => {
+        setLoading(true);
+        return signInWithPopup(auth, googleProvider);
+    };
+
+    const logOut = () => {
+        setLoading(true);
+        localStorage.removeItem('token');
+        localStorage.removeItem('userRole'); // Clear role on logout
+        return signOut(auth);
+    };
+
+    const updateUserProfile = (name, photo) => {
+        return updateProfile(auth.currentUser, {
+            displayName: name,
+            photoURL: photo
+        });
+    };
+
+    const updateUserPassword = (newPassword) => {
+        return updatePassword(auth.currentUser, newPassword);
+    };
+
+    useEffect(() => {
+        const unsubscribe = onAuthStateChanged(auth, async (currentUser) => {
+            setUser(currentUser);
+
+            if (currentUser) {
+                // Get JWT token
+                const token = await currentUser.getIdToken();
+                localStorage.setItem('token', token);
+
+                // Fetch role from backend
+                await fetchUserRole(currentUser.email);
+            } else {
+                localStorage.removeItem('token');
+                localStorage.removeItem('userRole');
+                setRole(null);
+                setDbUser(null);
+            }
+
             setLoading(false);
         });
 
-        return () => unsubscribe();
+        return () => {
+            return unsubscribe();
+        };
     }, []);
 
-    const value = {
+    const authInfo = {
         user,
+        role,
+        dbUser,
         loading,
-        token,
-        register,
-        login,
-        googleLogin,
-        logout
+        createUser,
+        signIn,
+        signInGoogle,
+        logOut,
+        updateUserProfile,
+        updateUserPassword
     };
 
     return (
-        <AuthContext.Provider value={value}>
+        <AuthContext.Provider value={authInfo}>
             {children}
         </AuthContext.Provider>
     );
 };
-
-export default AuthProvider;

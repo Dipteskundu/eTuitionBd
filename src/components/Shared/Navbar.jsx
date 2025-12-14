@@ -1,127 +1,212 @@
+import React, { useState, useContext } from 'react';
 import { Link, NavLink, useNavigate } from 'react-router-dom';
-import { FiMenu, FiX, FiSun, FiMoon } from 'react-icons/fi';
-import { useState, useEffect } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
+import { Menu, X, User, LogOut, ChevronDown, Sun, Moon } from 'lucide-react';
 import useAuth from '../../hooks/useAuth';
+import useRole from '../../hooks/useRole';
+import { ThemeContext } from '../../context/ThemeContext';
+import { ROLES } from '../../utils/constants';
+import Button from '../ui/Button';
 
 const Navbar = () => {
-    const { user, logout } = useAuth();
-
-    const [isMenuOpen, setIsMenuOpen] = useState(false);
-
-    // Theme State
-    const [theme, setTheme] = useState(localStorage.getItem('theme') || 'mytheme');
-
-    useEffect(() => {
-        localStorage.setItem('theme', theme);
-        const localTheme = localStorage.getItem('theme');
-        document.querySelector('html').setAttribute('data-theme', localTheme);
-    }, [theme]);
-
-    const handleToggle = () => {
-        setTheme(theme === 'mytheme' ? 'dark' : 'mytheme');
-    };
-
+    const [isOpen, setIsOpen] = useState(false);
+    const { user, logOut } = useAuth();
+    const { role } = useRole();
+    const { theme, toggleTheme } = useContext(ThemeContext);
     const navigate = useNavigate();
 
     const handleLogout = async () => {
         try {
-            await logout();
+            await logOut();
             navigate('/login');
         } catch (error) {
-            console.error('Logout error:', error);
+            console.error('Logout failed:', error);
         }
     };
 
-    const navLinks = (
-        <>
-            <NavLink to="/" className={({ isActive }) => isActive ? 'text-primary font-semibold' : 'text-gray-700 hover:text-primary transition'}>
-                Home
-            </NavLink>
-            <NavLink to="/tuitions" className={({ isActive }) => isActive ? 'text-primary font-semibold' : 'text-gray-700 hover:text-primary transition'}>
-                Tuitions
-            </NavLink>
-            <NavLink to="/tutors" className={({ isActive }) => isActive ? 'text-primary font-semibold' : 'text-gray-700 hover:text-primary transition'}>
-                Tutors
-            </NavLink>
-            <NavLink to="/about" className={({ isActive }) => isActive ? 'text-primary font-semibold' : 'text-gray-700 hover:text-primary transition'}>
-                About
-            </NavLink>
-            <NavLink to="/contact" className={({ isActive }) => isActive ? 'text-primary font-semibold' : 'text-gray-700 hover:text-primary transition'}>
-                Contact
-            </NavLink>
-        </>
-    );
+    const getDashboardLink = () => {
+        switch (role) {
+            case ROLES.STUDENT: return '/dashboard/student';
+            case ROLES.TUTOR: return '/dashboard/tutor';
+            case ROLES.ADMIN: return '/dashboard/admin';
+            default: return '/';
+        }
+    };
+
+    const navLinks = [
+        { name: 'Home', path: '/' },
+        { name: 'Tuitions', path: '/tuitions' },
+        { name: 'Tutors', path: '/tutors' },
+        { name: 'About', path: '/about' },
+        { name: 'Contact', path: '/contact' },
+    ];
 
     return (
-        <nav className="sticky top-0 z-50 bg-white shadow-md">
-            <div className="page-container">
-                <div className="navbar px-0">
+        <nav className="sticky top-0 z-40 bg-base-100/80 backdrop-blur-md border-b border-base-200">
+            <div className="container mx-auto px-4 sm:px-6 lg:px-8">
+                <div className="flex justify-between items-center h-16">
                     {/* Logo */}
-                    <div className="navbar-start">
-                        <Link to="/" className="text-2xl font-bold text-primary flex items-center gap-2">
-                            <span className="text-3xl">📚</span>
-                            <span>eTuitionBd</span>
-                        </Link>
-                    </div>
+                    <Link to="/" className="flex items-center gap-2">
+                        <span className="text-2xl font-bold bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">
+                            eTuitionBd
+                        </span>
+                    </Link>
 
                     {/* Desktop Menu */}
-                    <div className="navbar-center hidden lg:flex">
-                        <ul className="menu menu-horizontal gap-4 text-base">
-                            {navLinks}
-                        </ul>
-                    </div>
+                    <div className="hidden md:flex items-center gap-8">
+                        <div className="flex items-center gap-6">
+                            {navLinks.map((link) => (
+                                <NavLink
+                                    key={link.name}
+                                    to={link.path}
+                                    className={({ isActive }) =>
+                                        `text-sm font-medium transition-colors duration-200 hover:text-primary ${isActive ? 'text-primary' : 'text-gray-600 dark:text-gray-300'
+                                        }`
+                                    }
+                                >
+                                    {link.name}
+                                </NavLink>
+                            ))}
+                        </div>
 
-                    {/* Auth Section */}
-                    <div className="navbar-end gap-2">
-                        {/* Theme Toggle */}
-                        <button onClick={handleToggle} className="btn btn-ghost btn-circle">
-                            {theme === 'mytheme' ? <FiMoon size={20} /> : <FiSun size={20} />}
-                        </button>
-                        {user ? (
-                            <>
-                                <Link to={`/dashboard/${user.role}`} className="btn btn-primary btn-sm">
-                                    Dashboard
-                                </Link>
+                        {/* Auth Buttons */}
+                        <div className="flex items-center gap-4">
+                            {/* Theme Toggle */}
+                            <button
+                                onClick={toggleTheme}
+                                className="btn btn-ghost btn-circle btn-sm"
+                                aria-label="Toggle Theme"
+                            >
+                                {theme === 'light' ? <Moon size={20} /> : <Sun size={20} />}
+                            </button>
+
+                            {user ? (
                                 <div className="dropdown dropdown-end">
-                                    <label tabIndex={0} className="btn btn-ghost btn-circle avatar">
+                                    <label tabIndex={0} className="btn btn-ghost btn-circle avatar border border-base-300">
                                         <div className="w-10 rounded-full">
-                                            <img src={user.photoURL || 'https://via.placeholder.com/150'} alt={user.displayName || user.name || 'User'} />
+                                            {user.photoURL ? (
+                                                <img src={user.photoURL} alt={user.displayName} />
+                                            ) : (
+                                                <User className="w-6 h-6 m-2 text-gray-500" />
+                                            )}
                                         </div>
                                     </label>
-                                    <ul tabIndex={0} className="mt-3 z-[1] p-2 shadow menu menu-sm dropdown-content bg-base-100 rounded-box w-52">
-                                        <li><span className="font-semibold">{user.displayName || user.name || user.email}</span></li>
-                                        <li><span className="text-xs text-gray-500">{user.email}</span></li>
-                                        <li><Link to={`/dashboard/${user.role}/profile`}>Profile Settings</Link></li>
-                                        <li><button onClick={handleLogout} className="text-red-600">Logout</button></li>
+                                    <ul tabIndex={0} className="mt-3 z-[1] p-2 shadow-lg menu menu-sm dropdown-content bg-base-100 rounded-box w-52 border border-base-200">
+                                        <li className="px-4 py-2 hover:bg-transparent">
+                                            <p className="font-semibold truncate text-gray-800 dark:text-gray-200">{user.displayName || user.email}</p>
+                                            <p className="text-xs text-gray-500 block mt-1">
+                                                User: <span className="uppercase font-bold text-primary">{role || 'User'}</span>
+                                            </p>
+                                        </li>
+                                        <div className="divider my-0"></div>
+                                        <li><Link to={getDashboardLink()}>Dashboard</Link></li>
+                                        <li><Link to="/profile-settings">Profile Settings</Link></li>
+                                        <li>
+                                            <button onClick={handleLogout} className="text-error">
+                                                <LogOut size={16} /> Logout
+                                            </button>
+                                        </li>
                                     </ul>
                                 </div>
-                            </>
-                        ) : (
-                            <>
-                                <Link to="/login" className="btn btn-ghost btn-sm">Login</Link>
-                                <Link to="/register" className="btn btn-primary btn-sm">Register</Link>
-                            </>
-                        )}
+                            ) : (
+                                <>
+                                    <Link to="/login">
+                                        <Button variant="ghost" size="sm">Login</Button>
+                                    </Link>
+                                    <Link to="/register">
+                                        <Button variant="primary" size="sm">Register</Button>
+                                    </Link>
+                                </>
+                            )}
+                        </div>
+                    </div>
 
-                        {/* Mobile Menu Button */}
+                    {/* Mobile Menu Button */}
+                    <div className="md:hidden flex items-center">
                         <button
-                            className="btn btn-ghost lg:hidden"
-                            onClick={() => setIsMenuOpen(!isMenuOpen)}
+                            onClick={() => setIsOpen(!isOpen)}
+                            className="btn btn-ghost btn-circle"
                         >
-                            {isMenuOpen ? <FiX size={24} /> : <FiMenu size={24} />}
+                            {isOpen ? <X size={24} /> : <Menu size={24} />}
                         </button>
                     </div>
                 </div>
-
-                {/* Mobile Menu */}
-                {isMenuOpen && (
-                    <div className="lg:hidden pb-4">
-                        <ul className="menu menu-vertical gap-2">
-                            {navLinks}
-                        </ul>
-                    </div>
-                )}
             </div>
+
+            {/* Mobile Menu AnimatePresence */}
+            <AnimatePresence>
+                {isOpen && (
+                    <motion.div
+                        initial={{ opacity: 0, height: 0 }}
+                        animate={{ opacity: 1, height: 'auto' }}
+                        exit={{ opacity: 0, height: 0 }}
+                        className="md:hidden overflow-hidden border-b border-base-200 bg-base-100"
+                    >
+                        <div className="px-4 py-4 space-y-4">
+                            {navLinks.map((link) => (
+                                <NavLink
+                                    key={link.name}
+                                    to={link.path}
+                                    onClick={() => setIsOpen(false)}
+                                    className={({ isActive }) =>
+                                        `block text-base font-medium py-2 ${isActive ? 'text-primary' : 'text-gray-600'
+                                        }`
+                                    }
+                                >
+                                    {link.name}
+                                </NavLink>
+                            ))}
+
+                            <div className="divider my-2"></div>
+
+                            {user ? (
+                                <div className="space-y-3">
+                                    <div className="flex items-center gap-3 px-2">
+                                        <div className="avatar">
+                                            <div className="w-10 rounded-full border">
+                                                {user.photoURL ? (
+                                                    <img src={user.photoURL} alt={user.displayName} />
+                                                ) : (
+                                                    <User className="w-6 h-6 m-2" />
+                                                )}
+                                            </div>
+                                        </div>
+                                        <div>
+                                            <p className="font-semibold">{user.displayName}</p>
+                                            <p className="text-xs text-gray-500 capitalize">{role}</p>
+                                        </div>
+                                    </div>
+                                    <Link
+                                        to={getDashboardLink()}
+                                        onClick={() => setIsOpen(false)}
+                                        className="btn btn-primary w-full btn-sm"
+                                    >
+                                        Dashboard
+                                    </Link>
+                                    <button
+                                        onClick={() => {
+                                            handleLogout();
+                                            setIsOpen(false);
+                                        }}
+                                        className="btn btn-outline btn-error w-full btn-sm"
+                                    >
+                                        Logout
+                                    </button>
+                                </div>
+                            ) : (
+                                <div className="flex flex-col gap-3">
+                                    <Link to="/login" onClick={() => setIsOpen(false)}>
+                                        <Button variant="ghost" className="w-full">Login</Button>
+                                    </Link>
+                                    <Link to="/register" onClick={() => setIsOpen(false)}>
+                                        <Button variant="primary" className="w-full">Register</Button>
+                                    </Link>
+                                </div>
+                            )}
+                        </div>
+                    </motion.div>
+                )}
+            </AnimatePresence>
         </nav>
     );
 };

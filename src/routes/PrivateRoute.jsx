@@ -1,21 +1,18 @@
-import { Navigate } from 'react-router-dom';
+import React from 'react';
+import { Navigate, useLocation } from 'react-router-dom';
 import useAuth from '../hooks/useAuth';
-import Loading from '../components/Shared/Loading';
+import Loader from '../components/ui/Loader';
 
-const PrivateRoute = ({ children, allowedRoles = [] }) => {
+const PrivateRoute = ({ children }) => {
     const { user, loading } = useAuth();
+    const location = useLocation();
 
     if (loading) {
-        return <Loading />;
+        return <Loader fullScreen text="Checking authentication..." />;
     }
 
     if (!user) {
-        return <Navigate to="/login" replace />;
-    }
-
-    if (allowedRoles.length > 0 && !allowedRoles.includes(user.role)) {
-        // Redirect to user's dashboard
-        return <Navigate to={`/dashboard/${user.role}`} replace />;
+        return <Navigate to="/login" state={{ from: location }} replace />;
     }
 
     return children;
