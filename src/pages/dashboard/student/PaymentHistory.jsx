@@ -10,7 +10,7 @@ const PaymentHistory = () => {
     useEffect(() => {
         const fetchPayments = async () => {
             try {
-                const res = await axiosSecure.get('/student/payment-history');
+                const res = await axiosSecure.get('/my-payments');
                 setPayments(res.data);
             } catch (error) {
                 console.error("Error fetching payments:", error);
@@ -33,34 +33,40 @@ const PaymentHistory = () => {
                     <table className="table table-zebra w-full">
                         <thead>
                             <tr>
-                                <th>Transaction ID</th>
+                                <th>Tutor/Student</th>
+                                <th>Tuition</th>
                                 <th>Amount</th>
-                                <th>Date</th>
                                 <th>Status</th>
+                                <th>Date</th>
                             </tr>
                         </thead>
                         <tbody>
                             {payments.length === 0 ? (
                                 <tr>
-                                    <td colSpan="4" className="text-center py-8 text-gray-500">
+                                    <td colSpan="5" className="text-center py-8 text-gray-500">
                                         No payment records found.
                                     </td>
                                 </tr>
                             ) : (
                                 payments.map((payment) => (
                                     <tr key={payment._id}>
-                                        <td className="font-mono text-xs">{payment.transactionId}</td>
+                                        <td className="font-bold">
+                                            {payment.otherName || payment.tutorEmail}
+                                        </td>
+                                        <td>
+                                            <div className="text-sm">{payment.tuitionTitle || 'General Tuition'}</div>
+                                            <div className="text-xs opacity-50 font-mono">{payment.transactionId}</div>
+                                        </td>
                                         <td className="font-medium">BDT {payment.amount}</td>
                                         <td>
-                                            <div className="flex items-center gap-2">
-                                                <Calendar size={14} className="text-gray-400" />
-                                                {new Date(payment.created_at).toLocaleDateString()}
+                                            <div className={`badge ${payment.status === 'paid' ? 'badge-success text-white' : 'badge-ghost'}`}>
+                                                {payment.status === 'paid' ? 'Success' : payment.status}
                                             </div>
                                         </td>
                                         <td>
-                                            <div className="flex items-center gap-1 text-success font-medium">
-                                                <CheckCircle size={14} />
-                                                {payment.status}
+                                            <div className="flex items-center gap-2">
+                                                <Calendar size={14} className="text-gray-400" />
+                                                {new Date(payment.date || payment.created_at).toLocaleDateString()}
                                             </div>
                                         </td>
                                     </tr>

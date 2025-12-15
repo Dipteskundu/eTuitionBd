@@ -125,7 +125,7 @@ const MyTuitions = () => {
                                                 <Eye size={16} />
                                             </Link>
                                             <Link
-                                                to={`/dashboard/student/applications?tuitionId=${item._id}`}
+                                                to={`/dashboard/tuition/${item._id}/applications`}
                                                 className="btn btn-sm btn-outline btn-primary gap-2"
                                             >
                                                 <Users size={16} />

@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { useSearchParams } from 'react-router-dom';
+import { useParams, useNavigate } from 'react-router-dom';
 import useAxiosSecure from '../../../hooks/useAxiosSecure';
 import useToast from '../../../hooks/useToast';
 import { User, DollarSign, CreditCard } from 'lucide-react';
@@ -7,8 +7,8 @@ import Button from '../../../components/ui/Button';
 import Swal from 'sweetalert2';
 
 const Applications = () => {
-    const [searchParams] = useSearchParams();
-    const tuitionId = searchParams.get('tuitionId');
+    const { tuitionId } = useParams();
+    const navigate = useNavigate();
     const axiosSecure = useAxiosSecure();
     const { showToast } = useToast();
 

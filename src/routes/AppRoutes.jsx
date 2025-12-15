@@ -73,8 +73,12 @@ const AppRoutes = () => {
                 <Route path="/dashboard/student" element={<RoleRoute allowedRoles={[ROLES.STUDENT]}><StudentOverview /></RoleRoute>} />
                 <Route path="/dashboard/student/post-tuition" element={<RoleRoute allowedRoles={[ROLES.STUDENT]}><PostTuition /></RoleRoute>} />
                 <Route path="/dashboard/student/my-tuitions" element={<RoleRoute allowedRoles={[ROLES.STUDENT]}><MyTuitions /></RoleRoute>} />
-                <Route path="/dashboard/student/applications" element={<RoleRoute allowedRoles={[ROLES.STUDENT]}><StudentApplications /></RoleRoute>} />
-                <Route path="/dashboard/student/payments" element={<RoleRoute allowedRoles={[ROLES.STUDENT]}><PaymentHistory /></RoleRoute>} />
+                <Route path="/dashboard/student/my-tuitions" element={<RoleRoute allowedRoles={[ROLES.STUDENT]}><MyTuitions /></RoleRoute>} />
+
+                {/* Tuition Applications Route (Moved out of student/ specific namespace but protected) */}
+                <Route path="/dashboard/tuition/:tuitionId/applications" element={<RoleRoute allowedRoles={[ROLES.STUDENT]}><StudentApplications /></RoleRoute>} />
+
+                <Route path="/dashboard/transactions" element={<RoleRoute allowedRoles={[ROLES.STUDENT]}><PaymentHistory /></RoleRoute>} />
                 <Route path="/dashboard/student/payment/success" element={<RoleRoute allowedRoles={[ROLES.STUDENT]}><PaymentSuccess /></RoleRoute>} />
                 <Route path="/dashboard/student/profile" element={<RoleRoute allowedRoles={[ROLES.STUDENT]}><StudentProfile /></RoleRoute>} />
 
