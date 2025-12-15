@@ -31,8 +31,8 @@ const Applications = () => {
                 const tuitionRes = await axiosSecure.get(`/tuitions/${tuitionId}`);
                 setTuitionDetails(tuitionRes.data);
 
-                // Fetch Applications
-                const appsRes = await axiosSecure.get(`/applied-tutors/${tuitionId}`);
+                // Fetch Applications (Strict Endpoint)
+                const appsRes = await axiosSecure.get(`/applications/${tuitionId}`);
                 setApplications(appsRes.data);
             } catch (error) {
                 console.error(error);
@@ -106,11 +106,40 @@ const Applications = () => {
         }
     };
 
+    const handleDelete = async (appId) => {
+        const result = await Swal.fire({
+            title: 'Delete Application?',
+            text: "This will remove the application permanently.",
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#d33',
+            cancelButtonColor: '#3085d6',
+            confirmButtonText: 'Yes, Delete'
+        });
+
+        if (!result.isConfirmed) return;
+
+        try {
+            const res = await axiosSecure.delete(`/applications/${appId}`);
+            if (res.data.deletedCount > 0) {
+                showToast('Application deleted.', 'success');
+                setApplications(prev => prev.filter(app => app._id !== appId));
+            }
+        } catch (error) {
+            console.error(error);
+            showToast('Failed to delete application.', 'error');
+        }
+    };
+
+    // Kept handleReject for status update logic if preferred, but user requested Delete. 
+    // We can keep both or replacing Reject with Delete? User prompt says "Accept / Reject / Delete". So we usually need all 3.
+    // I'll keep Reject as status update (PATCH) and add Delete (DELETE) as a separate option.
+
     const handleReject = async (appId) => {
         // Confirmation before reject
         const result = await Swal.fire({
             title: 'Reject this Tutor?',
-            text: "Do you want to reject this application?",
+            text: "Do you want to reject this application? (Status will be 'rejected')",
             icon: 'warning',
             showCancelButton: true,
             confirmButtonColor: '#d33',
@@ -208,6 +237,13 @@ const Applications = () => {
                                             >
                                                 Reject
                                             </button>
+                                            <button
+                                                onClick={() => handleDelete(app._id)}
+                                                className="btn btn-sm btn-ghost text-gray-400 hover:text-red-500"
+                                                title="Delete permanently"
+                                            >
+                                                Delete
+                                            </button>
                                             <Button
                                                 onClick={() => handleAcceptClick(app)}
                                                 size="sm"
@@ -267,7 +303,7 @@ const Applications = () => {
                     </form>
                 </div>
             </dialog>
-        </div>
+        </div >
     );
 };
 

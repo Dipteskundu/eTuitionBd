@@ -64,7 +64,6 @@ const AppRoutes = () => {
                 <Route path="/login" element={<Login />} />
                 <Route path="/register" element={<Register />} />
                 <Route path="/unauthorized" element={<div className="p-10 text-center text-red-500 font-bold text-2xl">Unauthorized Access</div>} />
-                <Route path="*" element={<NotFound />} />
             </Route>
 
             {/* Protected Student & Tutor Dashboard Routes */}
@@ -73,9 +72,11 @@ const AppRoutes = () => {
                 <Route path="/dashboard/student" element={<RoleRoute allowedRoles={[ROLES.STUDENT]}><StudentOverview /></RoleRoute>} />
                 <Route path="/dashboard/student/post-tuition" element={<RoleRoute allowedRoles={[ROLES.STUDENT]}><PostTuition /></RoleRoute>} />
                 <Route path="/dashboard/student/my-tuitions" element={<RoleRoute allowedRoles={[ROLES.STUDENT]}><MyTuitions /></RoleRoute>} />
-                <Route path="/dashboard/student/my-tuitions" element={<RoleRoute allowedRoles={[ROLES.STUDENT]}><MyTuitions /></RoleRoute>} />
 
                 {/* Tuition Applications Route (Moved out of student/ specific namespace but protected) */}
+                <Route path="/dashboard/student/applications" element={<RoleRoute allowedRoles={[ROLES.STUDENT]}><StudentApplications /></RoleRoute>} />
+                <Route path="/dashboard/student/applications/:tuitionId" element={<RoleRoute allowedRoles={[ROLES.STUDENT]}><StudentApplications /></RoleRoute>} />
+                {/* Legacy Route Support (to prevent 404 on stale links) */}
                 <Route path="/dashboard/tuition/:tuitionId/applications" element={<RoleRoute allowedRoles={[ROLES.STUDENT]}><StudentApplications /></RoleRoute>} />
 
                 <Route path="/dashboard/transactions" element={<RoleRoute allowedRoles={[ROLES.STUDENT]}><PaymentHistory /></RoleRoute>} />
@@ -116,6 +117,9 @@ const AppRoutes = () => {
                 {/* Can add AdminProfile or ProfileSettings if needed */}
                 <Route path="profile" element={<ProfileSettings />} />
             </Route>
+
+            {/* Catch-all for any unmatched routes */}
+            <Route path="*" element={<NotFound />} />
         </Routes>
     );
 };
