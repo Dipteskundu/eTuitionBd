@@ -80,8 +80,13 @@ const Sidebar = ({ isOpen, onClose }) => {
                 <div className="h-full flex flex-col">
                     {/* Logo Area */}
                     <div className="h-16 flex items-center px-6 border-b border-base-200">
-                        <Link to="/" className="text-xl font-bold text-primary">
-                            eTuitionBd
+                        <Link to="/" className="flex items-center gap-3">
+                            <img
+                                src="/src/assets/logo.png"
+                                alt="eTuitionBd Logo"
+                                className="w-8 h-8 object-contain"
+                            />
+                            <span className="text-xl font-bold text-primary">eTuitionBd</span>
                         </Link>
                     </div>
 
@@ -110,7 +115,17 @@ const Sidebar = ({ isOpen, onClose }) => {
                     </div>
 
                     {/* Bottom Area */}
-                    <div className="p-4 border-t border-base-200">
+                    <div className="p-4 border-t border-base-200 space-y-2">
+                        <Link
+                            to="/"
+                            className="flex w-full items-center gap-3 px-4 py-3 text-primary hover:bg-primary/10 rounded-lg transition-colors"
+                        >
+                            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                                <path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
+                                <polyline points="9 22 9 12 15 12 15 22"></polyline>
+                            </svg>
+                            <span className="font-medium">Return Home</span>
+                        </Link>
                         <button
                             onClick={handleLogout}
                             className="flex w-full items-center gap-3 px-4 py-3 text-error hover:bg-red-50 rounded-lg transition-colors"

@@ -46,7 +46,12 @@ const Navbar = () => {
             <div className="container mx-auto px-4 sm:px-6 lg:px-8">
                 <div className="flex justify-between items-center h-16">
                     {/* Logo */}
-                    <Link to="/" className="flex items-center gap-2">
+                    <Link to="/" className="flex items-center gap-3">
+                        <img
+                            src="/src/assets/logo.png"
+                            alt="eTuitionBd Logo"
+                            className="w-10 h-10 object-contain"
+                        />
                         <span className="text-2xl font-bold bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">
                             eTuitionBd
                         </span>
