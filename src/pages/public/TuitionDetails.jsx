@@ -5,6 +5,7 @@ import useAuth from '../../hooks/useAuth';
 import useAxiosSecure from '../../hooks/useAxiosSecure';
 import toast from 'react-hot-toast';
 import BecomeTeacherModal from '../../components/BecomeTeacherModal';
+import ApplicationModal from '../../components/ApplicationModal';
 import { MapPin, DollarSign, Calendar, BookOpen, Clock, User, CheckCircle } from 'lucide-react';
 import Loader from '../../components/ui/Loader';
 
@@ -187,10 +188,10 @@ const TuitionDetails = () => {
                                 onClick={handleApplyClick}
                                 disabled={isAssigned || role === 'admin'}
                                 className={`w-full py-4 rounded-xl font-bold text-lg shadow-xl transition-all transform hover:scale-[1.02] active:scale-[0.98] ${isAssigned
-                                        ? 'bg-gray-300 text-gray-500 cursor-not-allowed dark:bg-gray-700 dark:text-gray-400'
-                                        : role === 'admin'
-                                            ? 'bg-gray-300 text-gray-500 cursor-not-allowed dark:bg-gray-700'
-                                            : 'bg-gradient-to-r from-purple-600 to-indigo-600 text-white hover:shadow-purple-500/30'
+                                    ? 'bg-gray-300 text-gray-500 cursor-not-allowed dark:bg-gray-700 dark:text-gray-400'
+                                    : role === 'admin'
+                                        ? 'bg-gray-300 text-gray-500 cursor-not-allowed dark:bg-gray-700'
+                                        : 'bg-gradient-to-r from-purple-600 to-indigo-600 text-white hover:shadow-purple-500/30'
                                     }`}
                             >
                                 {isAssigned
@@ -218,32 +219,16 @@ const TuitionDetails = () => {
                 onClose={() => setShowBecomeTeacherModal(false)}
             />
 
-            {/* Confirmation Modal for Tutors */}
-            {showConfirmModal && (
-                <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50 backdrop-blur-sm">
-                    <div className="bg-white dark:bg-gray-800 rounded-2xl p-8 max-w-sm w-full animate-fade-in">
-                        <h3 className="text-xl font-bold mb-4 dark:text-white">Confirm Application</h3>
-                        <p className="mb-6 text-gray-600 dark:text-gray-300">
-                            Are you sure you want to apply for this tuition? The guardian will see your profile.
-                        </p>
-                        <div className="flex justify-end gap-3">
-                            <button
-                                onClick={() => setShowConfirmModal(false)}
-                                className="px-4 py-2 rounded-lg border border-gray-300 hover:bg-gray-50 dark:border-gray-600 dark:text-white dark:hover:bg-gray-700"
-                            >
-                                Cancel
-                            </button>
-                            <button
-                                onClick={confirmApply}
-                                disabled={applying}
-                                className="px-4 py-2 rounded-lg bg-primary text-white hover:bg-primary-focus"
-                            >
-                                {applying ? "Sending..." : "Confirm Apply"}
-                            </button>
-                        </div>
-                    </div>
-                </div>
-            )}
+            {/* Application Modal for Tutors */}
+            <ApplicationModal
+                isOpen={showConfirmModal}
+                onClose={() => setShowConfirmModal(false)}
+                tuition={tuition}
+                onSuccess={() => {
+                    // Optional: Refetch or update UI state to show Applied
+                    setApplying(false);
+                }}
+            />
         </div>
     );
 };

@@ -80,11 +80,11 @@ const Applications = () => {
                 tuitionId: tuitionId, // Use URL param directly
                 tutorEmail: selectedApp.tutorEmail,
                 amount: tuitionDetails?.salary || 0, // Fallback safely
-                method: 'Demo Card',
-                transactionId: 'TXN_' + Math.random().toString(36).substr(2, 9).toUpperCase()
             };
 
-            const res = await axiosSecure.post('/process-payment', payload);
+            // Use Demo Payment API
+            const res = await axiosSecure.post('/payments/demo', payload);
+
             if (res.data.success) {
                 document.getElementById('payment_modal').close();
                 Swal.fire(
@@ -94,7 +94,8 @@ const Applications = () => {
                 );
                 // Update local state
                 setApplications(prev => prev.map(a =>
-                    a._id === selectedApp._id ? { ...a, status: 'accepted' } : a
+                    a._id === selectedApp._id ? { ...a, status: 'approved' } : // Approved status
+                        (a.tuitionId === tuitionId && a._id !== selectedApp._id) ? { ...a, status: 'rejected' } : a // Reject others
                 ));
             }
         } catch (error) {
@@ -106,8 +107,22 @@ const Applications = () => {
     };
 
     const handleReject = async (appId) => {
+        // Confirmation before reject
+        const result = await Swal.fire({
+            title: 'Reject this Tutor?',
+            text: "Do you want to reject this application?",
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#d33',
+            cancelButtonColor: '#3085d6',
+            confirmButtonText: 'Yes, Reject'
+        });
+
+        if (!result.isConfirmed) return;
+
         try {
-            const res = await axiosSecure.post('/reject-tutor', { applicationId: appId });
+            // Updated to PATCH /applications/:id
+            const res = await axiosSecure.patch(`/applications/${appId}`, { status: 'rejected' });
             if (res.data.modifiedCount > 0) {
                 showToast('Application rejected.', 'success');
                 setApplications(prev => prev.map(app =>
@@ -159,7 +174,7 @@ const Applications = () => {
                                             <p className="text-xs text-gray-500">Applied on: {new Date(app.created_at).toLocaleDateString()}</p>
                                         </div>
                                     </div>
-                                    <div className={`badge ${app.status === 'accepted' ? 'badge-success text-white' :
+                                    <div className={`badge ${app.status === 'approved' ? 'badge-success text-white' :
                                         app.status === 'rejected' ? 'badge-error text-white' :
                                             'badge-warning text-white'
                                         }`}>
