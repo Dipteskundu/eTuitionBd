@@ -14,6 +14,7 @@ const StudentOverview = () => {
         totalSpent: 0
     });
     const [recentActivity, setRecentActivity] = useState([]);
+    const [roleRequests, setRoleRequests] = useState([]); // New State
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
@@ -24,6 +25,10 @@ const StudentOverview = () => {
 
                 const activityRes = await axiosSecure.get('/student/recent-activities');
                 setRecentActivity(activityRes.data);
+
+                // Fetch Role Requests
+                const roleRes = await axiosSecure.get('/role-requests/my');
+                setRoleRequests(roleRes.data);
             } catch (error) {
                 console.error("Error fetching dashboard data:", error);
             } finally {
@@ -79,6 +84,53 @@ const StudentOverview = () => {
                         </div>
                     </motion.div>
                 ))}
+            </div>
+
+            {/* Role Request Status Section */}
+            <div className="card bg-base-100 shadow-sm border border-base-200">
+                <div className="card-body">
+                    <h2 className="card-title text-lg mb-4">Tutor Role Requests</h2>
+                    {roleRequests.length > 0 ? (
+                        <div className="overflow-x-auto">
+                            <table className="table w-full">
+                                <thead>
+                                    <tr>
+                                        <th>Requested Role</th>
+                                        <th>Date</th>
+                                        <th>Status</th>
+                                        <th>Comments</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {roleRequests.map((req) => (
+                                        <tr key={req._id}>
+                                            <td className="capitalize">{req.requestedRole}</td>
+                                            <td>{new Date(req.created_at).toLocaleDateString()}</td>
+                                            <td>
+                                                <span className={`badge ${req.status === 'approved' ? 'badge-success text-white' :
+                                                    req.status === 'rejected' ? 'badge-error text-white' :
+                                                        'badge-warning text-white'
+                                                    }`}>
+                                                    {req.status}
+                                                </span>
+                                            </td>
+                                            <td className="text-sm text-gray-500">
+                                                {req.status === 'approved' ? 'Please refresh to access Tutor Dashboard' :
+                                                    req.status === 'rejected' ? 'Contact Admin for meaningful feedback' :
+                                                        'Under Review'}
+                                            </td>
+                                        </tr>
+                                    ))}
+                                </tbody>
+                            </table>
+                        </div>
+                    ) : (
+                        <div className="text-center py-4">
+                            <p className="text-gray-500 mb-2">You haven't requested to become a tutor yet.</p>
+                            <div className="text-sm text-purple-600">Apply for a tuition to start the process!</div>
+                        </div>
+                    )}
+                </div>
             </div>
 
             {/* Recent Activity */}

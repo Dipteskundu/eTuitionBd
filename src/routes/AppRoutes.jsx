@@ -40,6 +40,7 @@ import TutorProfile from '../pages/dashboard/tutor/TutorProfile';
 // Dashboard Pages - Admin
 import AdminOverview from '../pages/dashboard/admin/AdminOverview';
 import ManageUsers from '../pages/dashboard/admin/ManageUsers';
+import TeacherRequests from '../pages/dashboard/admin/TeacherRequests'; // New Import
 import ManageTuitions from '../pages/dashboard/admin/ManageTuitions';
 import Transactions from '../pages/dashboard/admin/Transactions';
 import Reports from '../pages/dashboard/admin/Reports';
@@ -103,6 +104,7 @@ const AppRoutes = () => {
             }>
                 <Route index element={<AdminOverview />} />
                 <Route path="users" element={<ManageUsers />} />
+                <Route path="teacher-requests" element={<TeacherRequests />} /> {/* New Route */}
                 <Route path="tuitions" element={<ManageTuitions />} />
                 <Route path="student-profile/:email" element={<StudentProfileDetails />} /> {/* New Route */}
                 <Route path="transactions" element={<Transactions />} />

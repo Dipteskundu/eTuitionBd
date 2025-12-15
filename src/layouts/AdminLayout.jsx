@@ -1,6 +1,6 @@
 import React from 'react';
 import { NavLink, Outlet } from 'react-router-dom';
-import { LayoutDashboard, Users, BookOpen, CreditCard, BarChart2 } from 'lucide-react';
+import { LayoutDashboard, Users, BookOpen, CreditCard, BarChart2, UserCheck } from 'lucide-react';
 import useAuth from '../hooks/useAuth';
 
 const AdminLayout = () => {
@@ -57,6 +57,11 @@ const AdminLayout = () => {
                         <li>
                             <NavLink to="/dashboard/admin/tuitions" className={({ isActive }) => isActive ? "active font-medium" : ""}>
                                 <BookOpen size={20} /> Manage Tuitions
+                            </NavLink>
+                        </li>
+                        <li>
+                            <NavLink to="/dashboard/admin/teacher-requests" className={({ isActive }) => isActive ? "active font-medium" : ""}>
+                                <UserCheck size={20} /> Teacher Requests
                             </NavLink>
                         </li>
                         <li>
