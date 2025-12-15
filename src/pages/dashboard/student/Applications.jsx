@@ -1,14 +1,16 @@
 import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import useAxiosSecure from '../../../hooks/useAxiosSecure';
+import useAuth from '../../../hooks/useAuth'; // Added import
 import useToast from '../../../hooks/useToast';
-import { User, DollarSign, CreditCard } from 'lucide-react';
+import { User, DollarSign, CreditCard, BookOpen } from 'lucide-react';
 import Button from '../../../components/ui/Button';
 import Swal from 'sweetalert2';
 
 const Applications = () => {
     const { tuitionId } = useParams();
     const navigate = useNavigate();
+    const { user } = useAuth(); // Get User
     const axiosSecure = useAxiosSecure();
     const { showToast } = useToast();
 
@@ -22,18 +24,18 @@ const Applications = () => {
 
     useEffect(() => {
         const fetchData = async () => {
-            if (!tuitionId) {
-                setLoading(false);
-                return;
-            }
             try {
-                // Fetch Tuition Details
-                const tuitionRes = await axiosSecure.get(`/tuitions/${tuitionId}`);
-                setTuitionDetails(tuitionRes.data);
-
-                // Fetch Applications (Strict Endpoint)
-                const appsRes = await axiosSecure.get(`/applications/${tuitionId}`);
-                setApplications(appsRes.data);
+                if (tuitionId) {
+                    // Specific Tuition Mode
+                    const tuitionRes = await axiosSecure.get(`/tuitions/${tuitionId}`);
+                    setTuitionDetails(tuitionRes.data);
+                    const appsRes = await axiosSecure.get(`/applications/${tuitionId}`);
+                    setApplications(appsRes.data);
+                } else if (user?.email) {
+                    // All Applications Mode
+                    const appsRes = await axiosSecure.get(`/student-applications/${user.email}`);
+                    setApplications(appsRes.data);
+                }
             } catch (error) {
                 console.error(error);
                 showToast('Failed to load applications.', 'error');
@@ -42,7 +44,7 @@ const Applications = () => {
             }
         };
         fetchData();
-    }, [tuitionId, axiosSecure]);
+    }, [tuitionId, axiosSecure, user?.email]);
 
     const handleAcceptClick = async (app) => {
         // 1. Wonderful Alert "Slider" (Confirmation)
@@ -166,12 +168,12 @@ const Applications = () => {
 
     if (loading) return <div className="flex justify-center p-8"><span className="loading loading-spinner text-primary"></span></div>;
 
-    if (!tuitionId) return <div className="p-8 text-center">Please select a tuition to view applications.</div>;
-
     return (
         <div className="space-y-6">
             <div>
-                <h1 className="text-2xl font-bold text-gray-800 dark:text-white">Review Applications</h1>
+                <h1 className="text-2xl font-bold text-gray-800 dark:text-white">
+                    {tuitionId ? 'Review Applications' : 'All Received Applications'}
+                </h1>
                 {tuitionDetails && (
                     <p className="text-gray-500">
                         For: <span className="font-semibold text-primary">{tuitionDetails.subject}</span> ({tuitionDetails.class}) -
@@ -200,6 +202,9 @@ const Applications = () => {
                                         </div>
                                         <div>
                                             <h2 className="card-title text-base">{app.tutorName || app.tutorEmail}</h2>
+                                            {!tuitionId && app.tuitionTitle && (
+                                                <div className="badge badge-outline badge-sm text-xs my-1">{app.tuitionTitle}</div>
+                                            )}
                                             <p className="text-xs text-gray-500">Applied on: {new Date(app.created_at).toLocaleDateString()}</p>
                                         </div>
                                     </div>
@@ -214,6 +219,18 @@ const Applications = () => {
                                 <div className="divider my-2"></div>
 
                                 <div className="space-y-2 text-sm">
+                                    {app.message && (
+                                        <div className="mb-3">
+                                            <span className="text-gray-500 block mb-1">Message:</span>
+                                            <p className="text-gray-700 dark:text-gray-300 text-sm bg-gray-50 dark:bg-gray-700 p-2 rounded">{app.message}</p>
+                                        </div>
+                                    )}
+                                    {app.availability && (
+                                        <div className="flex justify-between">
+                                            <span className="text-gray-500">Availability:</span>
+                                            <span className="font-medium">{app.availability}</span>
+                                        </div>
+                                    )}
                                     <div className="flex justify-between">
                                         <span className="text-gray-500">Experience:</span>
                                         <span className="font-medium">{app.experience || 'N/A'}</span>
@@ -228,7 +245,14 @@ const Applications = () => {
                                     </div>
                                 </div>
 
-                                <div className="card-actions justify-end mt-4">
+                                <div className="card-actions justify-end mt-4 flex-wrap gap-2">
+                                    <button
+                                        onClick={() => navigate(`/tutors/${app.tutorEmail}`)}
+                                        className="btn btn-sm btn-outline btn-info gap-2"
+                                        title="View tutor profile"
+                                    >
+                                        <User size={16} /> View Profile
+                                    </button>
                                     {app.status === 'pending' && (
                                         <>
                                             <button

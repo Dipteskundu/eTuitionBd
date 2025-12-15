@@ -79,6 +79,8 @@ const AppRoutes = () => {
                 {/* Legacy Route Support (to prevent 404 on stale links) */}
                 <Route path="/dashboard/tuition/:tuitionId/applications" element={<RoleRoute allowedRoles={[ROLES.STUDENT]}><StudentApplications /></RoleRoute>} />
 
+
+                <Route path="/dashboard/student/payments" element={<RoleRoute allowedRoles={[ROLES.STUDENT]}><PaymentHistory /></RoleRoute>} />
                 <Route path="/dashboard/transactions" element={<RoleRoute allowedRoles={[ROLES.STUDENT]}><PaymentHistory /></RoleRoute>} />
                 <Route path="/dashboard/student/payment/success" element={<RoleRoute allowedRoles={[ROLES.STUDENT]}><PaymentSuccess /></RoleRoute>} />
                 <Route path="/dashboard/student/profile" element={<RoleRoute allowedRoles={[ROLES.STUDENT]}><StudentProfile /></RoleRoute>} />

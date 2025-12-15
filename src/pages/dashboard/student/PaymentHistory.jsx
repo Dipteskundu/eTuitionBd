@@ -33,9 +33,11 @@ const PaymentHistory = () => {
                     <table className="table table-zebra w-full">
                         <thead>
                             <tr>
+                                <th>Transaction ID</th>
                                 <th>Tutor/Student</th>
                                 <th>Tuition</th>
                                 <th>Amount</th>
+                                <th>Method</th>
                                 <th>Status</th>
                                 <th>Date</th>
                             </tr>
@@ -43,23 +45,30 @@ const PaymentHistory = () => {
                         <tbody>
                             {payments.length === 0 ? (
                                 <tr>
-                                    <td colSpan="5" className="text-center py-8 text-gray-500">
+                                    <td colSpan="7" className="text-center py-8 text-gray-500">
                                         No payment records found.
                                     </td>
                                 </tr>
                             ) : (
                                 payments.map((payment) => (
                                     <tr key={payment._id}>
+                                        <td>
+                                            <div className="font-mono text-xs bg-gray-100 dark:bg-gray-700 px-2 py-1 rounded">
+                                                {payment.transactionId}
+                                            </div>
+                                        </td>
                                         <td className="font-bold">
-                                            {payment.otherName || payment.tutorEmail}
+                                            {payment.otherName || payment.tutorEmail || payment.studentEmail}
                                         </td>
                                         <td>
-                                            <div className="text-sm">{payment.tuitionTitle || 'General Tuition'}</div>
-                                            <div className="text-xs opacity-50 font-mono">{payment.transactionId}</div>
+                                            <div className="text-sm font-medium">{payment.tuitionTitle || 'General Tuition'}</div>
                                         </td>
-                                        <td className="font-medium">BDT {payment.amount}</td>
+                                        <td className="font-bold text-success">BDT {payment.amount}</td>
                                         <td>
-                                            <div className={`badge ${payment.status === 'paid' ? 'badge-success text-white' : 'badge-ghost'}`}>
+                                            <div className="badge badge-ghost badge-sm">{payment.method || 'N/A'}</div>
+                                        </td>
+                                        <td>
+                                            <div className={`badge ${payment.status === 'paid' ? 'badge-success text-white' : 'badge-warning'}`}>
                                                 {payment.status === 'paid' ? 'Success' : payment.status}
                                             </div>
                                         </td>

@@ -26,15 +26,14 @@ const ApplicationModal = ({ isOpen, onClose, tuition, onSuccess }) => {
 
         const payload = {
             tuitionId: tuition._id,
-            tutorId: user.email, // Using email as ID often in this system
-            // But API reads token, so just sending body fields
-            qualifications,
-            experience,
+            tutorId: user.email,
+            message: qualifications, // Mapping UI field to API expectation
+            availability: experience,  // Mapping UI field to API expectation
             expectedSalary: parseInt(expectedSalary),
         };
 
         try {
-            await axiosSecure.post('/apply-tuition', payload);
+            await axiosSecure.post('/tuition-application', payload);
             toast.success("Application sent successfully!");
             onSuccess();
             onClose();
@@ -73,25 +72,35 @@ const ApplicationModal = ({ isOpen, onClose, tuition, onSuccess }) => {
 
                     {/* Inputs */}
                     <div className="form-control">
-                        <label className="label font-medium text-gray-700 dark:text-gray-300">Qualifications</label>
+                        <label className="label font-medium text-gray-700 dark:text-gray-300">Message to Guardian</label>
                         <textarea
                             required
-                            value={qualifications}
+                            value={qualifications} // Reusing state var 'qualifications' as 'message' or adding new one? 
+                            // Creating new state variable 'message' is better but I have to define it at top.
+                            // I will use 'qualifications' as 'Message' for now based on context or rename it?
+                            // Better: Add new state 'message' in next step or rename here? 
+                            // Quickest: Rename the label for 'qualifications' to 'Message / Qualifications' or keep it structure.
+                            // Prompt says "Message". I'll rename the label and use the variable 'qualifications' as the message body for now to minimal change, or properly Add 'message'.
+                            // Let's add 'message' properly requires state update. I'll assume I can just add inputs.
+                            // Wait, tool doesn't let me update Top of function state easily without big Replace.
+                            // I'll update the whole file content for safety or use multi-replace.
                             onChange={(e) => setQualifications(e.target.value)}
-                            placeholder="Type your qualifications..."
-                            className="textarea textarea-bordered w-full h-20"
+                            placeholder="Why are you the best fit? (e.g. experience, approach)"
+                            className="textarea textarea-bordered w-full h-24"
                         ></textarea>
                     </div>
 
                     <div className="form-control">
-                        <label className="label font-medium text-gray-700 dark:text-gray-300">Experience</label>
-                        <textarea
-                            required
-                            value={experience}
+                        <label className="label font-medium text-gray-700 dark:text-gray-300">Availability</label>
+                        <input
+                            type="text"
+                            value={experience} // Reusing 'experience' state as 'availability' for minimal refactor or just label change?
+                            // This modal originally had Qualifications & Experience. Prompt asks for Message & Availability.
+                            // I will repurpose: Qualifications -> Message, Experience -> Availability.
                             onChange={(e) => setExperience(e.target.value)}
-                            placeholder="Describe your teaching experience..."
-                            className="textarea textarea-bordered w-full h-20"
-                        ></textarea>
+                            placeholder="e.g. Mon, Wed, Fri (3pm - 5pm)"
+                            className="input input-bordered w-full"
+                        />
                     </div>
 
                     <div className="form-control">
