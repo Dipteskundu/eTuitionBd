@@ -6,6 +6,7 @@ import useAuth from '../../hooks/useAuth';
 import useToast from '../../hooks/useToast';
 import Input from '../../components/ui/Input';
 import Button from '../../components/ui/Button';
+import Card from '../../components/ui/Card';
 
 const Login = () => {
     const [email, setEmail] = useState('');
@@ -66,84 +67,111 @@ const Login = () => {
     };
 
     return (
-        <div className="min-h-[calc(100vh-64px)] flex items-center justify-center p-4 bg-base-200/30">
+        <div className="min-h-[calc(100vh-64px)] flex items-center justify-center p-4 gradient-bg">
+            {/* Floating Orbs */}
+            <div className="absolute inset-0 opacity-20 pointer-events-none">
+                <div className="absolute top-20 right-20 w-64 h-64 bg-primary rounded-full blur-3xl animate-float" />
+                <div className="absolute bottom-20 left-20 w-80 h-80 bg-secondary rounded-full blur-3xl animate-float animation-delay-300" />
+            </div>
+
             <motion.div
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.5 }}
-                className="card w-full max-w-md bg-base-100 shadow-2xl border border-base-200"
+                className="w-full max-w-md relative z-10"
             >
-                <div className="card-body p-8">
-                    <div className="text-center mb-6">
-                        <h2 className="text-3xl font-bold bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">Welcome Back</h2>
-                        <p className="text-gray-500 mt-2">Enter your credentials to access your account</p>
-                    </div>
-
-                    <form onSubmit={handleSubmit} className="space-y-4">
-                        <Input
-                            label="Email Address"
-                            type="email"
-                            placeholder="you@example.com"
-                            icon={<Mail size={20} />}
-                            value={email}
-                            onChange={(e) => setEmail(e.target.value)}
-                            required
-                        />
-
-                        <div className="form-control w-full">
-                            <Input
-                                label="Password"
-                                type="password"
-                                placeholder="••••••••"
-                                icon={<Lock size={20} />}
-                                value={password}
-                                onChange={(e) => setPassword(e.target.value)}
-                                required
-                            />
-                            <label className="label">
-                                <span className="label-text-alt"></span>
-                                <a href="#" className="label-text-alt link link-hover text-primary">Forgot password?</a>
-                            </label>
+                <Card glass className="overflow-hidden">
+                    <div className="p-8">
+                        {/* Header */}
+                        <div className="text-center mb-8">
+                            <motion.div
+                                initial={{ scale: 0.8 }}
+                                animate={{ scale: 1 }}
+                                transition={{ delay: 0.2 }}
+                            >
+                                <h2 className="font-heading text-4xl font-bold gradient-text mb-2">
+                                    Welcome Back
+                                </h2>
+                                <p className="text-base-content/60">
+                                    Enter your credentials to access your account
+                                </p>
+                            </motion.div>
                         </div>
 
+                        {/* Form */}
+                        <form onSubmit={handleSubmit} className="space-y-5">
+                            <Input
+                                floating
+                                label="Email Address"
+                                type="email"
+                                leftIcon={<Mail size={20} />}
+                                value={email}
+                                onChange={(e) => setEmail(e.target.value)}
+                                required
+                            />
+
+                            <div>
+                                <Input
+                                    label="Password"
+                                    type="password"
+                                    leftIcon={<Lock size={20} />}
+                                    value={password}
+                                    onChange={(e) => setPassword(e.target.value)}
+                                    required
+                                />
+                                <div className="flex justify-end mt-2">
+                                    <a href="#" className="text-sm text-primary hover:underline">
+                                        Forgot password?
+                                    </a>
+                                </div>
+                            </div>
+
+                            <Button
+                                type="submit"
+                                variant="gradient"
+                                size="lg"
+                                fullWidth
+                                loading={loading}
+                                disabled={loading}
+                                rightIcon={<LogIn size={18} />}
+                                className="mt-6"
+                            >
+                                Sign In
+                            </Button>
+                        </form>
+
+                        {/* Divider */}
+                        <div className="divider text-sm text-base-content/50 my-6">OR</div>
+
+                        {/* Google Login */}
                         <Button
-                            type="submit"
-                            variant="primary"
-                            className="w-full mt-2"
-                            loading={loading}
+                            variant="outline"
+                            size="lg"
+                            fullWidth
+                            onClick={handleGoogleLogin}
                             disabled={loading}
+                            leftIcon={<Chrome size={20} className="text-primary" />}
                         >
-                            Sign In <LogIn size={18} className="ml-2" />
+                            Continue with Google
                         </Button>
-                    </form>
 
-                    <div className="divider text-sm text-gray-500">OR</div>
+                        {/* Register Link */}
+                        <p className="text-center mt-6 text-sm text-base-content/70">
+                            Don't have an account?{' '}
+                            <Link to="/register" className="text-primary font-semibold hover:underline">
+                                Register Now
+                            </Link>
+                        </p>
 
-                    <Button
-                        variant="outline"
-                        className="w-full"
-                        onClick={handleGoogleLogin}
-                        disabled={loading}
-                    >
-                        <Chrome size={20} className="mr-2 text-primary" /> Continue with Google
-                    </Button>
-
-                    <p className="text-center mt-6 text-sm text-gray-600">
-                        Don't have an account?
-                        <Link to="/register" className="text-primary font-bold hover:underline ml-1">
-                            Register Now
-                        </Link>
-                    </p>
-
-                    <div className="alert alert-info bg-blue-50 text-blue-800 text-xs mt-6 flex items-start gap-2 border-blue-100">
-                        <AlertCircle size={16} className="shrink-0 mt-0.5" />
-                        <span>
-                            <strong>Note:</strong> These are example credentials.
-                            <br />
-                            Please <strong>Register</strong> first to create these accounts if they don't exist.
-                        </span>
+                        {/* Info Alert */}
+                        <div className="alert bg-primary/10 border border-primary/20 text-sm mt-6 p-4">
+                            <AlertCircle size={16} className="text-primary shrink-0" />
+                            <span className="text-base-content/80">
+                                <strong>Note:</strong> Please register first if you don't have an account.
+                            </span>
+                        </div>
                     </div>
-                </div>
+                </Card>
             </motion.div>
         </div>
     );

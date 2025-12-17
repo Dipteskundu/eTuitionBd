@@ -1,8 +1,12 @@
 import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import useAxiosSecure from '../../../hooks/useAxiosSecure';
-import { User, Phone, Mail, ArrowLeft, GraduationCap } from 'lucide-react';
+import { User, Phone, Mail, ArrowLeft, MapPin, Shield, GraduationCap } from 'lucide-react';
 import useToast from '../../../hooks/useToast';
+import Card from '../../../components/ui/Card';
+import Button from '../../../components/ui/Button';
+import Spinner from '../../../components/ui/Spinner';
+import { motion } from 'framer-motion';
 
 const StudentProfileDetails = () => {
     const { email } = useParams();
@@ -15,8 +19,6 @@ const StudentProfileDetails = () => {
     useEffect(() => {
         const fetchStudent = async () => {
             try {
-                // Using the email from the URL parameter to fetch user details
-                // Reusing the existing GET /users/:email endpoint which returns user details
                 const res = await axiosSecure.get(`/users/${email}`);
                 setStudent(res.data);
             } catch (err) {

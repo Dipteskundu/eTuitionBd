@@ -3,6 +3,7 @@ import useAxiosSecure from '../../../hooks/useAxiosSecure';
 import { motion } from 'framer-motion';
 import { Users, DollarSign, Briefcase, Star, Clock, CheckCircle } from 'lucide-react';
 import Card from '../../../components/ui/Card';
+import Spinner from '../../../components/ui/Spinner';
 import useAuth from '../../../hooks/useAuth';
 
 const TutorOverview = () => {
@@ -27,7 +28,7 @@ const TutorOverview = () => {
                 const apps = activityRes.data.recentApps.map(app => ({
                     id: app._id,
                     type: 'Application',
-                    title: `Applied for Tuition ID: ${app.tuitionId.substring(0, 8)}...`, // Better to fetch tuition title if possible, but ID for now
+                    title: `Applied for Tuition ID: ${app.tuitionId.substring(0, 8)}...`,
                     time: new Date(app.created_at).toLocaleDateString(),
                     status: app.status
                 }));
@@ -54,23 +55,26 @@ const TutorOverview = () => {
     }, [axiosSecure]);
 
     const statCards = [
-        { title: 'Total Earnings', value: `BDT ${stats.totalEarnings}`, icon: <DollarSign className="text-white" size={24} />, color: 'bg-primary' },
-        { title: 'Active Tuitions', value: stats.activeTuitionsCount, icon: <Briefcase className="text-white" size={24} />, color: 'bg-secondary' },
-        { title: 'Total Applications', value: stats.totalApplications, icon: <Briefcase className="text-white" size={24} />, color: 'bg-accent' },
-        { title: 'Profile Views', value: stats.profileViews || 'N/A', icon: <Users className="text-white" size={24} />, color: 'bg-warning' },
+        { title: 'Total Earnings', value: `৳${stats.totalEarnings}`, icon: DollarSign, bgColor: 'bg-success/10', textColor: 'text-success' },
+        { title: 'Active Tuitions', value: stats.activeTuitionsCount, icon: Briefcase, bgColor: 'bg-primary/10', textColor: 'text-primary' },
+        { title: 'Total Applications', value: stats.totalApplications, icon: CheckCircle, bgColor: 'bg-secondary/10', textColor: 'text-secondary' },
+        { title: 'Profile Views', value: stats.profileViews || 0, icon: Users, bgColor: 'bg-accent/10', textColor: 'text-accent' },
     ];
 
-    if (loading) return <div className="flex justify-center p-10"><span className="loading loading-spinner text-primary"></span></div>;
+    if (loading) return <Spinner variant="dots" size="lg" fullScreen />;
 
     return (
         <div className="space-y-6">
             {/* Welcome Section */}
-            <div className="flex justify-between items-center">
+            <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
                 <div>
-                    <h1 className="text-2xl font-bold text-gray-800 dark:text-gray-100">Welcome Back, {user?.displayName?.split(' ')[0] || 'Tutor'}! 👨‍🏫</h1>
-                    <p className="text-gray-500 dark:text-gray-400">Track your earnings and job applications here.</p>
+                    <h1 className="font-heading text-3xl font-bold gradient-text mb-2">
+                        Welcome Back, {user?.displayName?.split(' ')[0] || 'Tutor'}! 👨‍🏫
+                    </h1>
+                    <p className="text-base-content/70">Track your earnings and job applications here.</p>
                 </div>
-                <div className="text-sm text-gray-500 dark:text-gray-400 bg-white dark:bg-base-200 px-4 py-2 rounded-lg shadow-sm border border-base-200 dark:border-base-300">
+                <div className="badge badge-primary badge-outline gap-2 p-3">
+                    <Clock size={14} />
                     {new Date().toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}
                 </div>
             </div>
@@ -78,22 +82,19 @@ const TutorOverview = () => {
             {/* Stats Grid */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
                 {statCards.map((stat, index) => (
-                    <motion.div
-                        key={index}
-                        initial={{ opacity: 0, y: 20 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        transition={{ delay: index * 0.1 }}
-                    >
-                        <div className="stats shadow w-full bg-base-100 border border-base-200 dark:border-base-300">
-                            <div className="stat">
-                                <div className={`stat-figure ${stat.color} p-3 rounded-xl shadow-lg`}>
-                                    {stat.icon}
-                                </div>
-                                <div className="stat-title text-gray-500 dark:text-gray-400 font-medium">{stat.title}</div>
-                                <div className="stat-value text-2xl mt-1 dark:text-gray-200">{stat.value}</div>
+                    <Card key={index} glass hover>
+                        <div className="flex items-center gap-4">
+                            <div className={`p-4 ${stat.bgColor} rounded-xl`}>
+                                <stat.icon className={`w-8 h-8 ${stat.textColor}`} />
+                            </div>
+                            <div>
+                                <p className="text-sm text-base-content/60">{stat.title}</p>
+                                <h3 className="text-3xl font-heading font-bold gradient-text">
+                                    {stat.value}
+                                </h3>
                             </div>
                         </div>
-                    </motion.div>
+                    </Card>
                 ))}
             </div>
 

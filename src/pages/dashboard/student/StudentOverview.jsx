@@ -3,6 +3,8 @@ import useAxiosSecure from '../../../hooks/useAxiosSecure';
 import useAuth from '../../../hooks/useAuth';
 import { LayoutDashboard, FileText, CheckCircle, DollarSign, Activity, Clock } from 'lucide-react';
 import { motion } from 'framer-motion';
+import Card from '../../../components/ui/Card';
+import Spinner from '../../../components/ui/Spinner';
 
 const StudentOverview = () => {
     const { user } = useAuth();
@@ -40,22 +42,24 @@ const StudentOverview = () => {
     }, [axiosSecure]);
 
     if (loading) {
-        return <div className="flex justify-center items-center h-full"><span className="loading loading-spinner loading-lg text-primary"></span></div>;
+        return <Spinner variant="dots" size="lg" fullScreen />;
     }
 
     const statCards = [
-        { title: 'Total Posted', value: stats.totalTuitions, icon: FileText, color: 'bg-blue-100 text-blue-600' },
-        { title: 'Active Tuitions', value: stats.activeTuitions, icon: Activity, color: 'bg-green-100 text-green-600' },
-        { title: 'Completed', value: stats.completedTuitions, icon: CheckCircle, color: 'bg-purple-100 text-purple-600' },
-        { title: 'Total Spent', value: `$${stats.totalSpent}`, icon: DollarSign, color: 'bg-yellow-100 text-yellow-600' },
+        { title: 'Total Posted', value: stats.totalTuitions, icon: FileText, bgColor: 'bg-primary/10', textColor: 'text-primary' },
+        { title: 'Active Tuitions', value: stats.activeTuitions, icon: Activity, bgColor: 'bg-secondary/10', textColor: 'text-secondary' },
+        { title: 'Completed', value: stats.completedTuitions, icon: CheckCircle, bgColor: 'bg-accent/10', textColor: 'text-accent' },
+        { title: 'Total Spent', value: `৳${stats.totalSpent}`, icon: DollarSign, bgColor: 'bg-success/10', textColor: 'text-success' },
     ];
 
     return (
         <div className="space-y-6">
             <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
                 <div>
-                    <h1 className="text-2xl font-bold text-gray-800 dark:text-white">Welcome back, {user?.displayName}!</h1>
-                    <p className="text-gray-500 text-sm">Here's what's happening with your tuitions.</p>
+                    <h1 className="font-heading text-3xl font-bold gradient-text mb-2">
+                        Welcome back, {user?.displayName}!
+                    </h1>
+                    <p className="text-base-content/70">Here's what's happening with your tuitions.</p>
                 </div>
                 <div className="badge badge-primary badge-outline gap-2 p-3">
                     <Clock size={14} />
@@ -64,25 +68,21 @@ const StudentOverview = () => {
             </div>
 
             {/* Stats Cards */}
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
                 {statCards.map((stat, index) => (
-                    <motion.div
-                        key={index}
-                        initial={{ opacity: 0, y: 20 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        transition={{ delay: index * 0.1 }}
-                        className="card bg-base-100 shadow-sm border border-base-200 hover:shadow-md transition-shadow"
-                    >
-                        <div className="card-body p-6 flex flex-row items-center justify-between">
-                            <div>
-                                <p className="text-sm font-medium text-gray-500 mb-1">{stat.title}</p>
-                                <h3 className="text-2xl font-bold text-gray-800 dark:text-gray-100">{stat.value}</h3>
+                    <Card key={index} glass hover>
+                        <div className="flex items-center gap-4">
+                            <div className={`p-4 ${stat.bgColor} rounded-xl`}>
+                                <stat.icon className={`w-8 h-8 ${stat.textColor}`} />
                             </div>
-                            <div className={`p-3 rounded-full ${stat.color}`}>
-                                <stat.icon size={24} />
+                            <div>
+                                <p className="text-sm text-base-content/60">{stat.title}</p>
+                                <h3 className="text-3xl font-heading font-bold gradient-text">
+                                    {stat.value}
+                                </h3>
                             </div>
                         </div>
-                    </motion.div>
+                    </Card>
                 ))}
             </div>
 
@@ -175,7 +175,7 @@ const StudentOverview = () => {
                 </div>
 
                 {/* Quick Actions or Tips */}
-                <div className="card bg-gradient-to-br from-primary to-primary-focus text-primary-content shadow-lg">
+                <div className="card bg-gradient-to-br from-primary-500 to-primary-600 text-primary-content shadow-lg">
                     <div className="card-body">
                         <h2 className="card-title">Need a Tutor?</h2>
                         <p>Post a tuition requirement and get connected with verified tutors in your area.</p>

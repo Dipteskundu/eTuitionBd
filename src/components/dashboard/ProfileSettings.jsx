@@ -2,14 +2,20 @@ import React, { useState, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import useAuth from '../../hooks/useAuth';
 import axiosInstance from '../../utils/axiosInstance';
-import { Camera, Save, Lock, User, Phone, Mail } from 'lucide-react';
+import { Camera, Save, Lock, User, Phone, Mail, UploadCloud } from 'lucide-react';
 import toast from 'react-hot-toast';
+import Card from '../../components/ui/Card';
+import Input from '../../components/ui/Input';
+import Button from '../../components/ui/Button';
+import Spinner from '../../components/ui/Spinner';
+import { motion } from 'framer-motion';
 
 const ProfileSettings = () => {
     const { user, updateUserProfile, updateUserPassword } = useAuth();
     const [loading, setLoading] = useState(true);
     const [imagePreview, setImagePreview] = useState(null);
     const [selectedImage, setSelectedImage] = useState(null);
+    const [isSubmitting, setIsSubmitting] = useState(false);
 
     const { register, handleSubmit, reset, formState: { errors } } = useForm();
 
@@ -79,7 +85,7 @@ const ProfileSettings = () => {
     };
 
     const onSubmit = async (data) => {
-        setLoading(true);
+        setIsSubmitting(true);
         const toastId = toast.loading("Updating profile...");
         try {
             let photoURL = imagePreview;
@@ -98,7 +104,7 @@ const ProfileSettings = () => {
                     await updateUserPassword(data.newPassword);
                 } else {
                     toast.error("Passwords do not match!", { id: toastId });
-                    setLoading(false);
+                    setIsSubmitting(false);
                     return;
                 }
             }
@@ -118,142 +124,141 @@ const ProfileSettings = () => {
             console.error("Profile Update Error:", error);
             toast.error(error.message || "Failed to update profile", { id: toastId });
         } finally {
-            setLoading(false);
+            setIsSubmitting(false);
         }
     };
 
     if (loading && !imagePreview) { // Initial loading state
-        return <div className="flex justify-center p-10"><span className="loading loading-spinner loading-lg text-primary"></span></div>;
+        return <Spinner variant="dots" className="min-h-[400px]" />;
     }
 
     return (
-        <div className="max-w-4xl mx-auto p-6 bg-base-100 rounded-lg shadow-md border border-base-200">
-            <h2 className="text-2xl font-bold mb-6 text-center lg:text-left">Profile Settings</h2>
+        <motion.div
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.4 }}
+            className="w-full max-w-4xl mx-auto"
+        >
+            <Card glass className="border-t-4 border-t-primary">
+                <div className="flex flex-col md:flex-row items-center md:items-start justify-between gap-6 mb-8">
+                    <div>
+                        <h2 className="text-2xl font-bold font-heading">Profile Settings</h2>
+                        <p className="text-base-content/60 text-sm">Manage your account information and preferences.</p>
+                    </div>
+                </div>
 
-            <form onSubmit={handleSubmit(onSubmit)} className="space-y-8">
-
-                {/* Profile Picture Section */}
-                <div className="flex flex-col items-center lg:items-start gap-4">
-                    <label className="text-sm font-medium text-gray-700 dark:text-gray-300">Profile Picture</label>
-                    <div className="relative group cursor-pointer">
-                        <div className="w-32 h-32 rounded-full overflow-hidden border-4 border-primary/20">
-                            {imagePreview ? (
-                                <img src={imagePreview} alt="Profile" className="w-full h-full object-cover" />
-                            ) : (
-                                <div className="w-full h-full bg-base-300 flex items-center justify-center">
-                                    <User size={40} className="text-gray-400" />
-                                </div>
-                            )}
+                <form onSubmit={handleSubmit(onSubmit)} className="space-y-8">
+                    {/* Profile Picture Section */}
+                    <div className="flex flex-col items-center justify-center p-6 bg-base-200/50 rounded-2xl border border-base-200 border-dashed">
+                        <div className="relative group">
+                            <div className="w-32 h-32 rounded-full overflow-hidden border-4 border-base-100 ring-4 ring-primary/20 shadow-xl">
+                                {imagePreview ? (
+                                    <img src={imagePreview} alt="Profile" className="w-full h-full object-cover" />
+                                ) : (
+                                    <div className="w-full h-full bg-base-300 flex items-center justify-center text-base-content/30">
+                                        <User size={48} />
+                                    </div>
+                                )}
+                            </div>
+                            <label htmlFor="profile-upload" className="absolute bottom-0 right-0 bg-primary text-white p-2.5 rounded-full shadow-lg cursor-pointer hover:bg-primary-focus transition-all transform hover:scale-110 active:scale-95">
+                                <Camera size={20} />
+                            </label>
+                            <input
+                                type="file"
+                                id="profile-upload"
+                                accept="image/*"
+                                className="hidden"
+                                onChange={handleImageChange}
+                            />
                         </div>
-                        <label htmlFor="profile-upload" className="absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity rounded-full cursor-pointer">
-                            <Camera className="text-white" />
-                        </label>
-                        <input
-                            type="file"
-                            id="profile-upload"
-                            accept="image/*"
-                            className="hidden"
-                            onChange={handleImageChange}
-                        />
-                    </div>
-                </div>
-
-                {/* Personal Details */}
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <div className="form-control w-full">
-                        <label className="label">
-                            <span className="label-text font-medium flex items-center gap-2"><User size={16} /> Full Name</span>
-                        </label>
-                        <input
-                            type="text"
-                            placeholder="Your Name"
-                            className="input input-bordered w-full"
-                            {...register("displayName", { required: "Name is required" })}
-                        />
-                        {errors.displayName && <span className="text-red-500 text-xs mt-1">{errors.displayName.message}</span>}
+                        <p className="mt-4 text-sm font-medium text-base-content/70">
+                            {selectedImage ? selectedImage.name : "Click the camera icon to update photo"}
+                        </p>
                     </div>
 
-                    <div className="form-control w-full">
-                        <label className="label">
-                            <span className="label-text font-medium flex items-center gap-2"><Mail size={16} /> Email</span>
-                        </label>
-                        <input
-                            type="email"
-                            readOnly
-                            disabled
-                            className="input input-bordered w-full bg-base-200 text-gray-500 cursor-not-allowed"
-                            {...register("email")}
-                        />
-                        <label className="label">
-                            <span className="label-text-alt text-gray-400">Email cannot be changed</span>
-                        </label>
+                    {/* Personal Details */}
+                    <div className="space-y-6">
+                        <h3 className="text-lg font-bold flex items-center gap-2 border-b border-base-200 pb-2 text-primary">
+                            <User size={20} /> Personal Information
+                        </h3>
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <Input
+                                label="Full Name"
+                                placeholder="e.g. John Doe"
+                                leftIcon={User}
+                                error={errors.displayName}
+                                fullWidth
+                                {...register("displayName", { required: "Name is required" })}
+                            />
+                            <Input
+                                label="Email Address"
+                                leftIcon={Mail}
+                                value={user?.email}
+                                fullWidth
+                                disabled
+                                className="opacity-70 cursor-not-allowed"
+                            />
+                            <Input
+                                label="Phone Number"
+                                placeholder="e.g. +880 1XXX XXXXXX"
+                                leftIcon={Phone}
+                                error={errors.phoneNumber}
+                                fullWidth
+                                {...register("phoneNumber", {
+                                    pattern: {
+                                        value: /^\+?[0-9]{10,15}$/,
+                                        message: "Invalid phone number format"
+                                    }
+                                })}
+                            />
+                        </div>
                     </div>
 
-                    <div className="form-control w-full">
-                        <label className="label">
-                            <span className="label-text font-medium flex items-center gap-2"><Phone size={16} /> Phone Number</span>
-                        </label>
-                        <input
-                            type="tel"
-                            placeholder="Phone Number"
-                            className="input input-bordered w-full"
-                            {...register("phoneNumber", {
-                                pattern: {
-                                    value: /^\+?[0-9]{10,15}$/,
-                                    message: "Invalid phone number format"
-                                }
-                            })}
-                        />
-                        {errors.phoneNumber && <span className="text-red-500 text-xs mt-1">{errors.phoneNumber.message}</span>}
-                    </div>
-                </div>
-
-                <div className="divider">Security</div>
-
-                {/* Password Section */}
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <div className="form-control w-full">
-                        <label className="label">
-                            <span className="label-text font-medium flex items-center gap-2"><Lock size={16} /> New Password</span>
-                        </label>
-                        <input
-                            type="password"
-                            placeholder="Leave blank to keep current"
-                            className="input input-bordered w-full"
-                            {...register("newPassword", { minLength: { value: 6, message: "Password must be at least 6 characters" } })}
-                        />
-                        {errors.newPassword && <span className="text-red-500 text-xs mt-1">{errors.newPassword.message}</span>}
+                    {/* Security Section */}
+                    <div className="space-y-6">
+                        <h3 className="text-lg font-bold flex items-center gap-2 border-b border-base-200 pb-2 text-primary">
+                            <Lock size={20} /> Security
+                        </h3>
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <Input
+                                type="password"
+                                label="New Password"
+                                placeholder="Leave blank to keep current"
+                                leftIcon={Lock}
+                                error={errors.newPassword}
+                                fullWidth
+                                togglePassword
+                                {...register("newPassword", { minLength: { value: 6, message: "Password must be at least 6 characters" } })}
+                            />
+                            <Input
+                                type="password"
+                                label="Confirm New Password"
+                                placeholder="Re-enter new password"
+                                leftIcon={Lock}
+                                fullWidth
+                                togglePassword
+                                {...register("confirmPassword")}
+                            />
+                        </div>
                     </div>
 
-                    <div className="form-control w-full">
-                        <label className="label">
-                            <span className="label-text font-medium flex items-center gap-2"><Lock size={16} /> Confirm New Password</span>
-                        </label>
-                        <input
-                            type="password"
-                            placeholder="Confirm New Password"
-                            className="input input-bordered w-full"
-                            {...register("confirmPassword")}
-                        />
+                    {/* Action Buttons */}
+                    <div className="flex justify-end pt-6 border-t border-base-200">
+                        <Button
+                            type="submit"
+                            variant="primary"
+                            size="lg"
+                            isLoading={isSubmitting}
+                            leftIcon={Save}
+                            className="w-full md:w-auto min-w-[150px] shadow-lg shadow-primary/20"
+                        >
+                            Save Changes
+                        </Button>
                     </div>
-                </div>
 
-                <div className="flex justify-end pt-4">
-                    <button
-                        type="submit"
-                        disabled={loading}
-                        className={`btn btn-primary px-8 ${loading ? 'loading' : ''}`}
-                    >
-                        {loading ? 'Updating...' : (
-                            <>
-                                <Save size={18} /> Save Changes
-                            </>
-                        )}
-                    </button>
-                </div>
-
-            </form>
-        </div>
+                </form>
+            </Card>
+        </motion.div>
     );
 };
 

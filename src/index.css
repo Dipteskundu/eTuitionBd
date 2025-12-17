@@ -1,3 +1,5 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Poppins:wght@400;500;600;700;800;900&display=swap');
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -10,24 +12,112 @@
   --background: #ffffff;
 }
 
+* {
+  scroll-behavior: smooth;
+}
+
 body {
-  @apply bg-base-100 text-base-content min-h-screen font-sans;
+  @apply bg-base-100 text-base-content min-h-screen font-sans antialiased;
 }
 
 /* Custom Scrollbar */
 ::-webkit-scrollbar {
-  width: 8px;
-  height: 8px;
+  width: 10px;
+  height: 10px;
 }
 
 ::-webkit-scrollbar-track {
-  @apply bg-transparent;
+  @apply bg-base-200;
 }
 
 ::-webkit-scrollbar-thumb {
-  @apply bg-gray-300 rounded-full hover:bg-gray-400 transition-colors;
+  @apply bg-primary-500/30 rounded-full hover:bg-primary-500/50 transition-colors duration-200;
 }
 
 .dark ::-webkit-scrollbar-thumb {
-  @apply bg-gray-600 hover:bg-gray-500;
+  @apply bg-primary-500/40 hover:bg-primary-500/60;
+}
+
+/* Glassmorphism Utilities */
+@layer utilities {
+  .glass {
+    @apply bg-white/10 backdrop-blur-md border border-white/20;
+  }
+
+  .glass-dark {
+    @apply bg-black/10 backdrop-blur-md border border-black/20;
+  }
+
+  .gradient-text {
+    @apply bg-gradient-to-r from-primary-500 to-secondary-500 bg-clip-text text-transparent;
+  }
+
+  .gradient-text-accent {
+    @apply bg-gradient-to-r from-accent-500 to-primary-500 bg-clip-text text-transparent;
+  }
+
+  .gradient-bg {
+    @apply bg-gradient-to-br from-primary-500/10 via-secondary-500/10 to-accent-500/10;
+  }
+
+  .gradient-border {
+    @apply border-2 border-transparent bg-clip-padding;
+    background-image: linear-gradient(white, white),
+      linear-gradient(to right, #0ea5e9, #8b5cf6);
+    background-origin: border-box;
+    background-clip: padding-box, border-box;
+  }
+
+  .dark .gradient-border {
+    background-image: linear-gradient(#0f172a, #0f172a),
+      linear-gradient(to right, #0ea5e9, #8b5cf6);
+  }
+}
+
+/* Custom Component Styles */
+@layer components {
+  .btn-gradient {
+    @apply bg-gradient-to-r from-primary-500 to-secondary-500 text-white font-semibold;
+    @apply hover:shadow-glow transition-all duration-300;
+  }
+
+  .card-hover {
+    @apply transition-all duration-300 hover:-translate-y-2 hover:shadow-xl;
+  }
+
+  .input-focus {
+    @apply focus:ring-2 focus:ring-primary-500/50 focus:border-primary-500 transition-all duration-200;
+  }
+}
+
+/* Animation Delays */
+@layer utilities {
+  .animation-delay-100 {
+    animation-delay: 100ms;
+  }
+
+  .animation-delay-200 {
+    animation-delay: 200ms;
+  }
+
+  .animation-delay-300 {
+    animation-delay: 300ms;
+  }
+
+  .animation-delay-400 {
+    animation-delay: 400ms;
+  }
+
+  .animation-delay-500 {
+    animation-delay: 500ms;
+  }
+}
+
+/* Selection */
+::selection {
+  @apply bg-primary-500/30 text-primary-content;
+}
+
+::-moz-selection {
+  @apply bg-primary-500/30 text-primary-content;
 }

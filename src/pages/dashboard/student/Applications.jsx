@@ -1,16 +1,21 @@
 import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import useAxiosSecure from '../../../hooks/useAxiosSecure';
-import useAuth from '../../../hooks/useAuth'; // Added import
+import useAuth from '../../../hooks/useAuth';
 import useToast from '../../../hooks/useToast';
-import { User, DollarSign, CreditCard, BookOpen } from 'lucide-react';
+import { User, DollarSign, CreditCard, BookOpen, Clock, Briefcase, GraduationCap, ArrowLeft, Trash2, XCircle, CheckCircle } from 'lucide-react';
 import Button from '../../../components/ui/Button';
+import Card from '../../../components/ui/Card';
+import Modal from '../../../components/ui/Modal';
+import Spinner from '../../../components/ui/Spinner';
+import Input from '../../../components/ui/Input';
 import Swal from 'sweetalert2';
+import { motion, AnimatePresence } from 'framer-motion';
 
 const Applications = () => {
     const { tuitionId } = useParams();
     const navigate = useNavigate();
-    const { user } = useAuth(); // Get User
+    const { user } = useAuth();
     const axiosSecure = useAxiosSecure();
     const { showToast } = useToast();
 
@@ -20,6 +25,7 @@ const Applications = () => {
 
     // Payment State
     const [selectedApp, setSelectedApp] = useState(null);
+    const [isPaymentModalOpen, setIsPaymentModalOpen] = useState(false);
     const [paymentProcessing, setPaymentProcessing] = useState(false);
 
     useEffect(() => {
@@ -47,7 +53,6 @@ const Applications = () => {
     }, [tuitionId, axiosSecure, user?.email]);
 
     const handleAcceptClick = async (app) => {
-        // 1. Wonderful Alert "Slider" (Confirmation)
         const result = await Swal.fire({
             title: 'Accept this Tutor?',
             text: `Are you sure you want to accept ${app.tutorName || 'this tutor'}?`,
@@ -56,12 +61,17 @@ const Applications = () => {
             confirmButtonColor: '#3085d6',
             cancelButtonColor: '#d33',
             confirmButtonText: 'Yes, proceed to payment',
-            cancelButtonText: 'Cancel'
+            cancelButtonText: 'Cancel',
+            customClass: {
+                popup: 'rounded-2xl',
+                confirmButton: 'px-6 py-2.5 rounded-xl font-bold',
+                cancelButton: 'px-6 py-2.5 rounded-xl font-bold'
+            }
         });
 
         if (result.isConfirmed) {
             setSelectedApp(app);
-            document.getElementById('payment_modal').showModal();
+            setIsPaymentModalOpen(true);
         }
     };
 
@@ -70,8 +80,8 @@ const Applications = () => {
         setPaymentProcessing(true);
 
         const form = e.target;
-        const cardName = form.cardName.value;
-        const cardNumber = form.cardNumber.value;
+        // const cardName = form.cardName.value; // In a real app, these would be used
+        // const cardNumber = form.cardNumber.value;
 
         // Simulate 2 seconds processing
         await new Promise(resolve => setTimeout(resolve, 2000));
@@ -79,25 +89,29 @@ const Applications = () => {
         try {
             const payload = {
                 applicationId: selectedApp._id,
-                tuitionId: tuitionId, // Use URL param directly
+                tuitionId: tuitionId,
                 tutorEmail: selectedApp.tutorEmail,
-                amount: tuitionDetails?.salary || 0, // Fallback safely
+                amount: selectedApp?.expectedSalary || tuitionDetails?.salary || 0,
             };
 
-            // Use Demo Payment API
             const res = await axiosSecure.post('/payments/demo', payload);
 
             if (res.data.success) {
-                document.getElementById('payment_modal').close();
-                Swal.fire(
-                    'Payment Successful!',
-                    `You have hired ${selectedApp.tutorName || 'the tutor'}!`,
-                    'success'
-                );
+                setIsPaymentModalOpen(false);
+                Swal.fire({
+                    title: 'Payment Successful!',
+                    text: `You have hired ${selectedApp.tutorName || 'the tutor'} !`,
+                    icon: 'success',
+                    customClass: {
+                        popup: 'rounded-2xl',
+                        confirmButton: 'px-6 py-2.5 rounded-xl font-bold'
+                    }
+                });
+
                 // Update local state
                 setApplications(prev => prev.map(a =>
-                    a._id === selectedApp._id ? { ...a, status: 'approved' } : // Approved status
-                        (a.tuitionId === tuitionId && a._id !== selectedApp._id) ? { ...a, status: 'rejected' } : a // Reject others
+                    a._id === selectedApp._id ? { ...a, status: 'approved' } :
+                        (a.tuitionId === tuitionId && a._id !== selectedApp._id) ? { ...a, status: 'rejected' } : a
                 ));
             }
         } catch (error) {
@@ -115,8 +129,13 @@ const Applications = () => {
             icon: 'warning',
             showCancelButton: true,
             confirmButtonColor: '#d33',
-            cancelButtonColor: '#3085d6',
-            confirmButtonText: 'Yes, Delete'
+            cancelButtonColor: '#cbd5e1',
+            confirmButtonText: 'Yes, Delete',
+            customClass: {
+                popup: 'rounded-2xl',
+                confirmButton: 'px-6 py-2.5 rounded-xl font-bold',
+                cancelButton: 'px-6 py-2.5 rounded-xl font-bold'
+            }
         });
 
         if (!result.isConfirmed) return;
@@ -138,15 +157,19 @@ const Applications = () => {
     // I'll keep Reject as status update (PATCH) and add Delete (DELETE) as a separate option.
 
     const handleReject = async (appId) => {
-        // Confirmation before reject
         const result = await Swal.fire({
             title: 'Reject this Tutor?',
             text: "Do you want to reject this application? (Status will be 'rejected')",
             icon: 'warning',
             showCancelButton: true,
             confirmButtonColor: '#d33',
-            cancelButtonColor: '#3085d6',
-            confirmButtonText: 'Yes, Reject'
+            cancelButtonColor: '#cbd5e1',
+            confirmButtonText: 'Yes, Reject',
+            customClass: {
+                popup: 'rounded-2xl',
+                confirmButton: 'px-6 py-2.5 rounded-xl font-bold',
+                cancelButton: 'px-6 py-2.5 rounded-xl font-bold'
+            }
         });
 
         if (!result.isConfirmed) return;
@@ -166,168 +189,262 @@ const Applications = () => {
         }
     };
 
-    if (loading) return <div className="flex justify-center p-8"><span className="loading loading-spinner text-primary"></span></div>;
+    if (loading) return <Spinner fullScreen variant="dots" />;
 
     return (
         <div className="space-y-6">
-            <div>
-                <h1 className="text-2xl font-bold text-gray-800 dark:text-white">
-                    {tuitionId ? 'Review Applications' : 'All Received Applications'}
-                </h1>
-                {tuitionDetails && (
-                    <p className="text-gray-500">
-                        For: <span className="font-semibold text-primary">{tuitionDetails.subject}</span> ({tuitionDetails.class}) -
-                        Salary: BDT {tuitionDetails.salary}
-                    </p>
-                )}
-            </div>
+            <motion.div
+                initial={{ opacity: 0, y: -20 }}
+                animate={{ opacity: 1, y: 0 }}
+                className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 bg-gradient-to-r from-primary-500/5 to-secondary-500/5 p-6 rounded-2xl border border-primary-500/10"
+            >
+                <div>
+                    <Button
+                        variant="ghost"
+                        size="sm"
+                        leftIcon={<ArrowLeft size={18} />}
+                        onClick={() => navigate(-1)}
+                        className="mb-2 -ml-2"
+                    >
+                        Back
+                    </Button>
+                    <h1 className="text-3xl font-heading font-bold gradient-text">
+                        {tuitionId ? 'Review Applications' : 'All Received Applications'}
+                    </h1>
+                    {tuitionDetails && (
+                        <p className="text-base-content/70 mt-1 flex flex-wrap items-center gap-2">
+                            For: <span className="font-bold text-primary">{tuitionDetails.subject}</span>
+                            <span className="badge badge-ghost badge-sm">{tuitionDetails.class}</span>
+                            <span className="flex items-center gap-1 text-secondary font-bold text-sm bg-secondary/10 px-2 py-0.5 rounded-md">
+                                <DollarSign size={12} /> {tuitionDetails.salary}
+                            </span>
+                        </p>
+                    )}
+                </div>
+            </motion.div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
-                {applications.length === 0 ? (
-                    <div className="col-span-full text-center py-12 text-gray-500 bg-base-100 rounded-xl border border-base-200">
-                        No applications received yet.
-                    </div>
-                ) : (
-                    applications.map((app) => (
-                        <div key={app._id} className="card bg-base-100 shadow-sm border border-base-200">
-                            <div className="card-body">
-                                <div className="flex items-start justify-between">
-                                    <div className="flex gap-3">
-                                        <div className="avatar placeholder">
-                                            <div className="bg-neutral-focus text-neutral-content rounded-full w-12 h-12">
-                                                <span className="text-xl">
-                                                    {app.tutorName ? app.tutorName[0] : 'T'}
-                                                </span>
+                <AnimatePresence mode="popLayout">
+                    {applications.length === 0 ? (
+                        <motion.div
+                            initial={{ opacity: 0 }}
+                            animate={{ opacity: 1 }}
+                            className="col-span-full text-center py-16 text-base-content/50 bg-base-100/50 rounded-2xl border border-base-200"
+                        >
+                            <div className="flex flex-col items-center justify-center">
+                                <User size={48} className="mb-4 opacity-30" />
+                                <p className="text-lg">No applications received yet.</p>
+                            </div>
+                        </motion.div>
+                    ) : (
+                        applications.map((app, index) => (
+                            <motion.div
+                                key={app._id}
+                                layout
+                                initial={{ opacity: 0, scale: 0.9 }}
+                                animate={{ opacity: 1, scale: 1 }}
+                                exit={{ opacity: 0, scale: 0.9 }}
+                                transition={{ delay: index * 0.05 }}
+                            >
+                                <Card glass className="h-full flex flex-col hover:border-primary/30 transition-all duration-300">
+                                    {/* Header */}
+                                    <div className="flex items-start justify-between mb-4">
+                                        <div className="flex gap-4">
+                                            <div className="avatar placeholder">
+                                                <div className="bg-gradient-to-br from-primary to-secondary text-white rounded-full w-12 h-12 flex items-center justify-center ring-2 ring-base-100 shadow-md">
+                                                    <span className="text-xl font-bold">
+                                                        {app.tutorName ? app.tutorName[0].toUpperCase() : 'T'}
+                                                    </span>
+                                                </div>
+                                            </div>
+                                            <div>
+                                                <h2 className="font-bold text-lg leading-tight cursor-pointer hover:text-primary transition-colors" onClick={() => navigate(`/tutors/${app.tutorEmail}`)}>
+                                                    {app.tutorName || app.tutorEmail}
+                                                </h2>
+                                                <p className="text-xs text-base-content/60 mt-0.5 flex items-center gap-1">
+                                                    <Clock size={12} /> Applied: {new Date(app.created_at).toLocaleDateString()}
+                                                </p>
+                                                {!tuitionId && app.tuitionTitle && (
+                                                    <div className="badge badge-outline badge-xs mt-1.5 opacity-70">
+                                                        {app.tuitionTitle}
+                                                    </div>
+                                                )}
                                             </div>
                                         </div>
-                                        <div>
-                                            <h2 className="card-title text-base">{app.tutorName || app.tutorEmail}</h2>
-                                            {!tuitionId && app.tuitionTitle && (
-                                                <div className="badge badge-outline badge-sm text-xs my-1">{app.tuitionTitle}</div>
+                                        <div className={`badge font-bold border-0 ${app.status === 'approved' ? 'bg-success/10 text-success' :
+                                            app.status === 'rejected' ? 'bg-error/10 text-error' :
+                                                'bg-warning/10 text-warning'
+                                            } `}>
+                                            {app.status.toUpperCase()}
+                                        </div>
+                                    </div>
+
+                                    {/* Body */}
+                                    <div className="flex-1 space-y-3 mb-6">
+                                        {app.message && (
+                                            <div className="bg-base-200/50 p-3 rounded-xl text-sm italic text-base-content/80 border border-base-200">
+                                                "{app.message}"
+                                            </div>
+                                        )}
+
+                                        <div className="space-y-2 text-sm">
+                                            <div className="flex justify-between items-center py-1 border-b border-base-200/50">
+                                                <span className="text-base-content/60 flex items-center gap-2"><Clock size={14} /> Availability</span>
+                                                <span className="font-medium text-right">{app.availability || 'N/A'}</span>
+                                            </div>
+                                            <div className="flex justify-between items-center py-1 border-b border-base-200/50">
+                                                <span className="text-base-content/60 flex items-center gap-2"><Briefcase size={14} /> Experience</span>
+                                                <span className="font-medium text-right">{app.experience || 'N/A'}</span>
+                                            </div>
+                                            <div className="flex justify-between items-center py-1 border-b border-base-200/50">
+                                                <span className="text-base-content/60 flex items-center gap-2"><GraduationCap size={14} /> Qualification</span>
+                                                <span className="font-medium text-right">{app.qualification || 'N/A'}</span>
+                                            </div>
+                                            <div className="flex justify-between items-center py-1">
+                                                <span className="text-base-content/60 flex items-center gap-2"><DollarSign size={14} /> Expected</span>
+                                                <span className="font-bold text-primary">BDT {app.expectedSalary || tuitionDetails?.salary}</span>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    {/* Actions */}
+                                    <div className="flex items-center gap-2 mt-auto pt-4 border-t border-base-200">
+                                        <button
+                                            onClick={() => navigate(`/tutors/${app.tutorEmail}`)}
+                                            className="btn btn-sm btn-ghost btn-circle tooltip tooltip-top"
+                                            data-tip="View Profile"
+                                        >
+                                            <User size={18} />
+                                        </button>
+
+                                        <div className="flex-1 flex justify-end gap-2">
+                                            {app.status === 'pending' && (
+                                                <>
+                                                    <button
+                                                        onClick={() => handleReject(app._id)}
+                                                        className="btn btn-sm btn-ghost text-error hover:bg-error/10"
+                                                        title="Reject"
+                                                    >
+                                                        <XCircle size={18} />
+                                                    </button>
+
+                                                    <Button
+                                                        onClick={() => handleAcceptClick(app)}
+                                                        size="sm"
+                                                        variant="gradient"
+                                                        leftIcon={CheckCircle}
+                                                        className="shadow-md shadow-primary/20"
+                                                    >
+                                                        Hire
+                                                    </Button>
+                                                </>
                                             )}
-                                            <p className="text-xs text-gray-500">Applied on: {new Date(app.created_at).toLocaleDateString()}</p>
+                                            {app.status === 'approved' && (
+                                                <Button size="sm" variant="success" className="w-full cursor-default" leftIcon={CheckCircle}>
+                                                    Hired
+                                                </Button>
+                                            )}
+                                            {app.status === 'rejected' && (
+                                                <Button
+                                                    size="sm"
+                                                    variant="ghost"
+                                                    className="w-full cursor-default text-error bg-error/5 hover:bg-error/10"
+                                                    leftIcon={XCircle}
+                                                >
+                                                    Rejected
+                                                </Button>
+                                            )}
+                                            {(app.status !== 'pending' && app.status !== 'approved') && (
+                                                <button
+                                                    onClick={() => handleDelete(app._id)}
+                                                    className="btn btn-sm btn-ghost text-base-content/50 hover:text-error"
+                                                    title="Delete"
+                                                >
+                                                    <Trash2 size={18} />
+                                                </button>
+                                            )}
                                         </div>
                                     </div>
-                                    <div className={`badge ${app.status === 'approved' ? 'badge-success text-white' :
-                                        app.status === 'rejected' ? 'badge-error text-white' :
-                                            'badge-warning text-white'
-                                        }`}>
-                                        {app.status}
-                                    </div>
-                                </div>
-
-                                <div className="divider my-2"></div>
-
-                                <div className="space-y-2 text-sm">
-                                    {app.message && (
-                                        <div className="mb-3">
-                                            <span className="text-gray-500 block mb-1">Message:</span>
-                                            <p className="text-gray-700 dark:text-gray-300 text-sm bg-gray-50 dark:bg-gray-700 p-2 rounded">{app.message}</p>
-                                        </div>
-                                    )}
-                                    {app.availability && (
-                                        <div className="flex justify-between">
-                                            <span className="text-gray-500">Availability:</span>
-                                            <span className="font-medium">{app.availability}</span>
-                                        </div>
-                                    )}
-                                    <div className="flex justify-between">
-                                        <span className="text-gray-500">Experience:</span>
-                                        <span className="font-medium">{app.experience || 'N/A'}</span>
-                                    </div>
-                                    <div className="flex justify-between">
-                                        <span className="text-gray-500">Qualification:</span>
-                                        <span className="font-medium">{app.qualification || 'N/A'}</span>
-                                    </div>
-                                    <div className="flex justify-between">
-                                        <span className="text-gray-500">Expected Salary:</span>
-                                        <span className="font-medium">BDT {app.expectedSalary || tuitionDetails?.salary}</span>
-                                    </div>
-                                </div>
-
-                                <div className="card-actions justify-end mt-4 flex-wrap gap-2">
-                                    <button
-                                        onClick={() => navigate(`/tutors/${app.tutorEmail}`)}
-                                        className="btn btn-sm btn-outline btn-info gap-2"
-                                        title="View tutor profile"
-                                    >
-                                        <User size={16} /> View Profile
-                                    </button>
-                                    {app.status === 'pending' && (
-                                        <>
-                                            <button
-                                                onClick={() => handleReject(app._id)}
-                                                className="btn btn-sm btn-ghost text-error"
-                                            >
-                                                Reject
-                                            </button>
-                                            <button
-                                                onClick={() => handleDelete(app._id)}
-                                                className="btn btn-sm btn-ghost text-gray-400 hover:text-red-500"
-                                                title="Delete permanently"
-                                            >
-                                                Delete
-                                            </button>
-                                            <Button
-                                                onClick={() => handleAcceptClick(app)}
-                                                size="sm"
-                                                variant="primary"
-                                                className="gap-2"
-                                            >
-                                                <DollarSign size={16} /> Accept & Pay
-                                            </Button>
-                                        </>
-                                    )}
-                                    {app.status === 'accepted' && (
-                                        <button className="btn btn-sm btn-disabled w-full">Selected Tutor</button>
-                                    )}
-                                </div>
-                            </div>
-                        </div>
-                    ))
-                )}
+                                </Card>
+                            </motion.div>
+                        ))
+                    )}
+                </AnimatePresence>
             </div>
 
-            {/* Wonderful Payment Modal */}
-            <dialog id="payment_modal" className="modal modal-bottom sm:modal-middle">
-                <div className="modal-box">
-                    <h3 className="font-bold text-lg mb-4 flex items-center gap-2">
-                        <CreditCard className="text-primary" /> Secure Payment
-                    </h3>
-                    <p className="mb-4 text-sm text-gray-500">
-                        You are paying <span className="font-bold">BDT {tuitionDetails?.salary}</span> to hire this tutor.
-                    </p>
+            {/* Premium Payment Modal */}
+            <Modal
+                isOpen={isPaymentModalOpen}
+                onClose={() => setIsPaymentModalOpen(false)}
+                title="Secure Payment"
+                maxWidth="max-w-md"
+            >
+                <div className="space-y-6">
+                    <div className="bg-base-200/50 p-4 rounded-xl flex items-center gap-4 border border-base-200">
+                        <div className="p-3 bg-primary/10 rounded-full text-primary">
+                            <DollarSign size={24} />
+                        </div>
+                        <div>
+                            <p className="text-sm text-base-content/70">Total Amount</p>
+                            <p className="text-2xl font-bold text-primary">
+                                BDT {selectedApp?.expectedSalary || tuitionDetails?.salary}
+                            </p>
+                        </div>
+                    </div>
 
                     <form onSubmit={handlePaymentSubmit} className="space-y-4">
-                        <div className="form-control">
-                            <label className="label"><span className="label-text">Card Holder Name</span></label>
-                            <input name="cardName" type="text" placeholder="John Doe" className="input input-bordered w-full" required />
-                        </div>
-                        <div className="form-control">
-                            <label className="label"><span className="label-text">Card Number (Demo)</span></label>
-                            <input name="cardNumber" type="text" placeholder="1234 5678 9012 3456" className="input input-bordered w-full" required />
-                        </div>
+                        <Input
+                            label="Card Holder Name"
+                            name="cardName"
+                            placeholder="John Doe"
+                            fullWidth
+                            required
+                        />
+                        <Input
+                            label="Card Number (Demo)"
+                            name="cardNumber"
+                            placeholder="1234 5678 9012 3456"
+                            leftIcon={CreditCard}
+                            fullWidth
+                            required
+                        />
                         <div className="grid grid-cols-2 gap-4">
-                            <div className="form-control">
-                                <label className="label"><span className="label-text">Expiry</span></label>
-                                <input type="text" placeholder="MM/YY" className="input input-bordered w-full" required />
-                            </div>
-                            <div className="form-control">
-                                <label className="label"><span className="label-text">CVC</span></label>
-                                <input type="text" placeholder="123" className="input input-bordered w-full" required />
-                            </div>
+                            <Input
+                                label="Expiry"
+                                placeholder="MM/YY"
+                                fullWidth
+                                required
+                            />
+                            <Input
+                                label="CVC"
+                                placeholder="123"
+                                fullWidth
+                                required
+                            />
                         </div>
 
-                        <div className="modal-action">
-                            <button type="button" className="btn" onClick={() => document.getElementById('payment_modal').close()} disabled={paymentProcessing}>Cancel</button>
-                            <button type="submit" className="btn btn-primary" disabled={paymentProcessing}>
-                                {paymentProcessing ? <span className="loading loading-spinner"></span> : `Pay BDT ${tuitionDetails?.salary}`}
-                            </button>
+                        <div className="flex justify-end gap-3 mt-6">
+                            <Button
+                                type="button"
+                                variant="ghost"
+                                onClick={() => setIsPaymentModalOpen(false)}
+                                disabled={paymentProcessing}
+                            >
+                                Cancel
+                            </Button>
+                            <Button
+                                type="submit"
+                                variant="primary"
+                                isLoading={paymentProcessing}
+                                leftIcon={CreditCard}
+                            >
+                                Pay Now
+                            </Button>
                         </div>
                     </form>
                 </div>
-            </dialog>
-        </div >
+            </Modal>
+        </div>
     );
 };
 

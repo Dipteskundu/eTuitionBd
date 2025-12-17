@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import useAxiosSecure from '../../../hooks/useAxiosSecure';
 import { DollarSign, Calendar, TrendingUp } from 'lucide-react';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
+import { motion } from 'framer-motion';
 
 const Earnings = () => {
     const axiosSecure = useAxiosSecure();
@@ -32,21 +33,49 @@ const Earnings = () => {
     const chartData = [
         { name: 'Jan', amount: 4000 },
         { name: 'Feb', amount: 3000 },
-        { name: 'Mar', amount: 2000 },
+        { name: 'Mar', amount: 5000 },
         { name: 'Apr', amount: 2780 },
         { name: 'May', amount: 1890 },
-        { name: 'Jun', amount: 2390 },
+        { name: 'Jun', amount: 6390 },
         { name: 'Jul', amount: 3490 },
     ];
 
     if (loading) return <div className="flex justify-center p-10"><span className="loading loading-spinner loading-lg text-primary"></span></div>;
 
+    const containerVariants = {
+        hidden: { opacity: 0 },
+        visible: {
+            opacity: 1,
+            transition: {
+                staggerChildren: 0.1
+            }
+        }
+    };
+
+    const itemVariants = {
+        hidden: { y: 20, opacity: 0 },
+        visible: {
+            y: 0,
+            opacity: 1
+        }
+    };
+
     return (
-        <div className="space-y-8">
-            <h1 className="text-2xl font-bold text-gray-800 dark:text-white">Earnings & Payments</h1>
+        <motion.div
+            className="space-y-8"
+            variants={containerVariants}
+            initial="hidden"
+            animate="visible"
+        >
+            <motion.h1
+                variants={itemVariants}
+                className="text-2xl font-bold font-heading gradient-text"
+            >
+                Earnings & Payments
+            </motion.h1>
 
             {/* Total Earnings Card */}
-            <div className="card bg-primary text-primary-content shadow-xl max-w-sm">
+            <motion.div variants={itemVariants} className="card bg-gradient-to-br from-primary-500 to-primary-600 text-primary-content shadow-xl max-w-sm">
                 <div className="card-body">
                     <h2 className="card-title">Total Earnings</h2>
                     <div className="flex items-center gap-2 text-4xl font-bold">
@@ -54,7 +83,7 @@ const Earnings = () => {
                         <span className="text-lg font-normal opacity-80">BDT</span>
                     </div>
                 </div>
-            </div>
+            </motion.div>
 
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
                 {/* Chart */}
@@ -110,7 +139,7 @@ const Earnings = () => {
                     </div>
                 </div>
             </div>
-        </div>
+        </motion.div>
     );
 };
 

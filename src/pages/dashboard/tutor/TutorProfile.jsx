@@ -2,14 +2,20 @@ import React, { useEffect, useState } from 'react';
 import useAuth from '../../../hooks/useAuth';
 import useAxiosSecure from '../../../hooks/useAxiosSecure';
 import useToast from '../../../hooks/useToast';
-import { Save, User, Briefcase, BookOpen, DollarSign, MapPin } from 'lucide-react';
+import { Save, User, Briefcase, BookOpen, DollarSign, MapPin, FileText } from 'lucide-react';
 import ProfileSettings from '../../../components/dashboard/ProfileSettings';
+import Card from '../../../components/ui/Card';
+import Input from '../../../components/ui/Input';
+import Button from '../../../components/ui/Button';
+import Spinner from '../../../components/ui/Spinner';
+import { motion } from 'framer-motion';
 
 const TutorProfile = () => {
     const { user } = useAuth();
     const axiosSecure = useAxiosSecure();
     const { showToast } = useToast();
     const [loading, setLoading] = useState(true);
+    const [isSubmitting, setIsSubmitting] = useState(false);
 
     const [tutorData, setTutorData] = useState({
         qualification: '',
@@ -44,6 +50,7 @@ const TutorProfile = () => {
 
     const handleTutorProfileUpdate = async (e) => {
         e.preventDefault();
+        setIsSubmitting(true);
         try {
             const payload = {
                 ...tutorData,
@@ -57,107 +64,117 @@ const TutorProfile = () => {
         } catch (error) {
             console.error(error);
             showToast('Failed to update professional profile.', 'error');
+        } finally {
+            setIsSubmitting(false);
         }
     };
 
-    if (loading) return <div className="flex justify-center p-10"><span className="loading loading-spinner text-primary"></span></div>;
+    if (loading) return <Spinner variant="dots" fullScreen />;
 
     return (
-        <div className="space-y-10">
-            <div className="border-b border-gray-200 pb-5">
-                <h1 className="text-3xl font-bold text-gray-800 dark:text-white">Profile Management</h1>
-                <p className="text-gray-500">Manage your personal and professional information.</p>
-            </div>
+        <div className="space-y-8">
+            <motion.div
+                initial={{ opacity: 0, y: -20 }}
+                animate={{ opacity: 1, y: 0 }}
+            >
+                <h1 className="text-3xl font-heading font-bold gradient-text">Profile Management</h1>
+                <p className="text-base-content/70 mt-1">Manage your personal and professional information to attract students.</p>
+            </motion.div>
 
             {/* Basic Info (Reusing Shared Component) */}
-            <section>
+            <motion.section
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.1 }}
+            >
                 <h2 className="text-xl font-semibold mb-4 flex items-center gap-2">
                     <User className="text-primary" /> Personal Information
                 </h2>
                 <ProfileSettings />
-            </section>
-
-            <div className="divider"></div>
+            </motion.section>
 
             {/* Professional Info */}
-            <section className="bg-base-100 p-6 rounded-xl shadow-sm border border-base-200">
-                <h2 className="text-xl font-semibold mb-6 flex items-center gap-2">
+            <motion.section
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.2 }}
+            >
+                <h2 className="text-xl font-semibold mb-4 flex items-center gap-2">
                     <Briefcase className="text-secondary" /> Professional Details
                 </h2>
 
-                <form onSubmit={handleTutorProfileUpdate} className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <div className="form-control col-span-2">
-                        <label className="label font-medium"><span className="label-text">Bio / Introduction</span></label>
-                        <textarea
-                            className="textarea textarea-bordered h-24"
-                            placeholder="Write a short bio about yourself..."
-                            value={tutorData.bio}
-                            onChange={(e) => setTutorData({ ...tutorData, bio: e.target.value })}
-                        ></textarea>
-                    </div>
+                <Card glass className="p-8 border-t-4 border-t-secondary/50">
+                    <form onSubmit={handleTutorProfileUpdate} className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div className="col-span-1 md:col-span-2">
+                            <label className="label font-medium pl-0"><span className="label-text flex items-center gap-2 text-base"><FileText size={16} /> Bio / Introduction</span></label>
+                            <textarea
+                                className="textarea textarea-bordered h-32 w-full focus:outline-none focus:ring-2 focus:ring-secondary/20 rounded-xl bg-base-100/50"
+                                placeholder="Write a compelling bio about yourself..."
+                                value={tutorData.bio}
+                                onChange={(e) => setTutorData({ ...tutorData, bio: e.target.value })}
+                            ></textarea>
+                            <label className="label"><span className="label-text-alt text-base-content/50">Tell students about your teaching style and experience.</span></label>
+                        </div>
 
-                    <div className="form-control">
-                        <label className="label font-medium flex items-center gap-2"><BookOpen size={16} /> Highest Qualification</label>
-                        <input
-                            type="text"
-                            className="input input-bordered"
+                        <Input
+                            label="Highest Qualification"
+                            leftIcon={BookOpen}
                             placeholder="e.g., B.Sc in Computer Science"
                             value={tutorData.qualification}
                             onChange={(e) => setTutorData({ ...tutorData, qualification: e.target.value })}
                         />
-                    </div>
 
-                    <div className="form-control">
-                        <label className="label font-medium flex items-center gap-2"><Briefcase size={16} /> Experience (Years)</label>
-                        <input
-                            type="text"
-                            className="input input-bordered"
+                        <Input
+                            label="Experience (Years)"
+                            leftIcon={Briefcase}
                             placeholder="e.g., 2 Years"
                             value={tutorData.experience}
                             onChange={(e) => setTutorData({ ...tutorData, experience: e.target.value })}
                         />
-                    </div>
 
-                    <div className="form-control">
-                        <label className="label font-medium flex items-center gap-2"><BookOpen size={16} /> Subjects (Comma Separated)</label>
-                        <input
-                            type="text"
-                            className="input input-bordered"
+                        <Input
+                            label="Subjects (Comma Separated)"
+                            leftIcon={BookOpen}
                             placeholder="e.g., Math, Physics, English"
                             value={tutorData.subjects}
                             onChange={(e) => setTutorData({ ...tutorData, subjects: e.target.value })}
                         />
-                    </div>
 
-                    <div className="form-control">
-                        <label className="label font-medium flex items-center gap-2"><DollarSign size={16} /> Hourly Rate (BDT)</label>
-                        <input
+                        <Input
+                            label="Hourly Rate (BDT)"
                             type="number"
-                            className="input input-bordered"
+                            leftIcon={DollarSign}
                             placeholder="e.g., 500"
                             value={tutorData.hourlyRate}
                             onChange={(e) => setTutorData({ ...tutorData, hourlyRate: e.target.value })}
                         />
-                    </div>
 
-                    <div className="form-control">
-                        <label className="label font-medium flex items-center gap-2"><MapPin size={16} /> Preferred Location</label>
-                        <input
-                            type="text"
-                            className="input input-bordered"
-                            placeholder="e.g., Mirpur, Dhanmondi"
-                            value={tutorData.location}
-                            onChange={(e) => setTutorData({ ...tutorData, location: e.target.value })}
-                        />
-                    </div>
+                        <div className="col-span-1 md:col-span-2">
+                            <Input
+                                label="Preferred Location"
+                                leftIcon={MapPin}
+                                placeholder="e.g., Mirpur, Dhanmondi"
+                                value={tutorData.location}
+                                onChange={(e) => setTutorData({ ...tutorData, location: e.target.value })}
+                                fullWidth
+                            />
+                        </div>
 
-                    <div className="col-span-2 flex justify-end mt-4">
-                        <button type="submit" className="btn btn-secondary px-8 gap-2">
-                            <Save size={18} /> Save Professional Details
-                        </button>
-                    </div>
-                </form>
-            </section>
+                        <div className="col-span-1 md:col-span-2 flex justify-end mt-4">
+                            <Button
+                                type="submit"
+                                variant="secondary"
+                                size="lg"
+                                className="px-8 shadow-lg shadow-secondary/20"
+                                leftIcon={Save}
+                                isLoading={isSubmitting}
+                            >
+                                Save Professional Details
+                            </Button>
+                        </div>
+                    </form>
+                </Card>
+            </motion.section>
         </div>
     );
 };

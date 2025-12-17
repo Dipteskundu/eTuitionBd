@@ -80,6 +80,12 @@ const AppRoutes = () => {
                 <Route path="/dashboard/tuition/:tuitionId/applications" element={<RoleRoute allowedRoles={[ROLES.STUDENT]}><StudentApplications /></RoleRoute>} />
 
 
+                import PaymentPage from '../pages/dashboard/student/PaymentPage';
+
+                // ... (existing imports)
+
+                // Inside AppRoutes return:
+                <Route path="/dashboard/payment/:applicationId" element={<RoleRoute allowedRoles={[ROLES.STUDENT]}><PaymentPage /></RoleRoute>} />
                 <Route path="/dashboard/student/payments" element={<RoleRoute allowedRoles={[ROLES.STUDENT]}><PaymentHistory /></RoleRoute>} />
                 <Route path="/dashboard/transactions" element={<RoleRoute allowedRoles={[ROLES.STUDENT]}><PaymentHistory /></RoleRoute>} />
                 <Route path="/dashboard/student/payment/success" element={<RoleRoute allowedRoles={[ROLES.STUDENT]}><PaymentSuccess /></RoleRoute>} />

@@ -2,8 +2,14 @@ import React, { useEffect, useState } from 'react';
 import useAuth from '../../../hooks/useAuth';
 import useAxiosSecure from '../../../hooks/useAxiosSecure';
 import useToast from '../../../hooks/useToast';
-import { Search, MapPin, BookOpen, DollarSign, Send } from 'lucide-react';
+import { Search, MapPin, BookOpen, DollarSign, Send, Briefcase, GraduationCap } from 'lucide-react';
 import Swal from 'sweetalert2';
+import Card from '../../../components/ui/Card';
+import Button from '../../../components/ui/Button';
+import Input from '../../../components/ui/Input';
+import Modal from '../../../components/ui/Modal';
+import Spinner from '../../../components/ui/Spinner';
+import { motion, AnimatePresence } from 'framer-motion';
 
 const AvailableTuitions = () => {
     const { user } = useAuth();
@@ -18,12 +24,14 @@ const AvailableTuitions = () => {
     });
 
     // Application Modal State
+    const [isModalOpen, setIsModalOpen] = useState(false);
     const [selectedTuition, setSelectedTuition] = useState(null);
     const [applicationData, setApplicationData] = useState({
         experience: '',
         qualification: '',
         expectedSalary: ''
     });
+    const [isSubmitting, setIsSubmitting] = useState(false);
 
     const fetchTuitions = async () => {
         setLoading(true);
@@ -35,7 +43,7 @@ const AvailableTuitions = () => {
             if (filters.class) query += `&class=${filters.class}`;
 
             const res = await axiosSecure.get(`/tuitions-post${query}`);
-            setTuitions(res.data); // Backend now returns array directly for GET /tuitions-post
+            setTuitions(res.data);
         } catch (error) {
             console.error(error);
             showToast('Failed to fetch tuitions', 'error');
@@ -45,8 +53,11 @@ const AvailableTuitions = () => {
     };
 
     useEffect(() => {
-        fetchTuitions();
-    }, [filters.subject, filters.location, filters.class, axiosSecure]); // Auto-fetch on filter change or use a separate search button
+        const timeoutId = setTimeout(() => {
+            fetchTuitions();
+        }, 500); // Debounce search
+        return () => clearTimeout(timeoutId);
+    }, [filters.subject, filters.location, filters.class, axiosSecure]);
 
     const handleFilterChange = (e) => {
         setFilters({ ...filters, [e.target.name]: e.target.value });
@@ -60,25 +71,31 @@ const AvailableTuitions = () => {
             qualification: '',
             expectedSalary: tuition.salary || ''
         });
-        document.getElementById('application_modal').showModal();
+        setIsModalOpen(true);
     };
 
     const handleApplicationSubmit = async (e) => {
         e.preventDefault();
 
-        // 1. Ask for Confirmation
+        // 1. Confirm before submitting
         const result = await Swal.fire({
             title: 'Send Application?',
-            text: "Are you sure you want to submit this application?",
+            text: `Apply for ${selectedTuition.subject} tuition?`,
             icon: 'question',
             showCancelButton: true,
             confirmButtonColor: '#3085d6',
             cancelButtonColor: '#d33',
-            confirmButtonText: 'Yes, send it!'
+            confirmButtonText: 'Yes, apply!',
+            customClass: {
+                popup: 'rounded-2xl',
+                confirmButton: 'btn btn-primary',
+                cancelButton: 'btn btn-ghost'
+            }
         });
 
         if (!result.isConfirmed) return;
 
+        setIsSubmitting(true);
         try {
             const payload = {
                 tuitionId: selectedTuition._id,
@@ -86,14 +103,15 @@ const AvailableTuitions = () => {
             };
             const res = await axiosSecure.post('/apply-tuition', payload);
             if (res.data.insertedId) {
-                // Success Toast
-                Swal.fire(
-                    'Sent!',
-                    'Your application has been sent to the student.',
-                    'success'
-                );
-                document.getElementById('application_modal').close();
-                // Optionally remove the applied tuition from list or mark as applied
+                Swal.fire({
+                    title: 'Application Sent!',
+                    text: 'The student will review your profile shortly.',
+                    icon: 'success',
+                    timer: 2000,
+                    showConfirmButton: false,
+                    customClass: { popup: 'rounded-2xl' }
+                });
+                setIsModalOpen(false);
             }
         } catch (error) {
             console.error(error);
@@ -102,149 +120,199 @@ const AvailableTuitions = () => {
             } else {
                 showToast('Failed to submit application.', 'error');
             }
+        } finally {
+            setIsSubmitting(false);
         }
     };
 
     return (
-        <div className="space-y-6">
-            <h1 className="text-2xl font-bold text-gray-800 dark:text-white">Available Tuitions</h1>
+        <div className="space-y-8">
+            <motion.div
+                initial={{ opacity: 0, y: -20 }}
+                animate={{ opacity: 1, y: 0 }}
+                className="flex flex-col md:flex-row justify-between items-end gap-4"
+            >
+                <div>
+                    <h1 className="text-3xl font-heading font-bold gradient-text">Available Tuitions</h1>
+                    <p className="text-base-content/70 mt-1">Browse and apply for the latest tuition opportunities.</p>
+                </div>
+            </motion.div>
 
             {/* Filters */}
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 bg-base-100 p-4 rounded-xl shadow-sm border border-base-200">
-                <div className="form-control">
-                    <div className="input-group flex items-center bg-base-200 rounded-lg px-3">
-                        <BookOpen size={18} className="text-gray-500" />
-                        <input
-                            type="text"
+            <motion.div
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.1 }}
+            >
+                <Card glass className="p-6">
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                        <Input
+                            leftIcon={BookOpen}
+                            placeholder="Filter by Subject..."
                             name="subject"
-                            placeholder="Filter by Subject"
-                            className="input input-ghost w-full focus:outline-none focus:bg-transparent"
                             value={filters.subject}
                             onChange={handleFilterChange}
+                            fullWidth
+                            className="bg-base-100/50"
                         />
-                    </div>
-                </div>
-                <div className="form-control">
-                    <div className="input-group flex items-center bg-base-200 rounded-lg px-3">
-                        <MapPin size={18} className="text-gray-500" />
-                        <input
-                            type="text"
+                        <Input
+                            leftIcon={MapPin}
+                            placeholder="Filter by Location..."
                             name="location"
-                            placeholder="Filter by Location"
-                            className="input input-ghost w-full focus:outline-none focus:bg-transparent"
                             value={filters.location}
                             onChange={handleFilterChange}
+                            fullWidth
+                            className="bg-base-100/50"
                         />
-                    </div>
-                </div>
-                <div className="form-control">
-                    <div className="input-group flex items-center bg-base-200 rounded-lg px-3">
-                        <Search size={18} className="text-gray-500" />
-                        <input
-                            type="text"
+                        <Input
+                            leftIcon={Search}
+                            placeholder="Filter by Class..."
                             name="class"
-                            placeholder="Filter by Class"
-                            className="input input-ghost w-full focus:outline-none focus:bg-transparent"
                             value={filters.class}
                             onChange={handleFilterChange}
+                            fullWidth
+                            className="bg-base-100/50"
                         />
                     </div>
-                </div>
-            </div>
+                </Card>
+            </motion.div>
 
             {/* Tuition List */}
             {loading ? (
-                <div className="flex justify-center p-10"><span className="loading loading-spinner loading-lg text-primary"></span></div>
+                <Spinner variant="dots" className="min-h-[300px]" />
             ) : tuitions.length === 0 ? (
-                <div className="text-center py-10 bg-base-100 rounded-xl border border-base-200">
-                    <p className="text-gray-500">No approved tuitions found matching your criteria.</p>
+                <div className="text-center py-16 bg-base-100/50 rounded-2xl border border-base-200 border-dashed">
+                    <div className="flex justify-center mb-4 opacity-50"><Search size={48} /></div>
+                    <h3 className="text-lg font-bold text-base-content/70">No tuitions found</h3>
+                    <p className="text-base-content/50">Try adjusting your search filters.</p>
                 </div>
             ) : (
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                    {tuitions.map((item) => (
-                        <div key={item._id} className="card bg-base-100 shadow-sm border border-base-200 hover:shadow-md transition-shadow">
-                            <div className="card-body">
-                                <h2 className="card-title text-primary">{item.subject}</h2>
-                                <h3 className="text-sm font-semibold text-gray-500">Class: {item.class}</h3>
+                    <AnimatePresence mode='popLayout'>
+                        {tuitions.map((item, index) => (
+                            <motion.div
+                                key={item._id}
+                                layout
+                                initial={{ opacity: 0, scale: 0.9 }}
+                                animate={{ opacity: 1, scale: 1 }}
+                                exit={{ opacity: 0, scale: 0.9 }}
+                                transition={{ duration: 0.2, delay: index * 0.05 }}
+                            >
+                                <Card hover glass className="h-full flex flex-col justify-between border-t-4 border-t-secondary/50">
+                                    <div className="space-y-4">
+                                        <div className="flex justify-between items-start">
+                                            <div>
+                                                <h2 className="text-xl font-bold text-secondary font-heading">{item.subject}</h2>
+                                                <p className="text-xs font-bold uppercase tracking-wider text-base-content/50 bg-base-200 inline-block px-2 py-1 rounded mt-1">Class {item.class}</p>
+                                            </div>
+                                            <div className="badge badge-outline text-xs opacity-70">{item.days} days/week</div>
+                                        </div>
 
-                                <div className="space-y-2 mt-2">
-                                    <div className="flex items-center gap-2 text-sm text-gray-600">
-                                        <MapPin size={16} /> {item.location}
+                                        <div className="space-y-2 py-2">
+                                            <div className="flex items-center gap-2 text-sm text-base-content/80">
+                                                <MapPin size={16} className="text-primary" />
+                                                <span className="truncate">{item.location}</span>
+                                            </div>
+                                            <div className="flex items-center gap-2 text-sm text-base-content/80">
+                                                <DollarSign size={16} className="text-success" />
+                                                <span className="font-bold text-success">৳ {item.salary}</span> <span className="text-xs opacity-60">/month</span>
+                                            </div>
+                                        </div>
                                     </div>
-                                    <div className="flex items-center gap-2 text-sm text-gray-600">
-                                        <DollarSign size={16} /> Salary: BDT {item.salary}
-                                    </div>
-                                </div>
 
-                                <div className="card-actions justify-end mt-4">
-                                    <button
-                                        className="btn btn-primary btn-sm gap-2"
-                                        onClick={() => handleApplyClick(item)}
-                                    >
-                                        <Send size={16} /> Apply Now
-                                    </button>
-                                </div>
-                            </div>
-                        </div>
-                    ))}
+                                    <div className="pt-4 mt-2 border-t border-base-200/50">
+                                        <Button
+                                            variant="primary"
+                                            size="sm"
+                                            onClick={() => handleApplyClick(item)}
+                                            className="w-full shadow-lg shadow-primary/20"
+                                            rightIcon={Send}
+                                        >
+                                            Apply Now
+                                        </Button>
+                                    </div>
+                                </Card>
+                            </motion.div>
+                        ))}
+                    </AnimatePresence>
                 </div>
             )}
 
             {/* Application Modal */}
-            <dialog id="application_modal" className="modal modal-bottom sm:modal-middle">
-                <div className="modal-box">
-                    <h3 className="font-bold text-lg mb-4">Apply for {selectedTuition?.subject}</h3>
-                    <form onSubmit={handleApplicationSubmit} className="space-y-4">
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                            <div className="form-control">
-                                <label className="label"><span className="label-text">Name</span></label>
-                                <input type="text" value={user?.displayName || ''} className="input input-bordered w-full bg-base-200" readOnly />
-                            </div>
-                            <div className="form-control">
-                                <label className="label"><span className="label-text">Email</span></label>
-                                <input type="text" value={user?.email || ''} className="input input-bordered w-full bg-base-200" readOnly />
-                            </div>
-                        </div>
+            <Modal
+                isOpen={isModalOpen}
+                onClose={() => setIsModalOpen(false)}
+                title={`Apply for ${selectedTuition?.subject}`}
+                maxWidth="max-w-xl"
+            >
+                <form onSubmit={handleApplicationSubmit} className="space-y-5">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <Input
+                            label="Name"
+                            value={user?.displayName || ''}
+                            readOnly
+                            disabled
+                            className="opacity-70"
+                        />
+                        <Input
+                            label="Email"
+                            value={user?.email || ''}
+                            readOnly
+                            disabled
+                            className="opacity-70"
+                        />
+                    </div>
 
-                        <div className="form-control">
-                            <label className="label"><span className="label-text">Experience</span></label>
-                            <textarea
-                                className="textarea textarea-bordered h-24"
-                                placeholder="Write briefly about your experience..."
-                                value={applicationData.experience}
-                                onChange={(e) => setApplicationData({ ...applicationData, experience: e.target.value })}
-                                required
-                            ></textarea>
-                        </div>
-                        <div className="form-control">
-                            <label className="label"><span className="label-text">Qualification</span></label>
-                            <input
-                                type="text"
-                                placeholder="Your highest qualification"
-                                className="input input-bordered"
-                                value={applicationData.qualification}
-                                onChange={(e) => setApplicationData({ ...applicationData, qualification: e.target.value })}
-                                required
-                            />
-                        </div>
-                        <div className="form-control">
-                            <label className="label"><span className="label-text">Expected Salary</span></label>
-                            <input
-                                type="number"
-                                placeholder="Your expected salary"
-                                className="input input-bordered"
-                                value={applicationData.expectedSalary}
-                                onChange={(e) => setApplicationData({ ...applicationData, expectedSalary: e.target.value })}
-                                required
-                            />
-                        </div>
-                        <div className="modal-action">
-                            <button type="button" className="btn" onClick={() => document.getElementById('application_modal').close()}>Cancel</button>
-                            <button type="submit" className="btn btn-primary">Submit Application</button>
-                        </div>
-                    </form>
-                </div>
-            </dialog>
+                    <div className="form-control">
+                        <label className="label font-medium"><span className="label-text flex items-center gap-2"><Briefcase size={16} /> Experience</span></label>
+                        <textarea
+                            className="textarea textarea-bordered h-24 focus:outline-none focus:ring-2 focus:ring-primary/20"
+                            placeholder="Briefly describe your teaching experience..."
+                            value={applicationData.experience}
+                            onChange={(e) => setApplicationData({ ...applicationData, experience: e.target.value })}
+                            required
+                        ></textarea>
+                    </div>
+
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <Input
+                            label="Highest Qualification"
+                            placeholder="e.g. B.Sc in Math"
+                            leftIcon={GraduationCap}
+                            value={applicationData.qualification}
+                            onChange={(e) => setApplicationData({ ...applicationData, qualification: e.target.value })}
+                            required
+                        />
+                        <Input
+                            label="Expected Salary"
+                            type="number"
+                            placeholder="e.g. 5000"
+                            leftIcon={DollarSign}
+                            value={applicationData.expectedSalary}
+                            onChange={(e) => setApplicationData({ ...applicationData, expectedSalary: e.target.value })}
+                            required
+                        />
+                    </div>
+
+                    <div className="flex justify-end gap-3 pt-4">
+                        <Button
+                            variant="ghost"
+                            type="button"
+                            onClick={() => setIsModalOpen(false)}
+                        >
+                            Cancel
+                        </Button>
+                        <Button
+                            variant="primary"
+                            type="submit"
+                            isLoading={isSubmitting}
+                            rightIcon={Send}
+                        >
+                            Submit Application
+                        </Button>
+                    </div>
+                </form>
+            </Modal>
         </div>
     );
 };

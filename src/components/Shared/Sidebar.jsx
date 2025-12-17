@@ -11,6 +11,7 @@ import {
     DollarSign,
     Briefcase
 } from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
 import useRole from '../../hooks/useRole';
 import useAuth from '../../hooks/useAuth';
 import { ROLES } from '../../utils/constants';
@@ -64,14 +65,35 @@ const Sidebar = ({ isOpen, onClose }) => {
 
     const menuItems = getMenuItems();
 
+    // Sidebar Variants
+    const sidebarVariants = {
+        open: { x: 0, transition: { type: 'spring', stiffness: 300, damping: 30 } },
+        closed: { x: '-100%', transition: { type: 'spring', stiffness: 300, damping: 30 } },
+    };
+
+    // Stagger for children
+    const listVariants = {
+        open: { transition: { staggerChildren: 0.05, delayChildren: 0.1 } },
+        closed: { transition: { staggerChildren: 0.05, staggerDirection: -1 } },
+    };
+
+    const itemVariants = {
+        open: { opacity: 1, x: 0 },
+        closed: { opacity: 0, x: -20 },
+    };
+
     return (
-        <>
+        <AnimatePresence>
             {/* Mobile Overlay */}
-            <div
-                className={`fixed inset-0 z-20 bg-black/50 transition-opacity lg:hidden ${isOpen ? 'opacity-100' : 'opacity-0 pointer-events-none'
-                    }`}
-                onClick={onClose}
-            />
+            {isOpen && (
+                <motion.div
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    exit={{ opacity: 0 }}
+                    className="fixed inset-0 z-20 bg-black/50 lg:hidden backdrop-blur-sm"
+                    onClick={onClose}
+                />
+            )}
 
             {/* Sidebar */}
             <aside
@@ -137,7 +159,7 @@ const Sidebar = ({ isOpen, onClose }) => {
                     </div>
                 </div>
             </aside>
-        </>
+        </AnimatePresence>
     );
 };
 

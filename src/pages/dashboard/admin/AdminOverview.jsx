@@ -2,6 +2,9 @@ import React, { useEffect, useState } from 'react';
 import useAxiosSecure from '../../../hooks/useAxiosSecure';
 import { Users, BookOpen, DollarSign, Activity } from 'lucide-react';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
+import Card from '../../../components/ui/Card';
+import Spinner from '../../../components/ui/Spinner';
+import { motion } from 'framer-motion';
 
 const AdminOverview = () => {
     const axiosSecure = useAxiosSecure();
@@ -28,7 +31,7 @@ const AdminOverview = () => {
         fetchStats();
     }, [axiosSecure]);
 
-    if (loading) return <div className="p-10 text-center"><span className="loading loading-dots loading-lg"></span></div>;
+    if (loading) return <Spinner variant="dots" size="lg" fullScreen />;
 
     const data = [
         { name: 'Students', value: stats.totalStudentCount },
@@ -36,55 +39,63 @@ const AdminOverview = () => {
         { name: 'Tuitions', value: stats.totalTuitions },
     ];
 
+    const statCards = [
+        { title: 'Total Users', value: stats.totalUsers, icon: Users, bgColor: 'bg-primary/10', textColor: 'text-primary', desc: `${stats.totalStudentCount} Students, ${stats.totalTutorCount} Tutors` },
+        { title: 'Total Tuitions', value: stats.totalTuitions, icon: BookOpen, bgColor: 'bg-secondary/10', textColor: 'text-secondary', desc: 'Posted on platform' },
+        { title: 'Total Revenue', value: `৳${stats.totalRevenue}`, icon: DollarSign, bgColor: 'bg-success/10', textColor: 'text-success', desc: 'From accepted tuitions' },
+        { title: 'System Health', value: 'Good', icon: Activity, bgColor: 'bg-accent/10', textColor: 'text-accent', desc: 'All systems operational' },
+    ];
+
+    const containerVariants = {
+        hidden: { opacity: 0 },
+        visible: {
+            opacity: 1,
+            transition: {
+                staggerChildren: 0.1
+            }
+        }
+    };
+
+    const itemVariants = {
+        hidden: { y: 20, opacity: 0 },
+        visible: {
+            y: 0,
+            opacity: 1
+        }
+    };
+
     return (
-        <div className="space-y-8">
-            <h1 className="text-3xl font-bold text-gray-800 dark:text-white">Dashboard Overview</h1>
+        <motion.div
+            className="space-y-8"
+            variants={containerVariants}
+            initial="hidden"
+            animate="visible"
+        >
+            <motion.h1
+                variants={itemVariants}
+                className="font-heading text-4xl font-bold gradient-text"
+            >
+                Dashboard Overview
+            </motion.h1>
 
             {/* Stats Cards */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-                <div className="stats shadow bg-base-100 border border-base-200">
-                    <div className="stat">
-                        <div className="stat-figure text-primary">
-                            <Users size={32} />
+                {statCards.map((stat, index) => (
+                    <Card key={index} glass hover>
+                        <div className="flex items-center gap-4 mb-3">
+                            <div className={`p-4 ${stat.bgColor} rounded-xl`}>
+                                <stat.icon className={`w-8 h-8 ${stat.textColor}`} />
+                            </div>
+                            <div>
+                                <p className="text-sm text-base-content/60">{stat.title}</p>
+                                <h3 className="text-3xl font-heading font-bold gradient-text">
+                                    {stat.value}
+                                </h3>
+                            </div>
                         </div>
-                        <div className="stat-title">Total Users</div>
-                        <div className="stat-value text-primary">{stats.totalUsers}</div>
-                        <div className="stat-desc">{stats.totalStudentCount} Students, {stats.totalTutorCount} Tutors</div>
-                    </div>
-                </div>
-
-                <div className="stats shadow bg-base-100 border border-base-200">
-                    <div className="stat">
-                        <div className="stat-figure text-secondary">
-                            <BookOpen size={32} />
-                        </div>
-                        <div className="stat-title">Total Tuitions</div>
-                        <div className="stat-value text-secondary">{stats.totalTuitions}</div>
-                        <div className="stat-desc text-secondary">Posted on platform</div>
-                    </div>
-                </div>
-
-                <div className="stats shadow bg-base-100 border border-base-200">
-                    <div className="stat">
-                        <div className="stat-figure text-success">
-                            <DollarSign size={32} />
-                        </div>
-                        <div className="stat-title">Total Revenue</div>
-                        <div className="stat-value text-success">${stats.totalRevenue}</div> {/* Assuming USD or converting */}
-                        <div className="stat-desc">From accepted tuitions</div>
-                    </div>
-                </div>
-
-                <div className="stats shadow bg-base-100 border border-base-200">
-                    <div className="stat">
-                        <div className="stat-figure text-warning">
-                            <Activity size={32} />
-                        </div>
-                        <div className="stat-title">System Health</div>
-                        <div className="stat-value text-warning">Good</div>
-                        <div className="stat-desc">All systems operational</div>
-                    </div>
-                </div>
+                        <p className="text-xs text-base-content/50">{stat.desc}</p>
+                    </Card>
+                ))}
             </div>
 
             {/* Charts Section */}
@@ -120,7 +131,7 @@ const AdminOverview = () => {
                     </div>
                 </div>
             </div>
-        </div>
+        </motion.div>
     );
 };
 

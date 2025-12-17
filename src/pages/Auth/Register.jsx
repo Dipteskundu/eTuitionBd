@@ -7,6 +7,7 @@ import useToast from '../../hooks/useToast';
 import Input from '../../components/ui/Input';
 import Button from '../../components/ui/Button';
 import Select from '../../components/ui/Select';
+import Card from '../../components/ui/Card';
 import { ROLES } from '../../utils/constants';
 import { uploadImage } from '../../utils/uploadImage';
 import axiosInstance from '../../utils/axiosInstance';
@@ -110,86 +111,115 @@ const Register = () => {
     };
 
     return (
-        <div className="min-h-[calc(100vh-64px)] flex items-center justify-center p-4 bg-base-200/30 py-10">
+        <div className="min-h-[calc(100vh-64px)] flex items-center justify-center p-4 gradient-bg py-10">
+            {/* Floating Orbs */}
+            <div className="absolute inset-0 opacity-20 pointer-events-none">
+                <div className="absolute top-20 left-20 w-72 h-72 bg-primary rounded-full blur-3xl animate-float" />
+                <div className="absolute bottom-20 right-20 w-96 h-96 bg-secondary rounded-full blur-3xl animate-float animation-delay-300" />
+            </div>
+
             <motion.div
                 initial={{ opacity: 0, scale: 0.95 }}
                 animate={{ opacity: 1, scale: 1 }}
                 transition={{ duration: 0.5 }}
-                className="card w-full max-w-2xl bg-base-100 shadow-xl border border-base-200 overflow-hidden"
+                className="w-full max-w-2xl relative z-10"
             >
-                <div className="flex flex-col md:flex-row">
-                    {/* Left Side - Info */}
-                    <div className="md:w-2/5 bg-primary text-primary-content p-8 flex flex-col justify-between hidden md:flex">
-                        <div>
-                            <h2 className="text-3xl font-bold mb-4">Join Us Today</h2>
-                            <p className="opacity-90 mb-8">Create an account to start your journey with eTuitionBd.</p>
-
-                            <div className="space-y-4">
-                                <div className="flex items-center gap-3">
-                                    <CheckCircle size={20} /> <span className="text-sm">Verified Tutors</span>
-                                </div>
-                                <div className="flex items-center gap-3">
-                                    <CheckCircle size={20} /> <span className="text-sm">Secure Payments</span>
-                                </div>
-                                <div className="flex items-center gap-3">
-                                    <CheckCircle size={20} /> <span className="text-sm">Instant Connections</span>
-                                </div>
-                            </div>
+                <Card glass className="overflow-hidden">
+                    <div className="p-8">
+                        {/* Header */}
+                        <div className="text-center mb-8">
+                            <motion.div
+                                initial={{ scale: 0.8 }}
+                                animate={{ scale: 1 }}
+                                transition={{ delay: 0.2 }}
+                            >
+                                <h2 className="font-heading text-4xl font-bold gradient-text mb-2">
+                                    Join Us Today
+                                </h2>
+                                <p className="text-base-content/60">
+                                    Create your account and start your journey
+                                </p>
+                            </motion.div>
                         </div>
-                        <div className="text-xs opacity-70 mt-8">
-                            &copy; 2024 eTuitionBd
-                        </div>
-                    </div>
 
-                    {/* Right Side - Form */}
-                    <div className="md:w-3/5 p-8">
-                        <h2 className="text-2xl font-bold text-center md:text-left mb-6 text-gray-800">Create Account</h2>
-
-                        <form onSubmit={handleSubmit} className="space-y-4">
+                        <form onSubmit={handleSubmit} className="space-y-5">
                             {/* Role Selection */}
-                            <div className="grid grid-cols-2 gap-4 mb-4">
-                                <div
+                            <div className="grid grid-cols-2 gap-4">
+                                <motion.div
+                                    whileHover={{ scale: 1.02 }}
+                                    whileTap={{ scale: 0.98 }}
                                     onClick={() => setFormData({ ...formData, role: ROLES.STUDENT })}
-                                    className={`cursor-pointer border rounded-lg p-3 flex flex-col items-center justify-center gap-2 transition-all ${formData.role === ROLES.STUDENT ? 'border-primary bg-primary/5 ring-2 ring-primary ring-offset-1' : 'border-gray-200 hover:border-gray-300'}`}
+                                    className={`cursor-pointer rounded-xl p-4 flex flex-col items-center justify-center gap-3 transition-all ${formData.role === ROLES.STUDENT
+                                        ? 'bg-primary/10 ring-2 ring-primary shadow-glow'
+                                        : 'bg-base-200/50 hover:bg-base-200'
+                                        }`}
                                 >
-                                    <GraduationCap size={24} className={formData.role === ROLES.STUDENT ? 'text-primary' : 'text-gray-400'} />
-                                    <span className={`font-medium text-sm ${formData.role === ROLES.STUDENT ? 'text-primary' : 'text-gray-600'}`}>I am a Student</span>
-                                </div>
-                                <div
+                                    <GraduationCap
+                                        size={32}
+                                        className={formData.role === ROLES.STUDENT ? 'text-primary' : 'text-base-content/40'}
+                                    />
+                                    <span
+                                        className={`font-heading font-semibold ${formData.role === ROLES.STUDENT ? 'text-primary' : 'text-base-content/70'
+                                            }`}
+                                    >
+                                        I'm a Student
+                                    </span>
+                                    <p className="text-xs text-base-content/50 text-center">
+                                        Find qualified tutors
+                                    </p>
+                                </motion.div>
+
+                                <motion.div
+                                    whileHover={{ scale: 1.02 }}
+                                    whileTap={{ scale: 0.98 }}
                                     onClick={() => setFormData({ ...formData, role: ROLES.TUTOR })}
-                                    className={`cursor-pointer border rounded-lg p-3 flex flex-col items-center justify-center gap-2 transition-all ${formData.role === ROLES.TUTOR ? 'border-secondary bg-secondary/5 ring-2 ring-secondary ring-offset-1' : 'border-gray-200 hover:border-gray-300'}`}
+                                    className={`cursor-pointer rounded-xl p-4 flex flex-col items-center justify-center gap-3 transition-all ${formData.role === ROLES.TUTOR
+                                        ? 'bg-secondary/10 ring-2 ring-secondary shadow-glow'
+                                        : 'bg-base-200/50 hover:bg-base-200'
+                                        }`}
                                 >
-                                    <Briefcase size={24} className={formData.role === ROLES.TUTOR ? 'text-secondary' : 'text-gray-400'} />
-                                    <span className={`font-medium text-sm ${formData.role === ROLES.TUTOR ? 'text-secondary' : 'text-gray-600'}`}>I am a Tutor</span>
-                                </div>
+                                    <Briefcase
+                                        size={32}
+                                        className={formData.role === ROLES.TUTOR ? 'text-secondary' : 'text-base-content/40'}
+                                    />
+                                    <span
+                                        className={`font-heading font-semibold ${formData.role === ROLES.TUTOR ? 'text-secondary' : 'text-base-content/70'
+                                            }`}
+                                    >
+                                        I'm a Tutor
+                                    </span>
+                                    <p className="text-xs text-base-content/50 text-center">
+                                        Teach students
+                                    </p>
+                                </motion.div>
                             </div>
 
                             <Input
+                                floating
                                 label="Full Name"
                                 name="name"
-                                placeholder="John Doe"
-                                icon={<User size={18} />}
+                                leftIcon={<User size={18} />}
                                 value={formData.name}
                                 onChange={handleChange}
                                 required
                             />
 
                             <Input
+                                floating
                                 label="Email Address"
                                 name="email"
                                 type="email"
-                                placeholder="john@example.com"
-                                icon={<Mail size={18} />}
+                                leftIcon={<Mail size={18} />}
                                 value={formData.email}
                                 onChange={handleChange}
                                 required
                             />
 
                             <Input
+                                floating
                                 label="Phone Number"
                                 name="phone"
-                                placeholder="+880 1xxx xxxxxx"
-                                icon={<Phone size={18} />}
+                                leftIcon={<Phone size={18} />}
                                 value={formData.phone}
                                 onChange={handleChange}
                                 required
@@ -200,8 +230,7 @@ const Register = () => {
                                     label="Password"
                                     name="password"
                                     type="password"
-                                    placeholder="••••••"
-                                    icon={<Lock size={18} />}
+                                    leftIcon={<Lock size={18} />}
                                     value={formData.password}
                                     onChange={handleChange}
                                     required
@@ -210,8 +239,7 @@ const Register = () => {
                                     label="Confirm Password"
                                     name="confirmPassword"
                                     type="password"
-                                    placeholder="••••••"
-                                    icon={<Lock size={18} />}
+                                    leftIcon={<Lock size={18} />}
                                     value={formData.confirmPassword}
                                     onChange={handleChange}
                                     required
@@ -221,14 +249,14 @@ const Register = () => {
                             {/* File Upload */}
                             <div className="form-control w-full">
                                 <label className="label">
-                                    <span className="label-text font-medium text-gray-700">Profile Photo</span>
+                                    <span className="label-text font-medium">Profile Photo (Optional)</span>
                                 </label>
                                 <label className="flex items-center gap-4 cursor-pointer">
-                                    <div className="w-16 h-16 rounded-full bg-base-200 border border-dashed border-gray-400 flex items-center justify-center overflow-hidden shrink-0">
+                                    <div className="w-16 h-16 rounded-full bg-base-200 border-2 border-dashed border-base-300 flex items-center justify-center overflow-hidden shrink-0 hover:border-primary transition-colors">
                                         {logoPreview ? (
                                             <img src={logoPreview} alt="Preview" className="w-full h-full object-cover" />
                                         ) : (
-                                            <Upload size={24} className="text-gray-400" />
+                                            <Upload size={24} className="text-base-content/40" />
                                         )}
                                     </div>
                                     <div className="flex-1">
@@ -238,30 +266,50 @@ const Register = () => {
                                             onChange={handlePhotoChange}
                                             className="file-input file-input-bordered file-input-sm w-full"
                                         />
-                                        <p className="text-xs text-gray-500 mt-1">Recommended: Square image, max 2MB</p>
+                                        <p className="text-xs text-base-content/50 mt-1">Max 2MB, square image recommended</p>
                                     </div>
                                 </label>
                             </div>
 
                             <Button
                                 type="submit"
-                                variant="primary"
-                                className="w-full mt-4"
+                                variant="gradient"
+                                size="lg"
+                                fullWidth
                                 loading={loading}
                                 disabled={loading}
+                                rightIcon={<UserPlus size={18} />}
+                                className="mt-6"
                             >
-                                Create Account <UserPlus size={18} className="ml-2" />
+                                Create Account
                             </Button>
                         </form>
 
-                        <p className="text-center mt-6 text-sm text-gray-600">
-                            Already have an account?
-                            <Link to="/login" className="text-primary font-bold hover:underline ml-1">
+                        {/* Login Link */}
+                        <p className="text-center mt-6 text-sm text-base-content/70">
+                            Already have an account?{' '}
+                            <Link to="/login" className="text-primary font-semibold hover:underline">
                                 Login
                             </Link>
                         </p>
+
+                        {/* Trust Indicators */}
+                        <div className="flex items-center justify-center gap-6 mt-8 text-xs text-base-content/60">
+                            <div className="flex items-center gap-2">
+                                <CheckCircle size={16} className="text-primary" />
+                                <span>Verified Tutors</span>
+                            </div>
+                            <div className="flex items-center gap-2">
+                                <CheckCircle size={16} className="text-secondary" />
+                                <span>Secure Platform</span>
+                            </div>
+                            <div className="flex items-center gap-2">
+                                <CheckCircle size={16} className="text-accent" />
+                                <span>Free Registration</span>
+                            </div>
+                        </div>
                     </div>
-                </div>
+                </Card>
             </motion.div>
         </div>
     );

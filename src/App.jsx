@@ -1,3 +1,4 @@
+import React from 'react';
 import { BrowserRouter } from 'react-router-dom';
 import { Toaster } from 'react-hot-toast';
 import { AuthProvider } from './context/AuthContext';
@@ -5,6 +6,11 @@ import { ThemeProvider } from './context/ThemeContext';
 import AppRoutes from './routes/AppRoutes';
 import './index.css';
 
+/**
+ * App - Root component
+ * Wraps the entire application with necessary context providers
+ * and routing configuration
+ */
 function App() {
   return (
     <BrowserRouter>

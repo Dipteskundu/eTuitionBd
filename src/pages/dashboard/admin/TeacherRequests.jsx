@@ -1,7 +1,12 @@
 import React, { useEffect, useState } from 'react';
 import useAxiosSecure from '../../../hooks/useAxiosSecure';
 import toast from 'react-hot-toast';
-import { UserCheck, XCircle, CheckCircle } from 'lucide-react';
+import { UserCheck, XCircle, CheckCircle, Clock } from 'lucide-react';
+import Card from '../../../components/ui/Card';
+import Table from '../../../components/ui/Table';
+import Button from '../../../components/ui/Button';
+import Spinner from '../../../components/ui/Spinner';
+import { motion } from 'framer-motion';
 
 const TeacherRequests = () => {
     const axiosSecure = useAxiosSecure();
@@ -9,11 +14,8 @@ const TeacherRequests = () => {
     const [loading, setLoading] = useState(true);
 
     const fetchRequests = async () => {
-        setLoading(true);
         try {
-            // Fetch all requests, or filter by pending if desired. The API supports raw get for all.
-            const res = await axiosSecure.get('/role-requests'); // Gets all
-            // Ideally filter pending on top or separate tabs. For now showing all.
+            const res = await axiosSecure.get('/role-requests');
             setRequests(res.data);
         } catch (error) {
             console.error("Error fetching requests:", error);
@@ -85,8 +87,8 @@ const TeacherRequests = () => {
                                             </td>
                                             <td>
                                                 <div className={`badge ${req.status === 'approved' ? 'badge-success text-white' :
-                                                        req.status === 'rejected' ? 'badge-error text-white' :
-                                                            'badge-warning text-white'
+                                                    req.status === 'rejected' ? 'badge-error text-white' :
+                                                        'badge-warning text-white'
                                                     }`}>
                                                     {req.status}
                                                 </div>

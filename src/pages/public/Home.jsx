@@ -94,143 +94,224 @@ const Home = () => {
     return (
         <div className="overflow-hidden">
             {/* Hero Section */}
-            <section className="relative bg-base-100 dark:bg-gray-900 pt-20 pb-32 overflow-hidden">
-                <div className="absolute top-0 left-0 w-full h-full bg-grid-slate-900/[0.04] bg-[bottom_1px_center] [mask-image:linear-gradient(to_bottom,transparent,black)]"></div>
+            <section className="relative min-h-screen flex items-center overflow-hidden gradient-bg">
+                {/* Animated Background Orbs */}
+                <div className="absolute inset-0 opacity-30">
+                    <div className="absolute top-20 left-20 w-72 h-72 bg-primary rounded-full blur-3xl animate-float" />
+                    <div className="absolute bottom-20 right-20 w-96 h-96 bg-secondary rounded-full blur-3xl animate-float animation-delay-300" />
+                    <div className="absolute top-1/2 left-1/2 w-64 h-64 bg-accent rounded-full blur-3xl animate-pulse-slow" />
+                </div>
+
                 <div className="container mx-auto px-4 relative z-10">
-                    <div className="flex flex-col lg:flex-row items-center gap-12">
+                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
+                        {/* Left Content */}
                         <motion.div
                             initial={{ opacity: 0, x: -50 }}
                             animate={{ opacity: 1, x: 0 }}
-                            transition={{ duration: 0.6 }}
-                            className="lg:w-1/2 text-center lg:text-left"
+                            transition={{ duration: 0.8 }}
+                            className="text-center lg:text-left"
                         >
-                            <Badge variant="secondary" size="lg" className="mb-6 animate-pulse">
-                                #1 Tuition Platform in Bangladesh
-                            </Badge>
-                            <h1 className="text-5xl lg:text-7xl font-extrabold tracking-tight text-gray-900 dark:text-white mb-6">
-                                Find the Perfect <br />
-                                <span className="bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">
-                                    Tutor for Your Child
-                                </span>
-                            </h1>
-                            <p className="text-lg text-gray-600 dark:text-gray-300 mb-8 max-w-2xl mx-auto lg:mx-0 leading-relaxed">
-                                Connect with thousands of qualified student tutors and experienced teachers.
-                                Whether you need help with Math, English, or Science, we have the right match for you.
-                            </p>
-                            <div className="flex flex-wrap justify-center lg:justify-start gap-4">
+                            {/* Badge */}
+                            <motion.div
+                                initial={{ opacity: 0, y: -20 }}
+                                animate={{ opacity: 1, y: 0 }}
+                                transition={{ delay: 0.2 }}
+                                className="inline-block mb-6"
+                            >
+                                <Badge variant="secondary" size="lg" className="animate-pulse">
+                                    🏆 #1 Tuition Platform in Bangladesh
+                                </Badge>
+                            </motion.div>
+
+                            {/* Main Heading */}
+                            <motion.h1
+                                initial={{ opacity: 0, y: 20 }}
+                                animate={{ opacity: 1, y: 0 }}
+                                transition={{ delay: 0.3 }}
+                                className="font-heading text-5xl lg:text-7xl font-bold mb-6 leading-tight"
+                            >
+                                Find the Perfect{' '}
+                                <span className="gradient-text">
+                                    Tutor
+                                </span>{' '}
+                                for Your Child
+                            </motion.h1>
+
+                            {/* Description */}
+                            <motion.p
+                                initial={{ opacity: 0, y: 20 }}
+                                animate={{ opacity: 1, y: 0 }}
+                                transition={{ delay: 0.4 }}
+                                className="text-xl text-base-content/70 mb-8 max-w-2xl mx-auto lg:mx-0 leading-relaxed"
+                            >
+                                Connect with thousands of qualified tutors across Bangladesh.
+                                Whether you need help with Math, English, or Science, we have the perfect match.
+                            </motion.p>
+
+                            {/* CTA Buttons */}
+                            <motion.div
+                                initial={{ opacity: 0, y: 20 }}
+                                animate={{ opacity: 1, y: 0 }}
+                                transition={{ delay: 0.5 }}
+                                className="flex flex-wrap justify-center lg:justify-start gap-4 mb-12"
+                            >
                                 <Link to="/tuitions">
-                                    <Button size="lg" className="rounded-full px-8">
-                                        Find a Tutor <Search className="ml-2 w-5 h-5" />
+                                    <Button
+                                        variant="gradient"
+                                        size="xl"
+                                        rightIcon={<Search className="w-5 h-5" />}
+                                        className="shadow-glow"
+                                    >
+                                        Find a Tutor
                                     </Button>
                                 </Link>
                                 <Link to="/register">
-                                    <Button variant="outline" size="lg" className="rounded-full px-8">
+                                    <Button
+                                        variant="outline"
+                                        size="xl"
+                                        rightIcon={<ArrowRight className="w-5 h-5" />}
+                                    >
                                         Become a Tutor
                                     </Button>
                                 </Link>
-                            </div>
+                            </motion.div>
 
-                            <div className="mt-12 flex items-center justify-center lg:justify-start gap-8 text-sm text-gray-500 dark:text-gray-400 font-medium">
+                            {/* Trust Indicators */}
+                            <motion.div
+                                initial={{ opacity: 0 }}
+                                animate={{ opacity: 1 }}
+                                transition={{ delay: 0.6 }}
+                                className="flex flex-wrap items-center justify-center lg:justify-start gap-6 text-sm font-medium"
+                            >
                                 <div className="flex items-center gap-2">
-                                    <span className="p-2 bg-primary/10 rounded-full text-primary"><CheckCircle size={16} /></span>
-                                    Verified Tutors
+                                    <div className="w-10 h-10 bg-primary/10 rounded-full flex items-center justify-center">
+                                        <CheckCircle className="w-5 h-5 text-primary" />
+                                    </div>
+                                    <span className="text-base-content/70">Verified Tutors</span>
                                 </div>
                                 <div className="flex items-center gap-2">
-                                    <span className="p-2 bg-secondary/10 rounded-full text-secondary"><CheckCircle size={16} /></span>
-                                    Free Registration
+                                    <div className="w-10 h-10 bg-secondary/10 rounded-full flex items-center justify-center">
+                                        <CheckCircle className="w-5 h-5 text-secondary" />
+                                    </div>
+                                    <span className="text-base-content/70">Free Registration</span>
                                 </div>
                                 <div className="flex items-center gap-2">
-                                    <span className="p-2 bg-accent/10 rounded-full text-accent"><CheckCircle size={16} /></span>
-                                    Secure Platform
+                                    <div className="w-10 h-10 bg-accent/10 rounded-full flex items-center justify-center">
+                                        <CheckCircle className="w-5 h-5 text-accent" />
+                                    </div>
+                                    <span className="text-base-content/70">Secure Platform</span>
                                 </div>
-                            </div>
+                            </motion.div>
                         </motion.div>
 
+                        {/* Right Image */}
                         <motion.div
-                            initial={{ opacity: 0, scale: 0.8 }}
+                            initial={{ opacity: 0, scale: 0.9 }}
                             animate={{ opacity: 1, scale: 1 }}
-                            transition={{ duration: 0.6, delay: 0.2 }}
-                            className="lg:w-1/2 relative"
+                            transition={{ duration: 0.8, delay: 0.3 }}
+                            className="relative"
                         >
-                            <div className="relative z-10 p-4 bg-white dark:bg-gray-800 rounded-2xl shadow-2xl skew-y-3 transform hover:rotate-2 transition-transform duration-500">
-                                <img
+                            {/* Main Image Card */}
+                            <Card
+                                glass
+                                className="overflow-hidden transform hover:scale-105 transition-transform duration-500"
+                            >
+                                <motion.img
                                     src="https://images.unsplash.com/photo-1523240795612-9a054b0db644?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80"
-                                    alt="Student learning"
-                                    className="rounded-xl w-full object-cover h-[400px]"
+                                    alt="Students learning together"
+                                    className="w-full h-[500px] object-cover"
+                                    whileHover={{ scale: 1.05 }}
+                                    transition={{ duration: 0.3 }}
                                 />
-                                <div className="absolute -bottom-6 -left-6 bg-base-100 p-4 rounded-xl shadow-xl flex items-center gap-4">
-                                    <div className="avatar px-4">
-                                        <div className="w-12 h-12 rounded-full border-4 border-primary">
-                                            <img src="https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&w=100&q=80" alt="Avatar" />
+                            </Card>
+
+                            {/* Floating Stats Card */}
+                            <motion.div
+                                initial={{ opacity: 0, x: -20 }}
+                                animate={{ opacity: 1, x: 0 }}
+                                transition={{ delay: 0.8 }}
+                                className="absolute -bottom-6 -left-6 glass rounded-2xl p-6 shadow-2xl"
+                            >
+                                <div className="flex items-center gap-4">
+                                    <div className="avatar">
+                                        <div className="w-14 h-14 rounded-full ring-4 ring-primary">
+                                            <img
+                                                src="https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&w=100&q=80"
+                                                alt="Tutor"
+                                            />
                                         </div>
                                     </div>
                                     <div>
-                                        <h3 className="font-bold">5000+</h3>
-                                        <p className="text-xs text-gray-500">Active Tutors</p>
+                                        <h3 className="font-heading text-2xl font-bold gradient-text">
+                                            5000+
+                                        </h3>
+                                        <p className="text-sm text-base-content/60">Active Tutors</p>
                                     </div>
                                 </div>
-                            </div>
+                            </motion.div>
 
-                            {/* Decorative elements */}
-                            <div className="absolute top-10 right-10 w-24 h-24 bg-primary/20 rounded-full blur-2xl -z-10"></div>
-                            <div className="absolute bottom-10 left-10 w-32 h-32 bg-secondary/20 rounded-full blur-2xl -z-10"></div>
+                            {/* Floating Rating Card */}
+                            <motion.div
+                                initial={{ opacity: 0, x: 20 }}
+                                animate={{ opacity: 1, x: 0 }}
+                                transition={{ delay: 1 }}
+                                className="absolute -top-6 -right-6 glass rounded-2xl p-4 shadow-2xl"
+                            >
+                                <div className="flex items-center gap-2">
+                                    <Star className="w-6 h-6 text-warning fill-warning" />
+                                    <div>
+                                        <p className="font-heading text-xl font-bold">4.9</p>
+                                        <p className="text-xs text-base-content/60">Rating</p>
+                                    </div>
+                                </div>
+                            </motion.div>
                         </motion.div>
                     </div>
                 </div>
             </section>
 
             {/* How It Works Section */}
-            <section className="py-24 bg-base-200/50">
+            <section className="py-24 bg-base-200/30">
                 <div className="container mx-auto px-4">
                     <div className="text-center max-w-2xl mx-auto mb-16">
-                        <h2 className="text-3xl lg:text-4xl font-bold mb-4">How It Works</h2>
-                        <p className="text-gray-600 dark:text-gray-300">Getting started is easy. Follow these simple steps to find your perfect tutor or tuition job.</p>
+                        <h2 className="font-heading text-4xl lg:text-5xl font-bold mb-4 gradient-text">
+                            How It Works
+                        </h2>
+                        <p className="text-base-content/70 text-lg">
+                            Getting started is easy. Follow these simple steps to find your perfect tutor or tuition job.
+                        </p>
                     </div>
 
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-                        <motion.div
-                            variants={itemVariants}
-                            initial="hidden"
-                            whileInView="visible"
-                            viewport={{ once: true }}
-                            className="bg-base-100 p-8 rounded-2xl shadow-lg border border-base-200 text-center hover:shadow-2xl transition-all duration-300"
-                        >
-                            <div className="w-16 h-16 bg-primary/10 rounded-2xl flex items-center justify-center mx-auto mb-6 text-primary">
-                                <User size={32} />
+                        <Card glass hover className="text-center">
+                            <div className="w-20 h-20 bg-primary/10 rounded-2xl flex items-center justify-center mx-auto mb-6">
+                                <User size={40} className="text-primary" />
                             </div>
-                            <h3 className="text-xl font-bold mb-4">Create Account</h3>
-                            <p className="text-gray-500 dark:text-gray-400">Register as a Student or Tutor. Set up your profile with details about your requirements or qualifications.</p>
-                        </motion.div>
+                            <h3 className="font-heading text-2xl font-bold mb-4">Create Account</h3>
+                            <p className="text-base-content/70">
+                                Register as a Student or Tutor. Set up your profile with details about your requirements or qualifications.
+                            </p>
+                        </Card>
 
-                        <motion.div
-                            variants={itemVariants}
-                            initial="hidden"
-                            whileInView="visible"
-                            viewport={{ once: true }}
-                            transition={{ delay: 0.2 }}
-                            className="bg-base-100 p-8 rounded-2xl shadow-lg border border-base-200 text-center hover:shadow-2xl transition-all duration-300"
-                        >
-                            <div className="w-16 h-16 bg-secondary/10 rounded-2xl flex items-center justify-center mx-auto mb-6 text-secondary">
-                                <Search size={32} />
+                        <Card glass hover className="text-center">
+                            <div className="w-20 h-20 bg-secondary/10 rounded-2xl flex items-center justify-center mx-auto mb-6">
+                                <Search size={40} className="text-secondary" />
                             </div>
-                            <h3 className="text-xl font-bold mb-4">Search & Post</h3>
-                            <p className="text-gray-500 dark:text-gray-400">Students post tuition needs. Tutors browse available jobs. Use our advanced filters to find the best match.</p>
-                        </motion.div>
+                            <h3 className="font-heading text-2xl font-bold mb-4">Search & Post</h3>
+                            <p className="text-base-content/70">
+                                Students post tuition needs. Tutors browse available jobs. Use our advanced filters to find the best match.
+                            </p>
+                        </Card>
 
-                        <motion.div
-                            variants={itemVariants}
-                            initial="hidden"
-                            whileInView="visible"
-                            viewport={{ once: true }}
-                            transition={{ delay: 0.4 }}
-                            className="bg-base-100 p-8 rounded-2xl shadow-lg border border-base-200 text-center hover:shadow-2xl transition-all duration-300"
-                        >
-                            <div className="w-16 h-16 bg-accent/10 rounded-2xl flex items-center justify-center mx-auto mb-6 text-accent">
-                                <Award size={32} />
+                        <Card glass hover className="text-center">
+                            <div className="w-20 h-20 bg-accent/10 rounded-2xl flex items-center justify-center mx-auto mb-6">
+                                <Award size={40} className="text-accent" />
                             </div>
-                            <h3 className="text-xl font-bold mb-4">Start Learning</h3>
-                            <p className="text-gray-500 dark:text-gray-400">Connect, agree on terms, and start the journey. We ensure a secure and professional environment.</p>
-                        </motion.div>
+                            <h3 className="font-heading text-2xl font-bold mb-4">Start Learning</h3>
+                            <p className="text-base-content/70">
+                                Connect, agree on terms, and start the journey. We ensure a secure and professional environment.
+                            </p>
+                        </Card>
                     </div>
                 </div>
             </section>
@@ -240,11 +321,15 @@ const Home = () => {
                 <div className="container mx-auto px-4">
                     <div className="flex justify-between items-end mb-12">
                         <div>
-                            <h2 className="text-3xl lg:text-4xl font-bold mb-2">Latest Tuitions</h2>
-                            <p className="text-gray-600 dark:text-gray-300">Recently posted tuition jobs near you</p>
+                            <h2 className="font-heading text-4xl lg:text-5xl font-bold mb-2 gradient-text">
+                                Latest Tuitions
+                            </h2>
+                            <p className="text-base-content/70 text-lg">Recently posted tuition jobs near you</p>
                         </div>
                         <Link to="/tuitions">
-                            <Button variant="ghost" className="hidden md:flex">View All <ArrowRight className="ml-2 w-4 h-4" /></Button>
+                            <Button variant="ghost" rightIcon={<ArrowRight className="w-4 h-4" />}>
+                                View All
+                            </Button>
                         </Link>
                     </div>
 
@@ -256,22 +341,31 @@ const Home = () => {
                         className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"
                     >
                         {tuitions.map((job) => (
-                            <Card key={job.id} title={job.subject} subtitle={job.class} className="hover:-translate-y-2">
-                                <div className="py-4 space-y-3">
-                                    <div className="flex items-center gap-3 text-gray-500 text-sm">
-                                        <MapPin size={16} className="text-primary" /> {job.location}
+                            <Card
+                                key={job.id}
+                                glass
+                                hover
+                                title={job.subject}
+                                subtitle={job.class}
+                            >
+                                <div className="space-y-3">
+                                    <div className="flex items-center gap-2 text-base-content/70">
+                                        <MapPin size={16} className="text-primary" />
+                                        <span className="text-sm">{job.location}</span>
                                     </div>
-                                    <div className="flex justify-between items-center text-sm">
-                                        <span className="font-semibold text-primary text-lg">৳ {job.salary}</span>
+                                    <div className="flex justify-between items-center">
+                                        <span className="font-heading text-xl font-bold text-primary">৳{job.salary}</span>
                                         <Badge variant="outline">{job.days}</Badge>
                                     </div>
-                                    <div className="flex gap-2 mt-2">
+                                    <div className="flex gap-2">
                                         <Badge size="sm" variant="neutral">{job.gender} Tutor</Badge>
                                     </div>
                                 </div>
-                                <div className="card-actions justify-end mt-4 pt-4 border-t border-base-200">
-                                    <Link to={`/tuitions/${job.id}`} className="w-full">
-                                        <Button variant="outline" className="w-full">View Details</Button>
+                                <div className="mt-4 pt-4 border-t border-base-300">
+                                    <Link to={`/tuitions/${job.id}`} className="w-full block">
+                                        <Button variant="primary" size="sm" fullWidth>
+                                            View Details
+                                        </Button>
                                     </Link>
                                 </div>
                             </Card>
@@ -280,7 +374,7 @@ const Home = () => {
 
                     <div className="mt-8 text-center md:hidden">
                         <Link to="/tuitions">
-                            <Button variant="outline" className="w-full">View All Tuitions</Button>
+                            <Button variant="outline" fullWidth>View All Tuitions</Button>
                         </Link>
                     </div>
                 </div>
@@ -290,8 +384,10 @@ const Home = () => {
             <section className="py-24 bg-base-200/30">
                 <div className="container mx-auto px-4">
                     <div className="text-center mb-16">
-                        <h2 className="text-3xl lg:text-4xl font-bold mb-4">Top Rated Tutors</h2>
-                        <p className="text-gray-600 dark:text-gray-300">Meet our highly experienced and verified tutors</p>
+                        <h2 className="font-heading text-4xl lg:text-5xl font-bold mb-4 gradient-text">
+                            Top Rated Tutors
+                        </h2>
+                        <p className="text-base-content/70 text-lg">Meet our highly experienced and verified tutors</p>
                     </div>
 
                     <motion.div
@@ -302,26 +398,25 @@ const Home = () => {
                         className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6"
                     >
                         {tutors.map((tutor) => (
-                            <motion.div variants={itemVariants} key={tutor.id} className="group relative">
-                                <div className="absolute inset-0 bg-gradient-to-r from-primary to-secondary rounded-xl blur opacity-25 group-hover:opacity-100 transition duration-500"></div>
-                                <div className="relative bg-base-100 p-6 rounded-xl border border-base-200 hover:border-transparent transition duration-300 text-center h-full flex flex-col items-center">
-                                    <div className="avatar mb-4">
-                                        <div className="w-24 h-24 rounded-full ring ring-primary ring-offset-base-100 ring-offset-2">
-                                            <img src={tutor.img} alt={tutor.name} />
-                                        </div>
+                            <Card key={tutor.id} glass hover className="text-center">
+                                <div className="avatar mb-4">
+                                    <div className="w-24 h-24 rounded-full ring-4 ring-primary ring-offset-2 ring-offset-base-100">
+                                        <img src={tutor.img} alt={tutor.name} />
                                     </div>
-                                    <h3 className="font-bold text-lg">{tutor.name}</h3>
-                                    <p className="text-primary text-sm font-medium mb-1">{tutor.subject}</p>
-                                    <p className="text-gray-500 dark:text-gray-400 text-xs mb-3">{tutor.experience}</p>
-                                    <div className="flex items-center gap-1 mb-4 bg-yellow-100 px-2 py-1 rounded-lg">
-                                        <Star size={14} className="fill-yellow-400 text-yellow-400" />
-                                        <span className="text-xs font-bold text-yellow-700">{tutor.rating}</span>
-                                    </div>
-                                    <Link to={`/tutors/${tutor.id}`} className="mt-auto">
-                                        <Button size="sm" variant="ghost" className="group-hover:text-primary">View Profile</Button>
-                                    </Link>
                                 </div>
-                            </motion.div>
+                                <h3 className="font-heading text-xl font-bold mb-1">{tutor.name}</h3>
+                                <p className="text-sm text-base-content/60 mb-3">{tutor.subject}</p>
+                                <p className="text-xs text-base-content/50 mb-4">{tutor.experience}</p>
+                                <div className="flex items-center justify-center gap-2 mb-4">
+                                    <Star size={16} className="text-warning fill-warning" />
+                                    <span className="font-heading font-bold text-warning">{tutor.rating}</span>
+                                </div>
+                                <Link to={`/tutors/${tutor.id}`}>
+                                    <Button size="sm" variant="outline" fullWidth>
+                                        View Profile
+                                    </Button>
+                                </Link>
+                            </Card>
                         ))}
                     </motion.div>
                 </div>

@@ -1,11 +1,17 @@
 import React, { useEffect, useState } from 'react';
 import axiosInstance from '../../utils/axiosInstance';
-import { MapPin, Star, BadgeCheck, Book, User } from 'lucide-react';
+import { MapPin, BadgeCheck, User, Search, ArrowRight, Star } from 'lucide-react';
 import { Link } from 'react-router-dom';
+import { motion } from 'framer-motion';
+import Card from '../../components/ui/Card';
+import Button from '../../components/ui/Button';
+import Spinner from '../../components/ui/Spinner';
+import Input from '../../components/ui/Input';
 
 const Tutors = () => {
     const [tutors, setTutors] = useState([]);
     const [loading, setLoading] = useState(true);
+    const [searchTerm, setSearchTerm] = useState('');
 
     useEffect(() => {
         const fetchTutors = async () => {
@@ -22,60 +28,139 @@ const Tutors = () => {
         fetchTutors();
     }, []);
 
+    const filteredTutors = tutors.filter(t =>
+        t.displayName?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        t.location?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        t.expertise?.some(exp => exp.toLowerCase().includes(searchTerm.toLowerCase()))
+    );
+
     if (loading) {
-        return <div className="flex justify-center items-center min-h-[400px]"><span className="loading loading-spinner loading-lg text-secondary"></span></div>;
+        return <Spinner variant="dots" size="lg" fullScreen />;
     }
 
-    return (
-        <div className="container mx-auto px-4 py-8">
-            <h1 className="text-4xl font-bold text-center mb-12 text-secondary">Find Your Tutor</h1>
+    const containerVariants = {
+        hidden: { opacity: 0 },
+        visible: {
+            opacity: 1,
+            transition: {
+                staggerChildren: 0.1
+            }
+        }
+    };
 
-            {tutors.length === 0 ? (
-                <div className="text-center text-gray-500 text-xl py-10">No tutors currently available.</div>
-            ) : (
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-                    {tutors.map((tutor) => (
-                        <div key={tutor._id} className="card bg-base-100 shadow-lg hover:shadow-xl transition-all border border-base-200 group">
-                            <figure className="px-4 pt-4 relative">
-                                <div className="avatar">
-                                    <div className="w-32 rounded-full ring ring-primary ring-offset-base-100 ring-offset-2 overflow-hidden">
-                                        {tutor.photoURL ? (
-                                            <img src={tutor.photoURL} alt={tutor.displayName} className="object-cover w-full h-full" />
-                                        ) : (
-                                            <div className="bg-neutral text-neutral-content w-full h-full flex items-center justify-center">
-                                                <User size={48} />
+    const itemVariants = {
+        hidden: { opacity: 0, scale: 0.95 },
+        visible: { opacity: 1, scale: 1 }
+    };
+
+    return (
+        <div className="min-h-screen bg-base-100 py-12 relative overflow-hidden">
+            {/* Background Elements */}
+            <div className="absolute top-0 left-0 w-full h-full overflow-hidden pointer-events-none z-0">
+                <div className="absolute top-[10%] -left-[10%] w-[40%] h-[40%] bg-secondary/5 rounded-full blur-[100px] animate-float" />
+                <div className="absolute -bottom-[10%] right-[10%] w-[30%] h-[30%] bg-primary/5 rounded-full blur-[100px] animate-float animation-delay-300" />
+            </div>
+
+            <div className="container mx-auto px-4 relative z-10">
+                {/* Header Section */}
+                <div className="text-center max-w-3xl mx-auto mb-12">
+                    <h1 className="text-4xl md:text-5xl font-heading font-bold gradient-text mb-4">
+                        Find Expert Tutors
+                    </h1>
+                    <p className="text-lg text-base-content/70 mb-8">
+                        Connect with qualified tutors who can help you achieve your academic goals.
+                    </p>
+
+                    {/* Search Bar */}
+                    <div className="max-w-xl mx-auto">
+                        <Input
+                            placeholder="Search by name, subject, or location..."
+                            leftIcon={<Search size={18} />}
+                            value={searchTerm}
+                            onChange={(e) => setSearchTerm(e.target.value)}
+                            className="bg-base-100/50 backdrop-blur-sm"
+                        />
+                    </div>
+                </div>
+
+                {filteredTutors.length === 0 ? (
+                    <motion.div
+                        initial={{ opacity: 0, scale: 0.95 }}
+                        animate={{ opacity: 1, scale: 1 }}
+                        className="flex flex-col items-center justify-center py-20 text-center glass rounded-3xl"
+                    >
+                        <div className="w-20 h-20 bg-base-200 rounded-full flex items-center justify-center mb-6">
+                            <Search className="w-10 h-10 text-base-content/30" />
+                        </div>
+                        <h3 className="text-2xl font-bold text-base-content/80 mb-2">No Tutors Found</h3>
+                        <p className="text-base-content/60 max-w-md">
+                            {searchTerm ? `No results found for "${searchTerm}". Try different keywords.` : "No tutors currently available."}
+                        </p>
+                    </motion.div>
+                ) : (
+                    <motion.div
+                        variants={containerVariants}
+                        initial="hidden"
+                        animate="visible"
+                        className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6"
+                    >
+                        {filteredTutors.map((tutor) => (
+                            <motion.div key={tutor._id} variants={itemVariants}>
+                                <Card className="h-full flex flex-col items-center text-center !p-6" hover glass>
+                                    <div className="relative mb-4">
+                                        <div className="w-24 h-24 rounded-full ring-4 ring-primary/20 p-1">
+                                            <div className="w-full h-full rounded-full overflow-hidden bg-base-200">
+                                                {tutor.photoURL ? (
+                                                    <img src={tutor.photoURL} alt={tutor.displayName} className="w-full h-full object-cover" />
+                                                ) : (
+                                                    <div className="w-full h-full flex items-center justify-center bg-base-300 text-base-content/40">
+                                                        <User size={32} />
+                                                    </div>
+                                                )}
+                                            </div>
+                                        </div>
+                                        {tutor.verified && (
+                                            <div className="absolute bottom-0 right-0 bg-white dark:bg-gray-800 rounded-full p-1" title="Verified Tutor">
+                                                <BadgeCheck className="w-6 h-6 text-blue-500 fill-blue-500/10" />
                                             </div>
                                         )}
                                     </div>
-                                </div>
-                                {tutor.verified && (
-                                    <div className="absolute top-6 right-6 tooltip" data-tip="Verified Tutor">
-                                        <BadgeCheck className="text-blue-500 fill-white" size={24} />
+
+                                    <h2 className="text-xl font-bold text-base-content mb-1">
+                                        {tutor.displayName}
+                                    </h2>
+
+                                    <div className="flex items-center gap-1 text-sm text-base-content/60 mb-3">
+                                        <MapPin size={14} className="text-secondary" />
+                                        <span>{tutor.location}</span>
                                     </div>
-                                )}
-                            </figure>
-                            <div className="card-body items-center text-center">
-                                <h2 className="card-title text-xl font-bold">{tutor.displayName}</h2>
-                                <p className="text-sm text-gray-500 flex items-center gap-1">
-                                    <MapPin size={14} /> {tutor.location}
-                                </p>
 
-                                <div className="flex flex-wrap gap-1 justify-center mt-2">
-                                    {tutor.expertise && tutor.expertise.map((exp, idx) => (
-                                        <span key={idx} className="badge badge-secondary badge-outline badge-sm">{exp}</span>
-                                    ))}
-                                </div>
+                                    <div className="flex flex-wrap gap-2 justify-center mb-4">
+                                        {tutor.expertise && tutor.expertise.slice(0, 3).map((exp, idx) => (
+                                            <span key={idx} className="badge badge-primary badge-outline badge-sm bg-primary/5">
+                                                {exp}
+                                            </span>
+                                        ))}
+                                        {tutor.expertise && tutor.expertise.length > 3 && (
+                                            <span className="badge badge-ghost badge-sm text-xs">+{tutor.expertise.length - 3}</span>
+                                        )}
+                                    </div>
 
-                                <p className="mt-3 text-sm text-gray-600 line-clamp-2">{tutor.bio || "No bio available."}</p>
+                                    <p className="text-sm text-base-content/60 line-clamp-2 mb-6 flex-grow">
+                                        {tutor.bio || "Passionate educator dedicated to student success."}
+                                    </p>
 
-                                <div className="card-actions mt-4 w-full">
-                                    <Link to={`/tutors/${tutor._id}`} className="btn btn-outline btn-secondary btn-sm w-full">View Profile</Link>
-                                </div>
-                            </div>
-                        </div>
-                    ))}
-                </div>
-            )}
+                                    <Link to={`/tutors/${tutor._id}`} className="w-full mt-auto">
+                                        <Button size="sm" variant="outline" fullWidth rightIcon={ArrowRight} className="group-hover:bg-secondary group-hover:text-white group-hover:border-secondary">
+                                            View Profile
+                                        </Button>
+                                    </Link>
+                                </Card>
+                            </motion.div>
+                        ))}
+                    </motion.div>
+                )}
+            </div>
         </div>
     );
 };

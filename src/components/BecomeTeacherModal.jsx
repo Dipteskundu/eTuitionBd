@@ -2,6 +2,10 @@ import React, { useState } from 'react';
 import useAuth from '../hooks/useAuth';
 import useAxiosSecure from '../hooks/useAxiosSecure';
 import toast from 'react-hot-toast';
+import { UserCheck, ArrowRight, CheckCircle, AlertCircle } from 'lucide-react';
+import Modal from './ui/Modal';
+import Button from './ui/Button';
+import { motion, AnimatePresence } from 'framer-motion';
 
 const BecomeTeacherModal = ({ isOpen, onClose, refetchRole }) => {
     const { user } = useAuth();
@@ -20,10 +24,12 @@ const BecomeTeacherModal = ({ isOpen, onClose, refetchRole }) => {
             });
             toast.success("Request sent successfully! Admin will review it.");
             onClose();
+            setStep(1); // Reset
         } catch (error) {
             console.error(error);
             if (error.response?.status === 409) {
                 toast.error("You already have a pending request.");
+                onClose();
             } else {
                 toast.error("Failed to send request.");
             }

@@ -43,17 +43,17 @@ const Navbar = () => {
     ];
 
     return (
-        <nav className="sticky top-0 z-40 bg-base-100/80 backdrop-blur-md border-b border-base-200">
+        <nav className="sticky top-0 z-40 glass border-b border-base-300">
             <div className="container mx-auto px-4 sm:px-6 lg:px-8">
                 <div className="flex justify-between items-center h-16">
                     {/* Logo */}
-                    <Link to="/" className="flex items-center gap-3">
+                    <Link to="/" className="flex items-center gap-3 group">
                         <img
                             src={logo}
                             alt="eTuitionBd Logo"
-                            className="w-10 h-10 object-contain"
+                            className="w-10 h-10 object-contain transition-transform group-hover:scale-110"
                         />
-                        <span className="text-2xl font-bold bg-gradient-to-r from-primary to-secondary bg-clip-text text-green-400 -ml-2">
+                        <span className="text-2xl font-heading font-bold gradient-text">
                             eTuitionBd
                         </span>
                     </Link>
@@ -147,16 +147,18 @@ const Navbar = () => {
                         initial={{ opacity: 0, height: 0 }}
                         animate={{ opacity: 1, height: 'auto' }}
                         exit={{ opacity: 0, height: 0 }}
-                        className="md:hidden overflow-hidden border-b border-base-200 bg-base-100"
+                        className="md:hidden overflow-hidden border-b border-base-200 bg-base-100/95 backdrop-blur-xl"
                     >
-                        <div className="px-4 py-4 space-y-4">
+                        <div className="px-4 py-6 space-y-3">
                             {navLinks.map((link) => (
                                 <NavLink
                                     key={link.name}
                                     to={link.path}
                                     onClick={() => setIsOpen(false)}
                                     className={({ isActive }) =>
-                                        `block text-base font-medium py-2 ${isActive ? 'text-primary' : 'text-gray-600'
+                                        `block px-4 py-3 rounded-xl transition-all duration-200 font-medium ${isActive
+                                            ? 'bg-primary/10 text-primary font-bold'
+                                            : 'text-base-content/70 hover:bg-base-200 hover:text-primary hover:pl-6'
                                         }`
                                     }
                                 >
@@ -164,49 +166,52 @@ const Navbar = () => {
                                 </NavLink>
                             ))}
 
-                            <div className="divider my-2"></div>
+                            <div className="divider my-4"></div>
 
                             {user ? (
-                                <div className="space-y-3">
-                                    <div className="flex items-center gap-3 px-2">
-                                        <div className="avatar">
-                                            <div className="w-10 rounded-full border">
+                                <div className="space-y-4 bg-base-200/50 p-4 rounded-2xl border border-base-200">
+                                    <div className="flex items-center gap-4">
+                                        <div className="avatar ring-2 ring-primary ring-offset-2 rounded-full">
+                                            <div className="w-12 rounded-full">
                                                 {user.photoURL ? (
                                                     <img src={user.photoURL} alt={user.displayName} />
                                                 ) : (
-                                                    <User className="w-6 h-6 m-2" />
+                                                    <User className="w-6 h-6 m-3" />
                                                 )}
                                             </div>
                                         </div>
                                         <div>
-                                            <p className="font-semibold">{user.displayName}</p>
-                                            <p className="text-xs text-gray-500 capitalize">{role}</p>
+                                            <p className="font-bold text-lg">{user.displayName}</p>
+                                            <div className="badge badge-primary badge-sm uppercase mt-1">{role || 'User'}</div>
                                         </div>
                                     </div>
-                                    <Link
-                                        to={getDashboardLink()}
-                                        onClick={() => setIsOpen(false)}
-                                        className="btn btn-primary w-full btn-sm"
-                                    >
-                                        Dashboard
-                                    </Link>
-                                    <button
-                                        onClick={() => {
-                                            handleLogout();
-                                            setIsOpen(false);
-                                        }}
-                                        className="btn btn-outline btn-error w-full btn-sm"
-                                    >
-                                        Logout
-                                    </button>
+
+                                    <div className="grid grid-cols-2 gap-3">
+                                        <Link
+                                            to={getDashboardLink()}
+                                            onClick={() => setIsOpen(false)}
+                                            className="btn btn-primary btn-sm w-full"
+                                        >
+                                            Dashboard
+                                        </Link>
+                                        <button
+                                            onClick={() => {
+                                                handleLogout();
+                                                setIsOpen(false);
+                                            }}
+                                            className="btn btn-outline btn-error btn-sm w-full"
+                                        >
+                                            Logout
+                                        </button>
+                                    </div>
                                 </div>
                             ) : (
-                                <div className="flex flex-col gap-3">
+                                <div className="grid grid-cols-2 gap-3">
                                     <Link to="/login" onClick={() => setIsOpen(false)}>
-                                        <Button variant="ghost" className="w-full">Login</Button>
+                                        <Button variant="ghost" className="w-full justify-center">Login</Button>
                                     </Link>
                                     <Link to="/register" onClick={() => setIsOpen(false)}>
-                                        <Button variant="primary" className="w-full">Register</Button>
+                                        <Button variant="primary" className="w-full justify-center">Register</Button>
                                     </Link>
                                 </div>
                             )}

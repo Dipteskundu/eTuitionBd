@@ -1,6 +1,10 @@
 import React, { useEffect, useState } from 'react';
 import useAxiosSecure from '../../../hooks/useAxiosSecure';
-import { Calendar, DollarSign, Briefcase } from 'lucide-react';
+import { Calendar, DollarSign, Briefcase, CheckCircle, XCircle, Clock, BookOpen } from 'lucide-react';
+import Card from '../../../components/ui/Card';
+import Button from '../../../components/ui/Button';
+import Spinner from '../../../components/ui/Spinner';
+import { motion } from 'framer-motion';
 
 const AppliedTuitions = () => {
     const axiosSecure = useAxiosSecure();
@@ -22,11 +26,28 @@ const AppliedTuitions = () => {
         fetchApplications();
     }, [axiosSecure]);
 
-    if (loading) return <div className="flex justify-center p-10"><span className="loading loading-spinner loading-lg text-primary"></span></div>;
+    if (loading) return <Spinner variant="dots" fullScreen />;
+
+    const getStatusBadge = (status) => {
+        switch (status) {
+            case 'approved':
+                return <span className="badge badge-success gap-1 text-white font-bold"><CheckCircle size={12} /> Approved</span>;
+            case 'rejected':
+                return <span className="badge badge-error gap-1 text-white font-bold"><XCircle size={12} /> Rejected</span>;
+            default:
+                return <span className="badge badge-warning gap-1 text-white font-bold"><Clock size={12} /> Pending</span>;
+        }
+    };
 
     return (
-        <div className="space-y-6">
-            <h1 className="text-2xl font-bold text-gray-800 dark:text-white">My Applications</h1>
+        <div className="space-y-8">
+            <motion.div
+                initial={{ opacity: 0, y: -20 }}
+                animate={{ opacity: 1, y: 0 }}
+            >
+                <h1 className="text-3xl font-heading font-bold gradient-text">My Applications</h1>
+                <p className="text-base-content/70 mt-1">Track the status of your sent applications.</p>
+            </motion.div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 {applications.length === 0 ? (
@@ -48,7 +69,7 @@ const AppliedTuitions = () => {
                                     <span className={`badge ${app.status === 'approved' ? 'badge-success text-white' :
                                             app.status === 'rejected' ? 'badge-error text-white' :
                                                 'badge-warning text-white'
-                                        }`}>
+                                        } `}>
                                         {app.status}
                                     </span>
                                 </div>
