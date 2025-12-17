@@ -23,10 +23,7 @@ const Applications = () => {
     const [loading, setLoading] = useState(true);
     const [tuitionDetails, setTuitionDetails] = useState(null);
 
-    // Payment State
-    const [selectedApp, setSelectedApp] = useState(null);
-    const [isPaymentModalOpen, setIsPaymentModalOpen] = useState(false);
-    const [paymentProcessing, setPaymentProcessing] = useState(false);
+    // Payment State removed
 
     useEffect(() => {
         const fetchData = async () => {
@@ -70,58 +67,11 @@ const Applications = () => {
         });
 
         if (result.isConfirmed) {
-            setSelectedApp(app);
-            setIsPaymentModalOpen(true);
+            navigate(`/dashboard/payment/${app._id}`);
         }
     };
 
-    const handlePaymentSubmit = async (e) => {
-        e.preventDefault();
-        setPaymentProcessing(true);
-
-        const form = e.target;
-        // const cardName = form.cardName.value; // In a real app, these would be used
-        // const cardNumber = form.cardNumber.value;
-
-        // Simulate 2 seconds processing
-        await new Promise(resolve => setTimeout(resolve, 2000));
-
-        try {
-            const payload = {
-                applicationId: selectedApp._id,
-                tuitionId: tuitionId,
-                tutorEmail: selectedApp.tutorEmail,
-                amount: selectedApp?.expectedSalary || tuitionDetails?.salary || 0,
-            };
-
-            const res = await axiosSecure.post('/payments/demo', payload);
-
-            if (res.data.success) {
-                setIsPaymentModalOpen(false);
-                Swal.fire({
-                    title: 'Payment Successful!',
-                    text: `You have hired ${selectedApp.tutorName || 'the tutor'} !`,
-                    icon: 'success',
-                    customClass: {
-                        popup: 'rounded-2xl',
-                        confirmButton: 'px-6 py-2.5 rounded-xl font-bold'
-                    }
-                });
-
-                // Update local state
-                setApplications(prev => prev.map(a =>
-                    a._id === selectedApp._id ? { ...a, status: 'approved' } :
-                        (a.tuitionId === tuitionId && a._id !== selectedApp._id) ? { ...a, status: 'rejected' } : a
-                ));
-            }
-        } catch (error) {
-            console.error(error);
-            showToast('Payment failed. Please try again.', 'error');
-        } finally {
-            setPaymentProcessing(false);
-        }
-    };
-
+    // Consolidated delete logic for brevity since payment logic is moved
     const handleDelete = async (appId) => {
         const result = await Swal.fire({
             title: 'Delete Application?',
@@ -372,78 +322,7 @@ const Applications = () => {
                 </AnimatePresence>
             </div>
 
-            {/* Premium Payment Modal */}
-            <Modal
-                isOpen={isPaymentModalOpen}
-                onClose={() => setIsPaymentModalOpen(false)}
-                title="Secure Payment"
-                maxWidth="max-w-md"
-            >
-                <div className="space-y-6">
-                    <div className="bg-base-200/50 p-4 rounded-xl flex items-center gap-4 border border-base-200">
-                        <div className="p-3 bg-primary/10 rounded-full text-primary">
-                            <DollarSign size={24} />
-                        </div>
-                        <div>
-                            <p className="text-sm text-base-content/70">Total Amount</p>
-                            <p className="text-2xl font-bold text-primary">
-                                BDT {selectedApp?.expectedSalary || tuitionDetails?.salary}
-                            </p>
-                        </div>
-                    </div>
-
-                    <form onSubmit={handlePaymentSubmit} className="space-y-4">
-                        <Input
-                            label="Card Holder Name"
-                            name="cardName"
-                            placeholder="John Doe"
-                            fullWidth
-                            required
-                        />
-                        <Input
-                            label="Card Number (Demo)"
-                            name="cardNumber"
-                            placeholder="1234 5678 9012 3456"
-                            leftIcon={CreditCard}
-                            fullWidth
-                            required
-                        />
-                        <div className="grid grid-cols-2 gap-4">
-                            <Input
-                                label="Expiry"
-                                placeholder="MM/YY"
-                                fullWidth
-                                required
-                            />
-                            <Input
-                                label="CVC"
-                                placeholder="123"
-                                fullWidth
-                                required
-                            />
-                        </div>
-
-                        <div className="flex justify-end gap-3 mt-6">
-                            <Button
-                                type="button"
-                                variant="ghost"
-                                onClick={() => setIsPaymentModalOpen(false)}
-                                disabled={paymentProcessing}
-                            >
-                                Cancel
-                            </Button>
-                            <Button
-                                type="submit"
-                                variant="primary"
-                                isLoading={paymentProcessing}
-                                leftIcon={CreditCard}
-                            >
-                                Pay Now
-                            </Button>
-                        </div>
-                    </form>
-                </div>
-            </Modal>
+            {/* Premium Payment Modal Removed - Using Dedicated Page */}
         </div>
     );
 };

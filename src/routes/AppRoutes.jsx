@@ -29,6 +29,7 @@ import StudentApplications from '../pages/dashboard/student/Applications';
 import PaymentHistory from '../pages/dashboard/student/PaymentHistory';
 import PaymentSuccess from '../pages/dashboard/student/PaymentSuccess';
 import StudentProfile from '../pages/dashboard/student/StudentProfile';
+import PaymentPage from '../pages/dashboard/student/PaymentPage';
 
 // Dashboard Pages - Tutor
 import TutorOverview from '../pages/dashboard/tutor/TutorOverview';
@@ -80,11 +81,6 @@ const AppRoutes = () => {
                 <Route path="/dashboard/tuition/:tuitionId/applications" element={<RoleRoute allowedRoles={[ROLES.STUDENT]}><StudentApplications /></RoleRoute>} />
 
 
-                import PaymentPage from '../pages/dashboard/student/PaymentPage';
-
-                // ... (existing imports)
-
-                // Inside AppRoutes return:
                 <Route path="/dashboard/payment/:applicationId" element={<RoleRoute allowedRoles={[ROLES.STUDENT]}><PaymentPage /></RoleRoute>} />
                 <Route path="/dashboard/student/payments" element={<RoleRoute allowedRoles={[ROLES.STUDENT]}><PaymentHistory /></RoleRoute>} />
                 <Route path="/dashboard/transactions" element={<RoleRoute allowedRoles={[ROLES.STUDENT]}><PaymentHistory /></RoleRoute>} />
