@@ -14,6 +14,7 @@ import {
 import useRole from '../../hooks/useRole';
 import useAuth from '../../hooks/useAuth';
 import { ROLES } from '../../utils/constants';
+import logo from '../../assets/logo.png';
 
 const Sidebar = ({ isOpen, onClose }) => {
     const { role } = useRole();
@@ -82,7 +83,7 @@ const Sidebar = ({ isOpen, onClose }) => {
                     <div className="h-16 flex items-center px-6 border-b border-base-200">
                         <Link to="/" className="flex items-center gap-3">
                             <img
-                                src="/src/assets/logo.png"
+                                src={logo}
                                 alt="eTuitionBd Logo"
                                 className="w-8 h-8 object-contain"
                             />

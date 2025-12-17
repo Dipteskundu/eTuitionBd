@@ -7,6 +7,7 @@ import useRole from '../../hooks/useRole';
 import { ThemeContext } from '../../context/ThemeContext';
 import { ROLES } from '../../utils/constants';
 import Button from '../ui/Button';
+import logo from '../../assets/logo.png';
 
 const Navbar = () => {
     const [isOpen, setIsOpen] = useState(false);
@@ -48,11 +49,11 @@ const Navbar = () => {
                     {/* Logo */}
                     <Link to="/" className="flex items-center gap-3">
                         <img
-                            src="/src/assets/logo.png"
+                            src={logo}
                             alt="eTuitionBd Logo"
                             className="w-10 h-10 object-contain"
                         />
-                        <span className="text-2xl font-bold bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">
+                        <span className="text-2xl font-bold bg-gradient-to-r from-primary to-secondary bg-clip-text text-green-400 -ml-2">
                             eTuitionBd
                         </span>
                     </Link>
@@ -70,6 +71,7 @@ const Navbar = () => {
                                     }
                                 >
                                     {link.name}
+
                                 </NavLink>
                             ))}
                         </div>
