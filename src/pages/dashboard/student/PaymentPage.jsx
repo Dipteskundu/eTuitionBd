@@ -3,19 +3,15 @@ import { useParams, useNavigate } from 'react-router-dom';
 import useAxiosSecure from '../../../hooks/useAxiosSecure';
 import useAuth from '../../../hooks/useAuth';
 import useToast from '../../../hooks/useToast';
-import { ArrowLeft, CreditCard, Lock, ShieldCheck, ShoppingBag, Globe } from 'lucide-react';
-import Button from '../../../components/ui/Button';
-import Input from '../../../components/ui/Input';
-import Spinner from '../../../components/ui/Spinner';
-import Card from '../../../components/ui/Card';
-import { motion } from 'framer-motion';
+import { ArrowLeft, CreditCard, ShieldCheck, Globe, CheckCircle, Sparkles, User, BookOpen } from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
 
 const PaymentPage = () => {
     const { applicationId } = useParams();
     const navigate = useNavigate();
     const { user } = useAuth();
     const axiosSecure = useAxiosSecure();
-    const { showToast } = useToast();
+    const { error: toastError } = useToast();
 
     const [loading, setLoading] = useState(true);
     const [processing, setProcessing] = useState(false);
@@ -25,32 +21,28 @@ const PaymentPage = () => {
     useEffect(() => {
         const fetchData = async () => {
             try {
-                // 1. Fetch Application Details to get expected salary & tutor info
-                // We might need a specific endpoint or filter from all apps. 
-                // For now, let's assume we can fetch by ID or filter from list.
-                // Since backend might not have single app endpoint, we'll fetch all and find.
-                // ideally: const res = await axiosSecure.get(`/applications/${applicationId}`);
-
-                // Fallback: Fetch all student applications and find
                 const res = await axiosSecure.get(`/student-applications/${user.email}`);
                 const foundApp = res.data.find(app => app._id === applicationId);
 
                 if (!foundApp) {
-                    showToast("Application not found", "error");
+                    toastError("Application not found");
                     navigate('/dashboard/student/applications');
                     return;
                 }
                 setApplication(foundApp);
 
-                // 2. Fetch Tuition Details for Subject Name etc.
                 if (foundApp.tuitionId) {
-                    const tuitionRes = await axiosSecure.get(`/tuitions/${foundApp.tuitionId}`);
-                    setTuition(tuitionRes.data);
+                    try {
+                        const tuitionRes = await axiosSecure.get(`/tuitions/${foundApp.tuitionId}`);
+                        setTuition(tuitionRes.data);
+                    } catch (err) {
+                        console.warn("Tuition details could not be loaded", err);
+                    }
                 }
 
             } catch (error) {
                 console.error("Error fetching payment details:", error);
-                showToast("Failed to load payment details", "error");
+                toastError("Failed to load payment details");
             } finally {
                 setLoading(false);
             }
@@ -59,7 +51,7 @@ const PaymentPage = () => {
         if (user?.email && applicationId) {
             fetchData();
         }
-    }, [applicationId, user, axiosSecure, navigate, showToast]);
+    }, [applicationId, user, axiosSecure, navigate, toastError]);
 
     const handlePayment = async (e) => {
         e.preventDefault();
@@ -74,7 +66,7 @@ const PaymentPage = () => {
                 tuitionId: application.tuitionId,
                 tutorEmail: application.tutorEmail,
                 amount: application.expectedSalary || tuition?.salary || 0,
-                method: "Card" // Could be dynamic
+                method: "Card"
             };
 
             const res = await axiosSecure.post('/payments/demo', payload);
@@ -82,199 +74,221 @@ const PaymentPage = () => {
             if (res.data.success) {
                 navigate('/dashboard/student/payment/success');
             } else {
-                showToast("Payment failed", "error");
+                toastError("Payment failed");
             }
         } catch (error) {
             console.error(error);
-            showToast("Payment processing error", "error");
+            toastError("Payment processing error");
         } finally {
             setProcessing(false);
         }
     };
 
-    if (loading) return <Spinner fullScreen variant="dots" />;
+    if (loading) {
+        return (
+            <div className="min-h-screen bg-slate-50 flex items-center justify-center">
+                <motion.div
+                    animate={{ rotate: 360 }}
+                    transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
+                    className="w-12 h-12 border-4 border-slate-200 border-t-indigo-600 rounded-full"
+                />
+            </div>
+        );
+    }
+
     if (!application) return null;
 
     const amount = application.expectedSalary || tuition?.salary || 0;
     const totalAmount = parseFloat(amount).toFixed(2);
 
     return (
-        <div className="min-h-screen flex flex-col md:flex-row font-sans">
-            {/* Left Side - Order Summary (Pinkish/Light Background) */}
-            <div className="w-full md:w-[45%] lg:w-[40%] bg-[#fdf2f2] p-8 md:p-12 border-r border-base-200 flex flex-col text-[#30313d]">
-                <div className="flex items-center gap-2 mb-8">
-                    <button className="btn btn-sm btn-ghost p-0 hover:bg-transparent text-[#30313d]/50 hover:text-[#30313d]" onClick={() => navigate(-1)}>
-                        <ArrowLeft size={16} />
-                    </button>
-                    <div className="bg-[#e4e4e7] px-2 py-1 rounded text-xs font-semibold flex items-center gap-1.5 text-[#30313d]">
-                        <span className="w-2 h-2 rounded-full bg-base-content/50"></span>
-                        New business sandbox
-                    </div>
-                    <div className="bg-[#2e2e31] text-white px-2 py-1 rounded text-xs font-semibold flex items-center gap-1.5">
-                        <span className="w-2 h-2 rounded-full bg-[#f6a723]"></span>
-                        Sandbox
-                    </div>
-                </div>
+        <div className="min-h-screen bg-[#F0F4F8] font-sans text-slate-900 relative overflow-hidden flex items-center justify-center p-4">
 
-                <div className="mt-8">
-                    <p className="text-[#30313d]/70 text-sm mb-2">Please pay for: <span className="font-medium text-[#30313d]">{tuition?.subject || "Tuition Fee"}</span></p>
-                    <div className="flex items-start">
-                        <h1 className="text-4xl font-bold text-[#30313d] tracking-tight">
-                            BDT-{totalAmount}
-                        </h1>
-                    </div>
-                </div>
-
-
+            {/* Ambient Background Elements */}
+            <div className="absolute inset-0 pointer-events-none overflow-hidden">
+                <motion.div
+                    animate={{ x: [0, 50, 0], y: [0, 30, 0] }}
+                    transition={{ duration: 20, repeat: Infinity, ease: "easeInOut" }}
+                    className="absolute -top-[20%] -left-[10%] w-[70vw] h-[70vw] bg-indigo-200/40 rounded-full blur-[120px]"
+                />
+                <motion.div
+                    animate={{ x: [0, -30, 0], y: [0, 50, 0] }}
+                    transition={{ duration: 15, repeat: Infinity, ease: "easeInOut", delay: 2 }}
+                    className="absolute -bottom-[20%] -right-[10%] w-[60vw] h-[60vw] bg-rose-200/40 rounded-full blur-[100px]"
+                />
             </div>
 
-            {/* Right Side - Payment Form */}
-            <div className="w-full md:flex-1 bg-white p-8 md:p-12 lg:p-16 flex flex-col justify-center">
-                <div className="max-w-md mx-auto w-full space-y-8">
+            <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                className="max-w-5xl w-full bg-white/70 backdrop-blur-2xl rounded-3xl shadow-xl border border-white/50 overflow-hidden flex flex-col md:flex-row z-10"
+            >
+                {/* Left Side: Summary Panel */}
+                <div className="w-full md:w-[40%] bg-gradient-to-br from-indigo-900 to-indigo-950 p-8 md:p-12 text-white relative flex flex-col justify-between">
 
-                    {/* Express Checkout Buttons */}
-                    <div className="grid grid-cols-3 gap-2">
-                        <button className="bg-[#00d66f] hover:bg-[#00c063] h-10 rounded text-white font-bold flex items-center justify-center gap-1 transition-colors">
-                            Link
-                        </button>
-                        <button className="bg-[#ffb3c7] hover:bg-[#ff9eb8] h-10 rounded text-black font-bold flex items-center justify-center transition-colors">
-                            Klarna
-                        </button>
-                        <button className="bg-[#fad676] hover:bg-[#f8cd5c] h-10 rounded text-black font-medium flex items-center justify-center transition-colors">
-                            amazon pay
-                        </button>
-                    </div>
+                    {/* Decorative Patterns */}
+                    <div className="absolute inset-0 opacity-10" style={{ backgroundImage: 'url("data:image/svg+xml,%3Csvg width=\'60\' height=\'60\' viewBox=\'0 0 60 60\' xmlns=\'http://www.w3.org/2000/svg\'%3E%3Cg fill=\'none\' fill-rule=\'evenodd\'%3E%3Cg fill=\'%23ffffff\' fill-opacity=\'1\'%3E%3Cpath d=\'M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z\'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E")' }}></div>
 
-                    <div className="relative flex items-center py-2">
-                        <div className="flex-grow border-t border-gray-200"></div>
-                        <span className="flex-shrink-0 mx-4 text-gray-400 text-xs font-medium">OR</span>
-                        <div className="flex-grow border-t border-gray-200"></div>
-                    </div>
-
-                    <form onSubmit={handlePayment} className="space-y-6">
-                        <div className="space-y-1.5">
-                            <label className="text-sm font-medium text-[#30313d]">Email</label>
-                            <Input
-                                value={user?.email || 'honey@nuts.com'}
-                                readOnly
-                                className="bg-[#f0f2f5] border-transparent focus:bg-white focus:border-primary transition-all hover:bg-[#e4e6e9]"
-                                fullWidth
-                            />
-                        </div>
-
-                        <div className="space-y-3">
-                            <label className="text-sm font-medium text-[#30313d]">Payment method</label>
-
-                            <div className="border border-[#e6e6e6] rounded-md overflow-hidden bg-white">
-                                {/* Card Option (Active) */}
-                                <div className="p-4 border-b border-[#e6e6e6] bg-[#fdfdfd] flex items-start gap-3">
-                                    <div className="mt-1">
-                                        <div className="w-4 h-4 rounded-full bg-primary border-[5px] border-white ring-1 ring-primary shadow-sm"></div>
-                                    </div>
-                                    <div className="flex-1">
-                                        <div className="flex justify-between items-center mb-4">
-                                            <span className="font-semibold text-[#30313d] text-sm">Card</span>
-                                            <div className="flex gap-1.5 opacity-70">
-                                                <div className="w-8 h-5 bg-[#1a1f71] rounded flex items-center justify-center text-[8px] text-white font-bold">VISA</div>
-                                                <div className="w-8 h-5 bg-[#ea001b] rounded flex items-center justify-center text-[8px] text-white font-bold">MC</div>
-                                                <div className="w-8 h-5 bg-[#006fcf] rounded flex items-center justify-center text-[8px] text-white font-bold">AMEX</div>
-                                            </div>
-                                        </div>
-
-                                        {/* Card Inputs */}
-                                        <div className="space-y-3">
-                                            <div className="space-y-1">
-                                                <label className="text-xs font-medium text-[#686975]">Card information</label>
-                                                <div className="relative">
-                                                    <input
-                                                        type="text"
-                                                        placeholder="1234 1234 1234 1234"
-                                                        className="w-full px-3 py-2.5 bg-white border border-[#e6e6e6] rounded-md text-sm outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary placeholder:text-gray-300 shadow-sm"
-                                                        maxLength={19}
-                                                        required
-                                                    />
-                                                    <div className="absolute right-3 top-1/2 -translate-y-1/2 flex gap-2">
-                                                        <CreditCard size={16} className="text-gray-400" />
-                                                    </div>
-                                                </div>
-                                                <div className="flex gap-3 pt-1">
-                                                    <input
-                                                        type="text"
-                                                        placeholder="MM / YY"
-                                                        className="w-1/2 px-3 py-2.5 bg-white border border-[#e6e6e6] rounded-md text-sm outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary placeholder:text-gray-300 shadow-sm"
-                                                        maxLength={5}
-                                                        required
-                                                    />
-                                                    <input
-                                                        type="text"
-                                                        placeholder="CVC"
-                                                        className="w-1/2 px-3 py-2.5 bg-white border border-[#e6e6e6] rounded-md text-sm outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary placeholder:text-gray-300 shadow-sm"
-                                                        maxLength={3}
-                                                        required
-                                                    />
-                                                </div>
-                                            </div>
-
-                                            <div className="space-y-1">
-                                                <label className="text-xs font-medium text-[#686975]">Cardholder name</label>
-                                                <input
-                                                    type="text"
-                                                    placeholder="Full name on card"
-                                                    className="w-full px-3 py-2.5 bg-white border border-[#e6e6e6] rounded-md text-sm outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary placeholder:text-gray-300 shadow-sm"
-                                                    required
-                                                />
-                                            </div>
-
-                                            <div className="space-y-1">
-                                                <label className="text-xs font-medium text-[#686975]">Country or region</label>
-                                                <select className="w-full px-3 py-2.5 bg-white border border-[#e6e6e6] rounded-md text-sm outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary shadow-sm appearance-none cursor-pointer">
-                                                    <option>United States</option>
-                                                    <option>Bangladesh</option>
-                                                </select>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div className="p-3 border-b border-[#e6e6e6] bg-[#fcfcfc] flex items-center gap-3 opacity-60 hover:opacity-100 cursor-pointer transition-opacity">
-                                    <div className="w-4 h-4 rounded-full border border-gray-300"></div>
-                                    <span className="font-medium text-[#30313d] text-sm">Affirm</span>
-                                </div>
-                                <div className="p-3 border-b border-[#e6e6e6] bg-[#fcfcfc] flex items-center gap-3 opacity-60 hover:opacity-100 cursor-pointer transition-opacity">
-                                    <div className="w-4 h-4 rounded-full border border-gray-300"></div>
-                                    <span className="font-medium text-[#30313d] text-sm flex items-center gap-2">
-                                        <div className="w-4 h-4 bg-[#00d64f] rounded-sm text-white flex items-center justify-center text-[10px] font-bold"></div> Cash App Pay
-                                    </span>
-                                </div>
-                                <div className="p-3 bg-[#fcfcfc] flex items-center gap-3 opacity-60 hover:opacity-100 cursor-pointer transition-opacity">
-                                    <div className="w-4 h-4 rounded-full border border-gray-300"></div>
-                                    <span className="font-medium text-[#30313d] text-sm">Klarna</span>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div className="flex items-start gap-2 p-3 bg-[#f8f9fa] rounded text-xs text-[#686975] leading-relaxed">
-                            <input type="checkbox" className="mt-0.5 rounded border-gray-300 text-primary focus:ring-primary" defaultChecked />
-                            <div>
-                                <strong className="text-[#30313d] block mb-0.5">Save my information for faster checkout</strong>
-                                Pay securely at New business sandbox and everywhere Link is accepted.
-                            </div>
-                        </div>
-
-                        <Button
-                            type="submit"
-                            fullWidth
-                            className="h-11 bg-[#0570de] hover:bg-[#0461c2] text-white font-semibold text-lg rounded shadow-sm border-none mt-2"
-                            isLoading={processing}
+                    <div>
+                        <button
+                            onClick={() => navigate(-1)}
+                            className="flex items-center gap-2 text-indigo-200 hover:text-white transition-colors mb-10 group"
                         >
-                            Pay
-                        </Button>
+                            <ArrowLeft size={18} className="group-hover:-translate-x-1 transition-transform" />
+                            <span className="text-sm font-medium">Back</span>
+                        </button>
 
-                        <div className="text-center text-[10px] text-[#686975] mt-4 space-y-1">
-                            <p>By paying, you agree to Link's <a href="#" className="underline">Terms</a> and <a href="#" className="underline">Privacy</a>.</p>
+                        <div className="mb-2">
+                            <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-indigo-500/20 border border-indigo-400/30 text-indigo-200 text-xs font-medium mb-6">
+                                <Sparkles size={12} className="text-amber-300" />
+                                Premium Education
+                            </span>
+                            <h2 className="text-indigo-200 text-sm font-medium uppercase tracking-wider mb-2">Payment For</h2>
+                            <h1 className="text-3xl font-bold text-white mb-6 leading-tight">
+                                {tuition?.subject || "Tuition Fee"} <br />
+                                <span className="text-indigo-300 font-normal text-xl">Standard Package</span>
+                            </h1>
                         </div>
-                    </form>
+
+                        <div className="space-y-6">
+                            <div className="flex items-center gap-4 p-4 rounded-xl bg-white/10 border border-white/5 backdrop-blur-md">
+                                <div className="p-3 bg-indigo-600 rounded-lg text-white shadow-lg shadow-indigo-900/20">
+                                    <User size={24} />
+                                </div>
+                                <div>
+                                    <p className="text-xs text-indigo-300">Tutor</p>
+                                    <p className="font-semibold">{application.tutorName || "Selected Tutor"}</p>
+                                </div>
+                            </div>
+
+                            {tuition && (
+                                <div className="flex items-center gap-4 p-4 rounded-xl bg-white/10 border border-white/5 backdrop-blur-md">
+                                    <div className="p-3 bg-rose-500 rounded-lg text-white shadow-lg shadow-rose-900/20">
+                                        <BookOpen size={24} />
+                                    </div>
+                                    <div>
+                                        <p className="text-xs text-indigo-300">Class & Medium</p>
+                                        <p className="font-semibold">{tuition.class} | {tuition.medium}</p>
+                                    </div>
+                                </div>
+                            )}
+                        </div>
+                    </div>
+
+                    <div className="mt-12 pt-8 border-t border-indigo-800/50">
+                        <div className="flex items-end justify-between">
+                            <span className="text-indigo-300 text-lg">Total</span>
+                            <div className="flex items-baseline gap-1">
+                                <span className="text-xl text-indigo-300">BDT</span>
+                                <span className="text-5xl font-bold tracking-tighter">{totalAmount}</span>
+                            </div>
+                        </div>
+                    </div>
                 </div>
-            </div>
+
+                {/* Right Side: Form */}
+                <div className="w-full md:w-[60%] p-8 md:p-12 lg:p-16 bg-white/50">
+                    <div className="max-w-md mx-auto">
+                        <h3 className="text-2xl font-bold text-slate-800 mb-2">Payment Details</h3>
+                        <p className="text-slate-500 text-sm mb-8">Complete your purchase safely and securely.</p>
+
+                        <form onSubmit={handlePayment} className="space-y-6">
+
+                            {/* Email Field */}
+                            <div className="space-y-2">
+                                <label className="text-xs font-semibold uppercase text-slate-500 tracking-wider">Email Address</label>
+                                <div className="relative group">
+                                    <Globe className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-indigo-500 transition-colors" size={18} />
+                                    <input
+                                        type="email"
+                                        value={user?.email || ''}
+                                        readOnly
+                                        className="w-full bg-white border border-slate-200 rounded-xl py-3 pl-11 pr-4 text-slate-700 outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all font-medium"
+                                    />
+                                    <div className="absolute right-4 top-1/2 -translate-y-1/2 text-emerald-500">
+                                        <CheckCircle size={18} />
+                                    </div>
+                                </div>
+                            </div>
+
+                            {/* Card Details */}
+                            <div className="space-y-2">
+                                <label className="text-xs font-semibold uppercase text-slate-500 tracking-wider">Card Information</label>
+                                <div className="bg-white border border-slate-200 rounded-xl overflow-hidden transition-all focus-within:ring-2 focus-within:ring-indigo-500/20 focus-within:border-indigo-500 shadow-sm">
+                                    <div className="relative border-b border-slate-100">
+                                        <CreditCard className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" size={18} />
+                                        <input
+                                            type="text"
+                                            placeholder="Card number"
+                                            maxLength={19}
+                                            required
+                                            className="w-full py-3.5 pl-11 pr-4 outline-none text-slate-800 placeholder:text-slate-400 font-medium"
+                                        />
+                                        <div className="absolute right-4 top-1/2 -translate-y-1/2 flex gap-2">
+                                            {/* Placeholder Card Icons */}
+                                            <div className="w-8 h-5 bg-slate-100 rounded border border-slate-200" />
+                                            <div className="w-8 h-5 bg-slate-100 rounded border border-slate-200" />
+                                        </div>
+                                    </div>
+                                    <div className="flex divide-x divide-slate-100">
+                                        <input
+                                            type="text"
+                                            placeholder="MM / YY"
+                                            maxLength={5}
+                                            required
+                                            className="w-1/2 py-3.5 px-4 outline-none text-slate-800 placeholder:text-slate-400 text-center font-medium"
+                                        />
+                                        <input
+                                            type="text"
+                                            placeholder="CVC"
+                                            maxLength={3}
+                                            required
+                                            className="w-1/2 py-3.5 px-4 outline-none text-slate-800 placeholder:text-slate-400 text-center font-medium"
+                                        />
+                                    </div>
+                                </div>
+                            </div>
+
+                            {/* Name on Card */}
+                            <div className="space-y-2">
+                                <label className="text-xs font-semibold uppercase text-slate-500 tracking-wider">Cardholder Name</label>
+                                <input
+                                    type="text"
+                                    placeholder="Full name on card"
+                                    required
+                                    className="w-full bg-white border border-slate-200 rounded-xl py-3 px-4 text-slate-700 outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all font-medium uppercase"
+                                />
+                            </div>
+
+                            <motion.button
+                                whileHover={{ scale: 1.02, boxShadow: "0 10px 25px -5px rgba(79, 70, 229, 0.4)" }}
+                                whileTap={{ scale: 0.98 }}
+                                type="submit"
+                                disabled={processing}
+                                className="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-4 rounded-xl shadow-lg shadow-indigo-500/30 transition-all flex items-center justify-center gap-2 relative overflow-hidden"
+                            >
+                                {processing ? (
+                                    <motion.div
+                                        animate={{ rotate: 360 }}
+                                        transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
+                                        className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full"
+                                    />
+                                ) : (
+                                    <>
+                                        <span>Pay BDT {totalAmount}</span>
+                                        <ShieldCheck size={18} className="text-indigo-200" />
+                                    </>
+                                )}
+                            </motion.button>
+                        </form>
+
+                        <div className="mt-8 flex items-center justify-center gap-2 text-slate-400 text-xs text-center">
+                            <ShieldCheck size={14} />
+                            <p>Payments are secure and encrypted</p>
+                        </div>
+                    </div>
+                </div>
+            </motion.div>
         </div>
     );
 };

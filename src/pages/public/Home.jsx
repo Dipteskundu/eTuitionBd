@@ -1,5 +1,6 @@
 import React, { useContext } from 'react';
 import { Link } from 'react-router-dom';
+import axiosInstance from '../../utils/axiosInstance';
 import { motion } from 'framer-motion';
 import Marquee from 'react-fast-marquee';
 import { Search, User, Award, CheckCircle, ArrowRight, Star, MapPin } from 'lucide-react';
@@ -11,70 +12,31 @@ import { ThemeContext } from '../../context/ThemeContext';
 const Home = () => {
     const { theme } = useContext(ThemeContext);
     // Mock Data
-    const tuitions = [
-        {
-            id: 1,
-            subject: 'Mathematics',
-            class: 'Class 10',
-            location: 'Dhanmondi, Dhaka',
-            salary: 5000,
-            days: '3 days/week',
-            gender: 'Any',
-        },
-        {
-            id: 2,
-            subject: 'English',
-            class: 'HSC',
-            location: 'Mirpur, Dhaka',
-            salary: 6000,
-            days: '4 days/week',
-            gender: 'Female',
-        },
-        {
-            id: 3,
-            subject: 'Physics',
-            class: 'Class 9',
-            location: 'Uttara, Dhaka',
-            salary: 5500,
-            days: '3 days/week',
-            gender: 'Male',
-        },
-    ];
+    const [tuitions, setTuitions] = React.useState([]);
+    const [tutors, setTutors] = React.useState([]);
+    const [loading, setLoading] = React.useState(true);
 
-    const tutors = [
-        {
-            id: 1,
-            name: 'Rahim Ahmed',
-            subject: 'Math Specialist',
-            experience: '5 Years Exp',
-            rating: 4.8,
-            img: 'https://images.unsplash.com/photo-1568602471122-7832951cc4c5?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=100&q=80',
-        },
-        {
-            id: 2,
-            name: 'Fatima Begum',
-            subject: 'English Teacher',
-            experience: '3 Years Exp',
-            rating: 4.9,
-            img: 'https://images.unsplash.com/photo-1544005313-94ddf0286df2?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=100&q=80',
-        },
-        {
-            id: 3,
-            name: 'Kamal Hasan',
-            subject: 'Science Tutor',
-            experience: '7 Years Exp',
-            rating: 4.7,
-            img: 'https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=100&q=80',
-        },
-        {
-            id: 4,
-            name: 'Nusrat Jahan',
-            subject: 'Biology Expert',
-            experience: '4 Years Exp',
-            rating: 5.0,
-            img: 'https://images.unsplash.com/photo-1438761681033-6461ffad8d80?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=100&q=80',
-        },
-    ];
+    React.useEffect(() => {
+        const fetchData = async () => {
+            try {
+                // Fetch Latest Tuitions
+                const tuitionRes = await axiosInstance.get('/tuitions');
+                // The API returns { data: [], total: ... }
+                const tuitionData = tuitionRes.data.data || [];
+                setTuitions(tuitionData.slice(0, 3)); // Show only 3 latest
+
+                // Fetch Top Tutors (Just fetching all and taking first 4 for now)
+                const tutorRes = await axiosInstance.get('/tutors');
+                setTutors(tutorRes.data.slice(0, 4) || []);
+            } catch (error) {
+                console.error("Failed to fetch home data", error);
+            } finally {
+                setLoading(false);
+            }
+        };
+
+        fetchData();
+    }, []);
 
     const containerVariants = {
         hidden: { opacity: 0 },
@@ -355,14 +317,14 @@ const Home = () => {
                                     </div>
                                     <div className="flex justify-between items-center">
                                         <span className="font-heading text-xl font-bold text-primary">৳{job.salary}</span>
-                                        <Badge variant="outline">{job.days}</Badge>
+                                        <Badge variant="outline">{job.daysPerWeek} days/week</Badge>
                                     </div>
                                     <div className="flex gap-2">
-                                        <Badge size="sm" variant="neutral">{job.gender} Tutor</Badge>
+                                        <Badge size="sm" variant="neutral">{job.genderPreference} Tutor</Badge>
                                     </div>
                                 </div>
                                 <div className="mt-4 pt-4 border-t border-base-300">
-                                    <Link to={`/tuitions/${job.id}`} className="w-full block">
+                                    <Link to={`/tuitions/${job._id}`} className="w-full block">
                                         <Button variant="primary" size="sm" fullWidth>
                                             View Details
                                         </Button>
@@ -401,17 +363,17 @@ const Home = () => {
                             <Card key={tutor.id} glass hover className="text-center">
                                 <div className="avatar mb-4">
                                     <div className="w-24 h-24 rounded-full ring-4 ring-primary ring-offset-2 ring-offset-base-100">
-                                        <img src={tutor.img} alt={tutor.name} />
+                                        <img src={tutor.photoURL} alt={tutor.displayName} />
                                     </div>
                                 </div>
-                                <h3 className="font-heading text-xl font-bold mb-1">{tutor.name}</h3>
-                                <p className="text-sm text-base-content/60 mb-3">{tutor.subject}</p>
-                                <p className="text-xs text-base-content/50 mb-4">{tutor.experience}</p>
+                                <h3 className="font-heading text-xl font-bold mb-1">{tutor.displayName}</h3>
+                                <p className="text-sm text-base-content/60 mb-3">{tutor.expertise?.[0] || 'Tutor'}</p>
+                                <p className="text-xs text-base-content/50 mb-4">{tutor.experience || 'Experienced'}</p>
                                 <div className="flex items-center justify-center gap-2 mb-4">
                                     <Star size={16} className="text-warning fill-warning" />
-                                    <span className="font-heading font-bold text-warning">{tutor.rating}</span>
+                                    <span className="font-heading font-bold text-warning">{tutor.rating || 'N/A'}</span>
                                 </div>
-                                <Link to={`/tutors/${tutor.id}`}>
+                                <Link to={`/tutors/${tutor._id}`}>
                                     <Button size="sm" variant="outline" fullWidth>
                                         View Profile
                                     </Button>
@@ -425,32 +387,51 @@ const Home = () => {
             {/* Trusted Universities/Partners Marquee */}
             <section className="py-16 bg-base-100 overflow-hidden">
                 <div className="container mx-auto px-4 mb-8 text-center">
-                    <p className="text-sm font-semibold text-primary uppercase tracking-wider">Trusted by students from top institutions</p>
+                    <p className="text-2xl font-semibold text-primary uppercase tracking-wider">Trusted by students from top institutions</p>
                 </div>
                 <Marquee gradient={true} gradientColor={theme === 'dark' ? [17, 24, 39] : [255, 255, 255]} speed={40}>
                     <div className="flex items-center gap-12 mx-6 opacity-60 hover:opacity-100 transition-opacity duration-300 grayscale hover:grayscale-0">
-                        <img src="https://upload.wikimedia.org/wikipedia/en/thumb/4/42/University_of_Dhaka_Logo.svg/1200px-University_of_Dhaka_Logo.svg.png" alt="DU" className="h-16 w-auto object-contain" />
-                        <span className="text-xl font-bold text-gray-400">Dhaka University</span>
+                       
+                        <span className="text-xl font-bold text-base-content/60">Dhaka University</span>
                     </div>
                     <div className="flex items-center gap-12 mx-6 opacity-60 hover:opacity-100 transition-opacity duration-300 grayscale hover:grayscale-0">
-                        <img src="https://upload.wikimedia.org/wikipedia/en/thumb/e/e8/Buet_logo.svg/1200px-Buet_logo.svg.png" alt="BUET" className="h-16 w-auto object-contain" />
-                        <span className="text-xl font-bold text-gray-400">BUET</span>
+                        
                     </div>
                     <div className="flex items-center gap-12 mx-6 opacity-60 hover:opacity-100 transition-opacity duration-300 grayscale hover:grayscale-0">
-                        <img src="https://upload.wikimedia.org/wikipedia/en/thumb/c/ca/North_South_University_Logo.svg/1200px-North_South_University_Logo.svg.png" alt="NSU" className="h-16 w-auto object-contain" />
-                        <span className="text-xl font-bold text-gray-400">NSU</span>
+                        
+                        <span className="text-xl font-bold text-base-content/60">NSU</span>
                     </div>
                     <div className="flex items-center gap-12 mx-6 opacity-60 hover:opacity-100 transition-opacity duration-300 grayscale hover:grayscale-0">
-                        <img src="https://upload.wikimedia.org/wikipedia/commons/9/91/Brac_University_logo.png" alt="BRAC" className="h-16 w-auto object-contain" />
-                        <span className="text-xl font-bold text-gray-400">BRAC University</span>
+                       
                     </div>
                     <div className="flex items-center gap-12 mx-6 opacity-60 hover:opacity-100 transition-opacity duration-300 grayscale hover:grayscale-0">
-                        <img src="https://upload.wikimedia.org/wikipedia/en/thumb/3/30/Chittagong_University_logo.svg/1200px-Chittagong_University_logo.svg.png" alt="CU" className="h-16 w-auto object-contain" />
-                        <span className="text-xl font-bold text-gray-400">Chittagong University</span>
+                       
+                        <span className="text-xl font-bold text-base-content/60">BRAC University</span>
+                    </div>
+
+                    <div className="flex items-center gap-12 mx-6 opacity-60 hover:opacity-100 transition-opacity duration-300 grayscale hover:grayscale-0">
+                       
+                        <span className="text-xl font-bold text-base-content/60">Jahangirnagar University</span>
                     </div>
                     <div className="flex items-center gap-12 mx-6 opacity-60 hover:opacity-100 transition-opacity duration-300 grayscale hover:grayscale-0">
-                        <img src="https://upload.wikimedia.org/wikipedia/en/thumb/6/62/Rajshahi_University_Emblem.svg/800px-Rajshahi_University_Emblem.svg.png" alt="RU" className="h-16 w-auto object-contain" />
-                        <span className="text-xl font-bold text-gray-400">Rajshahi University</span>
+                       
+                        <span className="text-xl font-bold text-base-content/60">Jagannath University</span>
+                    </div>
+                    <div className="flex items-center gap-12 mx-6 opacity-60 hover:opacity-100 transition-opacity duration-300 grayscale hover:grayscale-0">
+                       
+                        <span className="text-xl font-bold text-base-content/60">Ahsanullah University of Science and Technology</span>
+                    </div>
+                    <div className="flex items-center gap-12 mx-6 opacity-60 hover:opacity-100 transition-opacity duration-300 grayscale hover:grayscale-0">
+                       
+                        <span className="text-xl font-bold text-base-content/60">American International University-Bangladesh</span>
+                    </div>
+                    <div className="flex items-center gap-12 mx-6 opacity-60 hover:opacity-100 transition-opacity duration-300 grayscale hover:grayscale-0">
+                       
+                        <span className="text-xl font-bold text-base-content/60">Daffodil International University</span>
+                    </div>
+                    <div className="flex items-center gap-12 mx-6 opacity-60 hover:opacity-100 transition-opacity duration-300 grayscale hover:grayscale-0">
+                       
+                        <span className="text-xl font-bold text-base-content/60">International Islamic University Chittagong</span>
                     </div>
                 </Marquee>
             </section>
@@ -458,26 +439,38 @@ const Home = () => {
             {/* Call To Action */}
             <section className="py-20">
                 <div className="container mx-auto px-4">
-                    <div className="bg-primary rounded-3xl p-8 md:p-16 text-center text-white relative overflow-hidden">
-                        <div className="absolute top-0 right-0 w-64 h-64 bg-white/10 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2"></div>
-                        <div className="absolute bottom-0 left-0 w-64 h-64 bg-black/10 rounded-full blur-3xl translate-y-1/2 -translate-x-1/2"></div>
+                    <div className="relative overflow-hidden rounded-3xl bg-gradient-to-r from-primary-500 to-secondary-500 shadow-xl">
+                        {/* Decorative Background Elements */}
+                        <div className="absolute top-0 right-0 -mt-10 -mr-10 h-64 w-64 rounded-full bg-white/20 blur-3xl"></div>
+                        <div className="absolute bottom-0 left-0 -mb-10 -ml-10 h-64 w-64 rounded-full bg-black/10 blur-3xl"></div>
 
-                        <div className="relative z-10 max-w-3xl mx-auto">
-                            <h2 className="text-3xl md:text-5xl font-bold mb-6">Ready to Transform Your Learning Journey?</h2>
-                            <p className="text-lg text-primary-content/80 mb-10">
-                                Join thousands of students and tutors on the most trusted tuition platform in Bangladesh.
-                                Get started today for free!
+                        <div className="relative z-10 mx-auto max-w-4xl px-8 py-16 text-center text-white md:px-16">
+                            <h2 className="mb-6 font-heading text-3xl font-bold leading-tight md:text-5xl">
+                                Ready to Transform Your Learning Journey?
+                            </h2>
+                            <p className="mx-auto mb-10 max-w-2xl text-lg text-white/90 md:text-xl">
+                                Join thousands of students and tutors on <span className="font-bold">eTuitionBd</span>.
+                                Experience the new standard of education today.
                             </p>
-                            <div className="flex flex-col sm:flex-row gap-4 justify-center">
+
+                            <div className="flex flex-col items-center justify-center gap-4 sm:flex-row">
                                 <Link to="/register">
-                                    <button className="btn btn-lg bg-white text-primary hover:bg-gray-100 border-none px-10">
-                                        Register Now
-                                    </button>
+                                    <Button
+                                        size="xl"
+                                        className="border-none bg-secondary font-bold text-primary hover:bg-gray-600 hover:scale-105 shadow-lg"
+                                        rightIcon={<ArrowRight size={20} />}
+                                    >
+                                        Get Started Free
+                                    </Button>
                                 </Link>
                                 <Link to="/login">
-                                    <button className="btn btn-lg btn-outline text-white hover:bg-white/10 px-10">
+                                    <Button
+                                        variant="outline"
+                                        size="xl"
+                                        className="border-white text-white hover:bg-white/20 hover:border-white hover:text-white"
+                                    >
                                         Log In
-                                    </button>
+                                    </Button>
                                 </Link>
                             </div>
                         </div>
