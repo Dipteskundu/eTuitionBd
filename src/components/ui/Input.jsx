@@ -15,6 +15,7 @@ const Input = forwardRef((
         showCharCount = false,
         floating = false,
         fullWidth, // Consume fullWidth to prevent it from passing to DOM via ...props
+        togglePassword, // Destructure to prevent passing to DOM
         ...props
     },
     ref

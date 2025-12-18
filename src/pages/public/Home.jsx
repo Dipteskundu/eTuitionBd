@@ -304,7 +304,7 @@ const Home = () => {
                     >
                         {tuitions.map((job) => (
                             <Card
-                                key={job.id}
+                                key={job._id}
                                 glass
                                 hover
                                 title={job.subject}
@@ -360,10 +360,10 @@ const Home = () => {
                         className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6"
                     >
                         {tutors.map((tutor) => (
-                            <Card key={tutor.id} glass hover className="text-center">
+                            <Card key={tutor._id} glass hover className="text-center">
                                 <div className="avatar mb-4">
                                     <div className="w-24 h-24 rounded-full ring-4 ring-primary ring-offset-2 ring-offset-base-100">
-                                        <img src={tutor.photoURL} alt={tutor.displayName} />
+                                        <img src={tutor.photoURL || 'https://i.ibb.co/5GzXkwq/user.png'} alt={tutor.displayName} />
                                     </div>
                                 </div>
                                 <h3 className="font-heading text-xl font-bold mb-1">{tutor.displayName}</h3>
@@ -391,46 +391,46 @@ const Home = () => {
                 </div>
                 <Marquee gradient={true} gradientColor={theme === 'dark' ? [17, 24, 39] : [255, 255, 255]} speed={40}>
                     <div className="flex items-center gap-12 mx-6 opacity-60 hover:opacity-100 transition-opacity duration-300 grayscale hover:grayscale-0">
-                       
+
                         <span className="text-xl font-bold text-base-content/60">Dhaka University</span>
                     </div>
                     <div className="flex items-center gap-12 mx-6 opacity-60 hover:opacity-100 transition-opacity duration-300 grayscale hover:grayscale-0">
-                        
+
                     </div>
                     <div className="flex items-center gap-12 mx-6 opacity-60 hover:opacity-100 transition-opacity duration-300 grayscale hover:grayscale-0">
-                        
+
                         <span className="text-xl font-bold text-base-content/60">NSU</span>
                     </div>
                     <div className="flex items-center gap-12 mx-6 opacity-60 hover:opacity-100 transition-opacity duration-300 grayscale hover:grayscale-0">
-                       
+
                     </div>
                     <div className="flex items-center gap-12 mx-6 opacity-60 hover:opacity-100 transition-opacity duration-300 grayscale hover:grayscale-0">
-                       
+
                         <span className="text-xl font-bold text-base-content/60">BRAC University</span>
                     </div>
 
                     <div className="flex items-center gap-12 mx-6 opacity-60 hover:opacity-100 transition-opacity duration-300 grayscale hover:grayscale-0">
-                       
+
                         <span className="text-xl font-bold text-base-content/60">Jahangirnagar University</span>
                     </div>
                     <div className="flex items-center gap-12 mx-6 opacity-60 hover:opacity-100 transition-opacity duration-300 grayscale hover:grayscale-0">
-                       
+
                         <span className="text-xl font-bold text-base-content/60">Jagannath University</span>
                     </div>
                     <div className="flex items-center gap-12 mx-6 opacity-60 hover:opacity-100 transition-opacity duration-300 grayscale hover:grayscale-0">
-                       
+
                         <span className="text-xl font-bold text-base-content/60">Ahsanullah University of Science and Technology</span>
                     </div>
                     <div className="flex items-center gap-12 mx-6 opacity-60 hover:opacity-100 transition-opacity duration-300 grayscale hover:grayscale-0">
-                       
+
                         <span className="text-xl font-bold text-base-content/60">American International University-Bangladesh</span>
                     </div>
                     <div className="flex items-center gap-12 mx-6 opacity-60 hover:opacity-100 transition-opacity duration-300 grayscale hover:grayscale-0">
-                       
+
                         <span className="text-xl font-bold text-base-content/60">Daffodil International University</span>
                     </div>
                     <div className="flex items-center gap-12 mx-6 opacity-60 hover:opacity-100 transition-opacity duration-300 grayscale hover:grayscale-0">
-                       
+
                         <span className="text-xl font-bold text-base-content/60">International Islamic University Chittagong</span>
                     </div>
                 </Marquee>

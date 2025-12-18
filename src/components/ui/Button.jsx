@@ -13,8 +13,13 @@ const Button = ({
     leftIcon,
     rightIcon,
     fullWidth = false,
+    isLoading, // Destructure to prevent passing to DOM
     ...props
 }) => {
+    // Normalize loading state
+    const activeLoading = loading || isLoading;
+
+
     const [ripples, setRipples] = useState([]);
 
     const baseClasses = "btn font-medium transition-all duration-300 relative overflow-hidden";
@@ -69,11 +74,11 @@ const Button = ({
 
     return (
         <motion.button
-            whileHover={{ scale: disabled || loading ? 1 : 1.02 }}
-            whileTap={{ scale: disabled || loading ? 1 : 0.98 }}
+            whileHover={{ scale: disabled || activeLoading ? 1 : 1.02 }}
+            whileTap={{ scale: disabled || activeLoading ? 1 : 0.98 }}
             type={type}
             className={`${baseClasses} ${variants[variant]} ${sizes[size]} ${fullWidth ? 'w-full' : ''} ${className}`}
-            disabled={disabled || loading}
+            disabled={disabled || activeLoading}
             onClick={handleClick}
             {...props}
         >
@@ -93,12 +98,12 @@ const Button = ({
 
             {/* Button Content */}
             <span className="relative flex items-center justify-center gap-2">
-                {loading && <span className="loading loading-spinner loading-sm"></span>}
-                {!loading && leftIcon && <span className="inline-flex">
+                {activeLoading && <span className="loading loading-spinner loading-sm"></span>}
+                {!activeLoading && leftIcon && <span className="inline-flex">
                     {React.isValidElement(leftIcon) ? leftIcon : React.createElement(leftIcon, { size: size === 'lg' ? 20 : 18 })}
                 </span>}
-                {!loading && children}
-                {!loading && rightIcon && <span className="inline-flex">
+                {!activeLoading && children}
+                {!activeLoading && rightIcon && <span className="inline-flex">
                     {React.isValidElement(rightIcon) ? rightIcon : React.createElement(rightIcon, { size: size === 'lg' ? 20 : 18 })}
                 </span>}
             </span>

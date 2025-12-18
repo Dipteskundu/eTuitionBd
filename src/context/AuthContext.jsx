@@ -92,22 +92,32 @@ export const AuthProvider = ({ children }) => {
 
     useEffect(() => {
         const unsubscribe = onAuthStateChanged(auth, async (currentUser) => {
-            setUser(currentUser);
-
             if (currentUser) {
-                // Get JWT token
-                const token = await currentUser.getIdToken();
-                localStorage.setItem('token', token);
+                // 1. Get Token FIRST
+                try {
+                    const token = await currentUser.getIdToken();
+                    localStorage.setItem('token', token);
 
-                // Fetch role from backend
-                await fetchUserRole(currentUser.email);
+                    // 2. Set User (triggers PrivateRoute check, but token is now ready)
+                    setUser(currentUser);
+
+                    // 3. Fetch Role (non-blocking for auth, but good to have)
+                    await fetchUserRole(currentUser.email);
+                } catch (error) {
+                    console.error("Error setting up auth:", error);
+                    localStorage.removeItem('token');
+                    setUser(null);
+                }
             } else {
+                // Logout case
                 localStorage.removeItem('token');
                 localStorage.removeItem('userRole');
+                setUser(null);
                 setRole(null);
                 setDbUser(null);
             }
 
+            // 4. Finally stop loading
             setLoading(false);
         });
 

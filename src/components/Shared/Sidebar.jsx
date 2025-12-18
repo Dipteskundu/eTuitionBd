@@ -87,6 +87,7 @@ const Sidebar = ({ isOpen, onClose }) => {
             {/* Mobile Overlay */}
             {isOpen && (
                 <motion.div
+                    key="mobile-overlay"
                     initial={{ opacity: 0 }}
                     animate={{ opacity: 1 }}
                     exit={{ opacity: 0 }}
@@ -97,6 +98,7 @@ const Sidebar = ({ isOpen, onClose }) => {
 
             {/* Sidebar */}
             <aside
+                key="sidebar-panel"
                 className={`fixed top-0 left-0 z-30 h-full w-64 bg-base-100 border-r border-base-200 transition-transform duration-300 lg:translate-x-0 ${isOpen ? 'translate-x-0' : '-translate-x-full'
                     }`}
             >
