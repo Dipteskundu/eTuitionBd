@@ -1,6 +1,7 @@
 import React from 'react';
 import { NavLink, Outlet } from 'react-router-dom';
-import { LayoutDashboard, Users, BookOpen, CreditCard, BarChart2, UserCheck } from 'lucide-react';
+import { LayoutDashboard, Users, BookOpen, CreditCard, BarChart2, UserCheck, Home } from 'lucide-react';
+import { Link } from 'react-router-dom';
 import useAuth from '../hooks/useAuth';
 
 const AdminLayout = () => {
@@ -76,8 +77,12 @@ const AdminLayout = () => {
                         </li>
                     </ul>
 
-                    {/* Logout */}
-                    <div className="mt-auto border-t border-base-300 pt-4">
+                    {/* Bottom Actions */}
+                    <div className="mt-auto border-t border-base-300 pt-4 space-y-2">
+                        <Link to="/" className="btn btn-ghost w-full btn-sm justify-start gap-2">
+                            <Home size={18} />
+                            Return Home
+                        </Link>
                         <button onClick={logOut} className="btn btn-neutral w-full btn-sm">Sign Out</button>
                     </div>
                 </div>

@@ -7,12 +7,81 @@ import Card from '../../components/ui/Card';
 import Button from '../../components/ui/Button';
 import { motion } from 'framer-motion';
 import toast from 'react-hot-toast';
+import useAuth from '../../hooks/useAuth';
+import useRole from '../../hooks/useRole';
+import useAxiosSecure from '../../hooks/useAxiosSecure';
+import ReviewForm from '../../components/reviews/ReviewForm';
+import ReviewsList from '../../components/reviews/ReviewsList';
+import BookmarkButton from '../../components/ui/BookmarkButton';
+import { MessageCircle } from 'lucide-react';
 
 const TutorDetails = () => {
     const { id } = useParams();
     const navigate = useNavigate();
     const [tutor, setTutor] = useState(null);
     const [loading, setLoading] = useState(true);
+    const { user } = useAuth();
+    const { role } = useRole();
+    const axiosSecure = useAxiosSecure();
+    const [stats, setStats] = useState({ averageRating: 0, totalReviews: 0 });
+
+    useEffect(() => {
+        if (tutor) {
+            fetchStats();
+        }
+    }, [tutor]);
+
+    const fetchStats = async () => {
+        try {
+            const res = await axiosInstance.get(`/tutor-rating/${tutor.email}`);
+            setStats(res.data);
+        } catch (error) {
+            console.error('Failed to fetch rating stats:', error);
+        }
+    };
+
+    const [isContactModalOpen, setIsContactModalOpen] = useState(false);
+    const [messageText, setMessageText] = useState('');
+    const [sending, setSending] = useState(false);
+
+    const handleContactClick = () => {
+        if (!user) {
+            toast.error('Please login to contact tutor');
+            navigate('/login');
+            return;
+        }
+        setIsContactModalOpen(true);
+    };
+
+    const handleSendMessage = async (e) => {
+        e.preventDefault();
+        if (!messageText.trim()) return;
+
+        setSending(true);
+        try {
+            // 1. Get or Create Conversation
+            const convRes = await axiosSecure.post('/conversations', {
+                participantEmail: tutor.email
+            });
+            const conversationId = convRes.data._id;
+
+            // 2. Send Message
+            await axiosSecure.post('/messages', {
+                conversationId,
+                content: messageText,
+                receiverEmail: tutor.email
+            });
+
+            toast.success('Message sent successfully!');
+            setMessageText('');
+            setIsContactModalOpen(false);
+        } catch (error) {
+            console.error('Failed to send message:', error);
+            toast.error('Failed to send message');
+        } finally {
+            setSending(false);
+        }
+    };
 
     useEffect(() => {
         const fetchTutor = async () => {
@@ -137,10 +206,43 @@ const TutorDetails = () => {
                                             </p>
                                         </div>
                                     </section>
+
+                                    <section>
+                                        <div className="flex justify-between items-center mb-6 border-b border-base-200 pb-2">
+                                            <h2 className="text-2xl font-bold flex items-center gap-2">
+                                                <Star className="text-warning" /> Reviews
+                                            </h2>
+                                            {role === 'student' && (
+                                                <div className="tooltip" data-tip="Only students with completed tuitions can review">
+                                                    <span className="text-xs text-base-content/50 border border-base-300 px-2 py-1 rounded-full">
+                                                        Verified Students Only
+                                                    </span>
+                                                </div>
+                                            )}
+                                        </div>
+
+                                        {role === 'student' && (
+                                            <div className="mb-8">
+                                                <ReviewForm
+                                                    tutorEmail={tutor.email}
+                                                    onSuccess={() => {
+                                                        fetchStats();
+                                                        window.location.reload();
+                                                    }}
+                                                />
+                                            </div>
+                                        )}
+
+                                        <ReviewsList tutorEmail={tutor.email} />
+                                    </section>
                                 </div>
 
+                                {/* Sidebar */}
                                 <div className="space-y-6">
-                                    <div className="bg-gradient-to-br from-primary-500/5 to-secondary-500/5 p-6 rounded-2xl border border-primary-500/10">
+                                    <div className="bg-gradient-to-br from-primary-500/5 to-secondary-500/5 p-6 rounded-2xl border border-primary-500/10 relative">
+                                        <div className="absolute top-4 right-4">
+                                            <BookmarkButton itemId={tutor._id} type="tutor" />
+                                        </div>
                                         <h3 className="font-bold text-lg mb-4 flex items-center gap-2">
                                             <Award className="text-warning" /> Tutor Stats
                                         </h3>
@@ -152,7 +254,8 @@ const TutorDetails = () => {
                                             <div className="flex justify-between items-center p-3 bg-white/50 dark:bg-black/20 rounded-lg">
                                                 <span className="text-base-content/70">Rating</span>
                                                 <span className="font-bold flex items-center gap-1 text-warning">
-                                                    4.8 <Star size={14} fill="currentColor" />
+                                                    {stats.averageRating || 'N/A'} <Star size={14} fill="currentColor" />
+                                                    <span className="text-xs text-base-content/50 ml-1">({stats.totalReviews})</span>
                                                 </span>
                                             </div>
                                             <div className="flex justify-between items-center p-3 bg-white/50 dark:bg-black/20 rounded-lg">
@@ -162,7 +265,14 @@ const TutorDetails = () => {
                                         </div>
                                     </div>
 
-                                    <Button fullWidth size="lg" variant="primary" className="shadow-lg shadow-primary/20">
+                                    <Button
+                                        fullWidth
+                                        size="lg"
+                                        variant="primary"
+                                        className="shadow-lg shadow-primary/20"
+                                        onClick={handleContactClick}
+                                        leftIcon={MessageCircle}
+                                    >
                                         Contact Tutor
                                     </Button>
                                 </div>
@@ -171,6 +281,85 @@ const TutorDetails = () => {
                     </Card>
                 </motion.div>
             </div>
+
+            {/* Contact Modal */}
+            {isContactModalOpen && (
+                <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4">
+                    <motion.div
+                        initial={{ opacity: 0, scale: 0.9 }}
+                        animate={{ opacity: 1, scale: 1 }}
+                        exit={{ opacity: 0, scale: 0.9 }}
+                        className="bg-base-100 rounded-2xl shadow-xl w-full max-w-md overflow-hidden border border-base-200"
+                    >
+                        <div className="bg-primary/10 p-6 border-b border-base-200">
+                            <h3 className="text-xl font-bold text-base-content">Contact Tutor</h3>
+                            <p className="text-sm text-base-content/60 mt-1">Get in touch with {tutor.displayName}</p>
+                        </div>
+
+                        <div className="p-6 space-y-4">
+                            <div className="bg-base-200/50 p-4 rounded-xl space-y-3">
+                                <div className="flex items-center gap-3">
+                                    <User className="text-primary w-5 h-5" />
+                                    <div>
+                                        <p className="text-xs text-base-content/50 uppercase font-bold">Name</p>
+                                        <p className="font-medium">{tutor.displayName}</p>
+                                    </div>
+                                </div>
+                                <div className="flex items-center gap-3">
+                                    <Mail className="text-primary w-5 h-5" />
+                                    <div>
+                                        <p className="text-xs text-base-content/50 uppercase font-bold">Email</p>
+                                        <p className="font-medium">{tutor.email}</p>
+                                    </div>
+                                </div>
+                                {tutor.phone && (
+                                    <div className="flex items-center gap-3">
+                                        <Phone className="text-primary w-5 h-5" />
+                                        <div>
+                                            <p className="text-xs text-base-content/50 uppercase font-bold">Phone</p>
+                                            <p className="font-medium">{tutor.phone}</p>
+                                        </div>
+                                    </div>
+                                )}
+                            </div>
+
+                            <form onSubmit={handleSendMessage}>
+                                <div className="form-control">
+                                    <label className="label">
+                                        <span className="label-text font-medium">Message</span>
+                                    </label>
+                                    <textarea
+                                        className="textarea textarea-bordered h-32 focus:outline-none focus:border-primary"
+                                        placeholder="Type your message here..."
+                                        value={messageText}
+                                        onChange={(e) => setMessageText(e.target.value)}
+                                        required
+                                    ></textarea>
+                                </div>
+
+                                <div className="flex gap-3 mt-6">
+                                    <Button
+                                        type="button"
+                                        variant="ghost"
+                                        fullWidth
+                                        onClick={() => setIsContactModalOpen(false)}
+                                    >
+                                        Cancel
+                                    </Button>
+                                    <Button
+                                        type="submit"
+                                        variant="primary"
+                                        fullWidth
+                                        disabled={sending}
+                                    >
+                                        {sending ? <Spinner size="sm" /> : 'Send Message'}
+                                    </Button>
+                                </div>
+                            </form>
+                        </div>
+                    </motion.div>
+                </div>
+            )}
         </div>
     );
 };

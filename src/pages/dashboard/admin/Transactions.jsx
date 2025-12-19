@@ -4,7 +4,7 @@ import useToast from '../../../hooks/useToast';
 
 const Transactions = () => {
     const axiosSecure = useAxiosSecure();
-    const { showToast } = useToast();
+    const toast = useToast();
     const [transactions, setTransactions] = useState([]);
     const [loading, setLoading] = useState(true);
 
@@ -15,7 +15,7 @@ const Transactions = () => {
                 setTransactions(res.data);
             } catch (error) {
                 console.error(error);
-                showToast('Failed to fetch transactions', 'error');
+                toast.error('Failed to fetch transactions');
             } finally {
                 setLoading(false);
             }
@@ -23,46 +23,62 @@ const Transactions = () => {
         fetchTransactions();
     }, [axiosSecure]);
 
-    /*
-    const filteredTransactions = transactions.filter(txn =>
-        txn.transactionId?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        txn.studentEmail?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        txn.tutorEmail?.toLowerCase().includes(searchTerm.toLowerCase())
-    );
-    */
+    if (loading) {
+        return (
+            <div className="flex justify-center items-center min-h-[300px]">
+                <span className="loading loading-spinner loading-lg text-primary"></span>
+            </div>
+        );
+    }
 
-    if (loading) return <span className="loading loading-dots loading-lg"></span>;
+    if (transactions.length === 0) {
+        return (
+            <div className="text-center py-12">
+                <h3 className="text-lg font-semibold text-gray-500">No transactions found</h3>
+                <p className="text-sm text-gray-400">Transactions will appear here once payments are made.</p>
+            </div>
+        );
+    }
 
     return (
-        <div className="overflow-x-auto bg-base-100 rounded-xl shadow-sm border border-base-200">
-            <table className="table w-full">
-                <thead>
-                    <tr>
-                        <th>Transaction ID</th>
-                        <th>Student</th>
-                        <th>Tutor</th>
-                        <th>Amount</th>
-                        <th>Date</th>
-                        <th>Status</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {transactions.map((txn) => (
-                        <tr key={txn._id}>
-                            <td className="font-mono text-xs">{txn.transactionId}</td>
-                            <td>{txn.studentEmail}</td>
-                            <td>{txn.tutorEmail}</td>
-                            <td className="font-bold text-success">${txn.amount}</td>
-                            <td className="text-sm text-gray-500">
-                                {new Date(txn.created_at).toLocaleDateString()}
-                            </td>
-                            <td>
-                                <span className="badge badge-success text-white">PAID</span>
-                            </td>
+        <div>
+            <h2 className="text-2xl font-bold mb-6">All Transactions</h2>
+            <div className="overflow-x-auto bg-base-100 rounded-xl shadow-sm border border-base-200">
+                <table className="table w-full">
+                    <thead className="bg-base-200">
+                        <tr>
+                            <th>Transaction ID</th>
+                            <th>Student</th>
+                            <th>Tutor</th>
+                            <th>Amount</th>
+                            <th>Date</th>
+                            <th>Status</th>
                         </tr>
-                    ))}
-                </tbody>
-            </table>
+                    </thead>
+                    <tbody>
+                        {transactions.map((txn) => (
+                            <tr key={txn._id} className="hover">
+                                <td className="font-mono text-xs">{txn.transactionId || 'N/A'}</td>
+                                <td>{txn.studentEmail}</td>
+                                <td>{txn.tutorEmail}</td>
+                                <td className="font-bold text-success">৳{txn.amount}</td>
+                                <td className="text-sm text-gray-500">
+                                    {new Date(txn.date || txn.created_at).toLocaleDateString('en-US', {
+                                        year: 'numeric',
+                                        month: 'short',
+                                        day: 'numeric'
+                                    })}
+                                </td>
+                                <td>
+                                    <span className={`badge ${txn.status === 'paid' ? 'badge-success' : 'badge-warning'} text-white`}>
+                                        {txn.status?.toUpperCase() || 'PAID'}
+                                    </span>
+                                </td>
+                            </tr>
+                        ))}
+                    </tbody>
+                </table>
+            </div>
         </div>
     );
 };

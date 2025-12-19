@@ -71,10 +71,11 @@ const Input = forwardRef((
                     {/* Input Field */}
                     <motion.input
                         ref={ref}
+                        {...props}
                         type={inputType}
                         placeholder={floating ? '' : placeholder}
                         className={`input input-bordered w-full input-focus transition-all duration-200 ${error
-                            ? 'input-error focus:ring-error/50 animate-wiggle'
+                            ? 'input-error focus:ring-error/50'
                             : 'focus:ring-2 focus:ring-primary/50 focus:border-primary'
                             } ${leftIcon ? 'pl-10' : ''} ${rightIcon || isPassword ? 'pr-10' : ''
                             } ${className}`}
@@ -83,7 +84,6 @@ const Input = forwardRef((
                         onChange={handleChange}
                         value={value}
                         maxLength={maxLength}
-                        {...props}
                     />
 
                     {/* Right Icon or Password Toggle */}

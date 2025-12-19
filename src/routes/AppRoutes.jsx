@@ -49,6 +49,10 @@ import AdminProfile from '../pages/dashboard/admin/AdminProfile';
 import StudentProfileDetails from '../pages/dashboard/admin/StudentProfileDetails'; // New Import
 import ProfileSettings from '../components/dashboard/ProfileSettings'; // Import directly
 import MyTransactions from '../pages/dashboard/common/MyTransactions'; // New Import
+import Messages from '../pages/dashboard/shared/Messages';
+import Bookmarks from '../pages/dashboard/shared/Bookmarks';
+import Calendar from '../pages/dashboard/shared/Calendar';
+import NotificationBell from '../components/ui/NotificationBell';
 
 const AppRoutes = () => {
     return (
@@ -86,6 +90,9 @@ const AppRoutes = () => {
                 <Route path="/dashboard/transactions" element={<RoleRoute allowedRoles={[ROLES.STUDENT]}><PaymentHistory /></RoleRoute>} />
                 <Route path="/dashboard/student/payment/success" element={<RoleRoute allowedRoles={[ROLES.STUDENT]}><PaymentSuccess /></RoleRoute>} />
                 <Route path="/dashboard/student/profile" element={<RoleRoute allowedRoles={[ROLES.STUDENT]}><StudentProfile /></RoleRoute>} />
+                <Route path="/dashboard/student/messages" element={<RoleRoute allowedRoles={[ROLES.STUDENT]}><Messages /></RoleRoute>} />
+                <Route path="/dashboard/student/bookmarks" element={<RoleRoute allowedRoles={[ROLES.STUDENT]}><Bookmarks /></RoleRoute>} />
+                <Route path="/dashboard/student/calendar" element={<RoleRoute allowedRoles={[ROLES.STUDENT]}><Calendar /></RoleRoute>} />
 
                 {/* Tutor Routes */}
                 <Route path="/dashboard/tutor" element={<RoleRoute allowedRoles={[ROLES.TUTOR]}><TutorOverview /></RoleRoute>} />
@@ -93,6 +100,8 @@ const AppRoutes = () => {
                 <Route path="/dashboard/tutor/applied-tuitions" element={<RoleRoute allowedRoles={[ROLES.TUTOR]}><AppliedTuitions /></RoleRoute>} />
                 <Route path="/dashboard/tutor/earnings" element={<RoleRoute allowedRoles={[ROLES.TUTOR]}><Earnings /></RoleRoute>} />
                 <Route path="/dashboard/tutor/profile" element={<RoleRoute allowedRoles={[ROLES.TUTOR]}><TutorProfile /></RoleRoute>} />
+                <Route path="/dashboard/tutor/messages" element={<RoleRoute allowedRoles={[ROLES.TUTOR]}><Messages /></RoleRoute>} />
+                <Route path="/dashboard/tutor/calendar" element={<RoleRoute allowedRoles={[ROLES.TUTOR]}><Calendar /></RoleRoute>} />
 
                 {/* Shared Profile Settings Route */}
                 <Route path="/profile-settings" element={
@@ -101,6 +110,7 @@ const AppRoutes = () => {
                         <ProfileSettings />
                     </div>
                 } />
+                <Route path="/dashboard/notifications" element={<div className="p-6"><h1 className="text-2xl font-bold mb-4">Notifications</h1><NotificationBell fullPage /></div>} />
             </Route>
 
             {/* Protected Admin Dashboard Routes */}
@@ -118,6 +128,7 @@ const AppRoutes = () => {
                 <Route path="student-profile/:email" element={<StudentProfileDetails />} /> {/* New Route */}
                 <Route path="transactions" element={<Transactions />} />
                 <Route path="reports" element={<Reports />} />
+                <Route path="messages" element={<Messages />} />
                 {/* Can add AdminProfile or ProfileSettings if needed */}
                 <Route path="profile" element={<ProfileSettings />} />
             </Route>

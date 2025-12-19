@@ -3,6 +3,7 @@ import useAxiosSecure from '../../../hooks/useAxiosSecure';
 import { DollarSign, Calendar, TrendingUp } from 'lucide-react';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 import { motion } from 'framer-motion';
+import DashboardHeader from '../../../components/Shared/DashboardHeader';
 
 const Earnings = () => {
     const axiosSecure = useAxiosSecure();
@@ -67,6 +68,8 @@ const Earnings = () => {
             initial="hidden"
             animate="visible"
         >
+            <DashboardHeader />
+
             <motion.h1
                 variants={itemVariants}
                 className="text-2xl font-bold font-heading gradient-text"
@@ -91,8 +94,8 @@ const Earnings = () => {
                     <h3 className="font-semibold mb-4 flex items-center gap-2">
                         <TrendingUp size={18} className="text-primary" /> Monthly Overview
                     </h3>
-                    <div className="h-64 w-full">
-                        <ResponsiveContainer width="100%" height="100%">
+                    <div className="w-full h-[300px]">
+                        <ResponsiveContainer width="100%" height="100%" minWidth={0}>
                             <LineChart data={chartData}>
                                 <CartesianGrid strokeDasharray="3 3" opacity={0.3} />
                                 <XAxis dataKey="name" />

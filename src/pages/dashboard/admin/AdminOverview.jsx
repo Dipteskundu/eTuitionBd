@@ -102,8 +102,8 @@ const AdminOverview = () => {
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
                 <div className="card bg-base-100 shadow-xl border border-base-200 p-6">
                     <h3 className="text-xl font-bold mb-4">Platform Distribution</h3>
-                    <div className="h-64">
-                        <ResponsiveContainer width="100%" height="100%">
+                    <div className="w-full h-[300px]">
+                        <ResponsiveContainer width="100%" height="100%" minWidth={0}>
                             <BarChart data={data}>
                                 <CartesianGrid strokeDasharray="3 3" />
                                 <XAxis dataKey="name" />

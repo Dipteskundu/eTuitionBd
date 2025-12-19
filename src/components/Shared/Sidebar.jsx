@@ -9,17 +9,21 @@ import {
     LogOut,
     BookOpen,
     DollarSign,
-    Briefcase
+    Briefcase,
+    MessageCircle,
+    Bookmark,
+    Calendar
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import useRole from '../../hooks/useRole';
 import useAuth from '../../hooks/useAuth';
 import { ROLES } from '../../utils/constants';
 import logo from '../../assets/logo.png';
+import ThemeToggle from '../ui/ThemeToggle';
 
 const Sidebar = ({ isOpen, onClose }) => {
     const { role } = useRole();
-    const { logOut } = useAuth();
+    const { user, logOut } = useAuth();
     const navigate = useNavigate();
 
     const handleLogout = async () => {
@@ -41,6 +45,9 @@ const Sidebar = ({ isOpen, onClose }) => {
                     { name: 'Applications', path: '/dashboard/student/applications', icon: Users },
                     { name: 'Payment History', path: '/dashboard/student/payments', icon: CreditCard },
                     { name: 'Profile', path: '/dashboard/student/profile', icon: Settings },
+                    { name: 'Messages', path: '/dashboard/student/messages', icon: MessageCircle },
+                    { name: 'Bookmarks', path: '/dashboard/student/bookmarks', icon: Bookmark },
+                    { name: 'Calendar', path: '/dashboard/student/calendar', icon: Calendar },
                 ];
             case ROLES.TUTOR:
                 return [
@@ -49,6 +56,8 @@ const Sidebar = ({ isOpen, onClose }) => {
                     { name: 'Applied Tuitions', path: '/dashboard/tutor/applied-tuitions', icon: FileText },
                     { name: 'Earnings', path: '/dashboard/tutor/earnings', icon: DollarSign },
                     { name: 'Profile', path: '/dashboard/tutor/profile', icon: Settings },
+                    { name: 'Messages', path: '/dashboard/tutor/messages', icon: MessageCircle },
+                    { name: 'Calendar', path: '/dashboard/tutor/calendar', icon: Calendar },
                 ];
             case ROLES.ADMIN:
                 return [
@@ -57,6 +66,7 @@ const Sidebar = ({ isOpen, onClose }) => {
                     { name: 'Manage Tuitions', path: '/dashboard/admin/tuitions', icon: BookOpen },
                     { name: 'Transactions', path: '/dashboard/admin/transactions', icon: CreditCard },
                     { name: 'Reports', path: '/dashboard/admin/reports', icon: FileText },
+                    { name: 'Messages', path: '/dashboard/admin/messages', icon: MessageCircle },
                 ];
             default:
                 return [];
@@ -113,6 +123,24 @@ const Sidebar = ({ isOpen, onClose }) => {
                             />
                             <span className="text-xl font-bold text-primary">eTuitionBd</span>
                         </Link>
+                    </div>
+
+                    {/* Profile Section - First item after logo */}
+                    <div className="px-4 py-3 border-b border-base-200">
+                        <div className="flex items-center justify-between p-3 bg-base-100 border border-base-200 rounded-xl shadow-sm">
+                            <div className="flex items-center gap-3 overflow-hidden">
+                                <div className="avatar">
+                                    <div className="w-10 rounded-full ring ring-primary ring-offset-base-100 ring-offset-2">
+                                        <img src={user?.photoURL || "https://i.ibb.co/MBtH413/unknown-user.jpg"} alt="User" />
+                                    </div>
+                                </div>
+                                <div className="flex flex-col min-w-0">
+                                    <span className="font-bold text-sm truncate">{user?.displayName || 'User'}</span>
+                                    <span className="text-[10px] uppercase font-bold text-primary tracking-wider">{role}</span>
+                                </div>
+                            </div>
+                            <ThemeToggle />
+                        </div>
                     </div>
 
                     {/* Navigation Links */}

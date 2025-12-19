@@ -68,8 +68,9 @@ const TutorOverview = () => {
             {/* Welcome Section */}
             <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
                 <div>
-                    <h1 className="font-heading text-3xl font-bold gradient-text mb-2">
-                        Welcome Back, {user?.displayName?.split(' ')[0] || 'Tutor'}! 👨‍🏫
+                    {/* Simplified Welcome */}
+                    <h1 className="font-heading text-2xl font-bold gradient-text mb-1">
+                        Dashboard Overview
                     </h1>
                     <p className="text-base-content/70">Track your earnings and job applications here.</p>
                 </div>

@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
+import { useForm } from 'react-hook-form';
 import { motion } from 'framer-motion';
 import { User, Mail, Lock, Phone, Upload, UserPlus, CheckCircle, GraduationCap, Briefcase } from 'lucide-react';
 import useAuth from '../../hooks/useAuth';
@@ -13,15 +14,14 @@ import { uploadImage } from '../../utils/uploadImage';
 import axiosInstance from '../../utils/axiosInstance';
 
 const Register = () => {
-    const [formData, setFormData] = useState({
-        name: '',
-        email: '',
-        phone: '',
-        password: '',
-        confirmPassword: '',
-        role: ROLES.STUDENT, // Default role
+    const { register, handleSubmit, watch, setValue, formState: { errors } } = useForm({
+        mode: 'onChange',
+        defaultValues: {
+            role: ROLES.STUDENT
+        }
     });
 
+    const role = watch("role");
     const [photo, setPhoto] = useState(null);
     const [logoPreview, setLogoPreview] = useState(null);
     const [loading, setLoading] = useState(false);
@@ -29,10 +29,6 @@ const Register = () => {
     const { createUser, updateUserProfile } = useAuth();
     const toast = useToast();
     const navigate = useNavigate();
-
-    const handleChange = (e) => {
-        setFormData({ ...formData, [e.target.name]: e.target.value });
-    };
 
     const handlePhotoChange = (e) => {
         const file = e.target.files[0];
@@ -46,24 +42,12 @@ const Register = () => {
         }
     };
 
-    const handleSubmit = async (e) => {
-        e.preventDefault();
-
-        if (formData.password !== formData.confirmPassword) {
-            toast.error('Passwords do not match');
-            return;
-        }
-
-        if (formData.password.length < 6) {
-            toast.error('Password must be at least 6 characters');
-            return;
-        }
-
+    const onSubmit = async (data) => {
         setLoading(true);
 
         try {
             // 1. Create User in Firebase
-            const result = await createUser(formData.email, formData.password);
+            const result = await createUser(data.email, data.password);
             const user = result.user;
 
             // 2. Upload Photo if selected
@@ -73,30 +57,28 @@ const Register = () => {
             }
 
             // 3. Update Firebase Profile
-            await updateUserProfile(formData.name, photoURL);
+            await updateUserProfile(data.name, photoURL);
 
             // 4. Save User to Backend Database
             const userData = {
-                name: formData.name,
-                email: formData.email,
-                phone: formData.phone,
-                role: formData.role,
+                name: data.name,
+                email: data.email,
+                phone: data.phone,
+                role: data.role,
                 photoURL: photoURL,
                 firebaseId: user.uid,
             };
 
-            // Mock backend call if server not ready - Replace with actual API call later
-            // For now, we assume success or try to call the endpoint
             try {
                 // Correct Endpoint: /user
                 await axiosInstance.post('/user', userData);
-                localStorage.setItem('userRole', formData.role); // Important: Persist role locally for frontend state
-                toast.success(`Welcome, ${formData.name}! Registration successful.`);
+                localStorage.setItem('userRole', data.role); // Important: Persist role locally for frontend state
+                toast.success(`Welcome, ${data.name}! Registration successful.`);
                 navigate('/');
             } catch (backendError) {
                 console.warn("Backend registration failed (Server might be down), but Firebase Auth created.", backendError);
                 // Even if backend fails, strictly for this frontend demo, we persist role locally
-                localStorage.setItem('userRole', formData.role);
+                localStorage.setItem('userRole', data.role);
                 toast.error("Account created in Firebase, but failed to save to database.");
             }
 
@@ -142,24 +124,24 @@ const Register = () => {
                             </motion.div>
                         </div>
 
-                        <form onSubmit={handleSubmit} className="space-y-5">
+                        <form onSubmit={handleSubmit(onSubmit)} className="space-y-5">
                             {/* Role Selection */}
                             <div className="grid grid-cols-2 gap-4">
                                 <motion.div
                                     whileHover={{ scale: 1.02 }}
                                     whileTap={{ scale: 0.98 }}
-                                    onClick={() => setFormData({ ...formData, role: ROLES.STUDENT })}
-                                    className={`cursor-pointer rounded-xl p-4 flex flex-col items-center justify-center gap-3 transition-all ${formData.role === ROLES.STUDENT
+                                    onClick={() => setValue("role", ROLES.STUDENT)}
+                                    className={`cursor-pointer rounded-xl p-4 flex flex-col items-center justify-center gap-3 transition-all ${role === ROLES.STUDENT
                                         ? 'bg-primary/10 ring-2 ring-primary shadow-glow'
                                         : 'bg-base-200/50 hover:bg-base-200'
                                         }`}
                                 >
                                     <GraduationCap
                                         size={32}
-                                        className={formData.role === ROLES.STUDENT ? 'text-primary' : 'text-base-content/40'}
+                                        className={role === ROLES.STUDENT ? 'text-primary' : 'text-base-content/40'}
                                     />
                                     <span
-                                        className={`font-heading font-semibold ${formData.role === ROLES.STUDENT ? 'text-primary' : 'text-base-content/70'
+                                        className={`font-heading font-semibold ${role === ROLES.STUDENT ? 'text-primary' : 'text-base-content/70'
                                             }`}
                                     >
                                         I'm a Student
@@ -172,18 +154,18 @@ const Register = () => {
                                 <motion.div
                                     whileHover={{ scale: 1.02 }}
                                     whileTap={{ scale: 0.98 }}
-                                    onClick={() => setFormData({ ...formData, role: ROLES.TUTOR })}
-                                    className={`cursor-pointer rounded-xl p-4 flex flex-col items-center justify-center gap-3 transition-all ${formData.role === ROLES.TUTOR
+                                    onClick={() => setValue("role", ROLES.TUTOR)}
+                                    className={`cursor-pointer rounded-xl p-4 flex flex-col items-center justify-center gap-3 transition-all ${role === ROLES.TUTOR
                                         ? 'bg-secondary/10 ring-2 ring-secondary shadow-glow'
                                         : 'bg-base-200/50 hover:bg-base-200'
                                         }`}
                                 >
                                     <Briefcase
                                         size={32}
-                                        className={formData.role === ROLES.TUTOR ? 'text-secondary' : 'text-base-content/40'}
+                                        className={role === ROLES.TUTOR ? 'text-secondary' : 'text-base-content/40'}
                                     />
                                     <span
-                                        className={`font-heading font-semibold ${formData.role === ROLES.TUTOR ? 'text-secondary' : 'text-base-content/70'
+                                        className={`font-heading font-semibold ${role === ROLES.TUTOR ? 'text-secondary' : 'text-base-content/70'
                                             }`}
                                     >
                                         I'm a Tutor
@@ -193,56 +175,76 @@ const Register = () => {
                                     </p>
                                 </motion.div>
                             </div>
+                            <input type="hidden" {...register("role")} />
 
                             <Input
                                 floating
                                 label="Full Name"
-                                name="name"
+                                placeholder="Enter your full name"
                                 leftIcon={<User size={18} />}
-                                value={formData.name}
-                                onChange={handleChange}
-                                required
+                                error={errors.name?.message}
+                                {...register("name", { required: "Full Name is required" })}
                             />
 
                             <Input
                                 floating
                                 label="Email Address"
-                                name="email"
                                 type="email"
+                                placeholder="Enter your email"
                                 leftIcon={<Mail size={18} />}
-                                value={formData.email}
-                                onChange={handleChange}
-                                required
+                                error={errors.email?.message}
+                                {...register("email", {
+                                    required: "Email is required",
+                                    pattern: {
+                                        value: /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i,
+                                        message: "Invalid email address"
+                                    }
+                                })}
                             />
 
                             <Input
                                 floating
                                 label="Phone Number"
-                                name="phone"
+                                type="tel"
+                                placeholder="Enter your phone number"
                                 leftIcon={<Phone size={18} />}
-                                value={formData.phone}
-                                onChange={handleChange}
-                                required
+                                error={errors.phone?.message}
+                                {...register("phone", { required: "Phone Number is required" })}
                             />
 
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                 <Input
                                     label="Password"
-                                    name="password"
                                     type="password"
+                                    placeholder="Enter password"
                                     leftIcon={<Lock size={18} />}
-                                    value={formData.password}
-                                    onChange={handleChange}
-                                    required
+                                    error={errors.password?.message}
+                                    {...register("password", {
+                                        required: "Password is required",
+                                        minLength: {
+                                            value: 8,
+                                            message: "Password must be at least 8 characters"
+                                        },
+                                        pattern: {
+                                            value: /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/,
+                                            message: "Must have uppercase, lowercase, number & special char"
+                                        }
+                                    })}
                                 />
                                 <Input
                                     label="Confirm Password"
-                                    name="confirmPassword"
                                     type="password"
+                                    placeholder="Confirm password"
                                     leftIcon={<Lock size={18} />}
-                                    value={formData.confirmPassword}
-                                    onChange={handleChange}
-                                    required
+                                    error={errors.confirmPassword?.message}
+                                    {...register("confirmPassword", {
+                                        required: "Confirm Password is required",
+                                        validate: (val) => {
+                                            if (watch('password') != val) {
+                                                return "Passwords do not match";
+                                            }
+                                        }
+                                    })}
                                 />
                             </div>
 
@@ -293,21 +295,8 @@ const Register = () => {
                             </Link>
                         </p>
 
-                        {/* Trust Indicators */}
-                        <div className="flex items-center justify-center gap-6 mt-8 text-xs text-base-content/60">
-                            <div className="flex items-center gap-2">
-                                <CheckCircle size={16} className="text-primary" />
-                                <span>Verified Tutors</span>
-                            </div>
-                            <div className="flex items-center gap-2">
-                                <CheckCircle size={16} className="text-secondary" />
-                                <span>Secure Platform</span>
-                            </div>
-                            <div className="flex items-center gap-2">
-                                <CheckCircle size={16} className="text-accent" />
-                                <span>Free Registration</span>
-                            </div>
-                        </div>
+                       
+                        
                     </div>
                 </Card>
             </motion.div>

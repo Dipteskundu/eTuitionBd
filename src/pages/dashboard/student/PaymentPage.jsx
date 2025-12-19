@@ -3,7 +3,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 import useAxiosSecure from '../../../hooks/useAxiosSecure';
 import useAuth from '../../../hooks/useAuth';
 import useToast from '../../../hooks/useToast';
-import { ArrowLeft, CreditCard, ShieldCheck, Globe, CheckCircle, Sparkles, User, BookOpen } from 'lucide-react';
+import { ArrowLeft, CreditCard, ShieldCheck, Globe, CheckCircle, Sparkles, User, BookOpen, ArrowRight } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
 const PaymentPage = () => {
@@ -17,6 +17,12 @@ const PaymentPage = () => {
     const [processing, setProcessing] = useState(false);
     const [application, setApplication] = useState(null);
     const [tuition, setTuition] = useState(null);
+
+    // Card State
+    const [cardNumber, setCardNumber] = useState('');
+    const [cardName, setCardName] = useState('');
+    const [cardExpiry, setCardExpiry] = useState('');
+    const [cardCvc, setCardCvc] = useState('');
 
     useEffect(() => {
         const fetchData = async () => {
@@ -72,7 +78,7 @@ const PaymentPage = () => {
             const res = await axiosSecure.post('/payments/demo', payload);
 
             if (res.data.success) {
-                navigate('/dashboard/student/payment/success');
+                navigate(`/dashboard/student/payment/success?session_id=${res.data.paymentId}`);
             } else {
                 toastError("Payment failed");
             }
@@ -124,168 +130,212 @@ const PaymentPage = () => {
                 className="max-w-5xl w-full bg-white/70 backdrop-blur-2xl rounded-3xl shadow-xl border border-white/50 overflow-hidden flex flex-col md:flex-row z-10"
             >
                 {/* Left Side: Summary Panel */}
-                <div className="w-full md:w-[40%] bg-gradient-to-br from-indigo-900 to-indigo-950 p-8 md:p-12 text-white relative flex flex-col justify-between">
-
+                <div className="w-full md:w-[40%] bg-gradient-to-br from-indigo-900 to-indigo-950 p-8 md:p-12 text-white relative flex flex-col justify-between overflow-hidden">
                     {/* Decorative Patterns */}
                     <div className="absolute inset-0 opacity-10" style={{ backgroundImage: 'url("data:image/svg+xml,%3Csvg width=\'60\' height=\'60\' viewBox=\'0 0 60 60\' xmlns=\'http://www.w3.org/2000/svg\'%3E%3Cg fill=\'none\' fill-rule=\'evenodd\'%3E%3Cg fill=\'%23ffffff\' fill-opacity=\'1\'%3E%3Cpath d=\'M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z\'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E")' }}></div>
 
-                    <div>
+                    <div className="relative z-10">
                         <button
                             onClick={() => navigate(-1)}
-                            className="flex items-center gap-2 text-indigo-200 hover:text-white transition-colors mb-10 group"
+                            className="flex items-center gap-2 text-indigo-200 hover:text-white transition-colors mb-8 group"
                         >
                             <ArrowLeft size={18} className="group-hover:-translate-x-1 transition-transform" />
                             <span className="text-sm font-medium">Back</span>
                         </button>
 
-                        <div className="mb-2">
-                            <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-indigo-500/20 border border-indigo-400/30 text-indigo-200 text-xs font-medium mb-6">
+                        <div className="mb-8">
+                            <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-indigo-500/20 border border-indigo-400/30 text-indigo-200 text-xs font-medium mb-4">
                                 <Sparkles size={12} className="text-amber-300" />
                                 Premium Education
                             </span>
-                            <h2 className="text-indigo-200 text-sm font-medium uppercase tracking-wider mb-2">Payment For</h2>
-                            <h1 className="text-3xl font-bold text-white mb-6 leading-tight">
-                                {tuition?.subject || "Tuition Fee"} <br />
-                                <span className="text-indigo-300 font-normal text-xl">Standard Package</span>
+                            <h2 className="text-indigo-200 text-xs font-bold uppercase tracking-widest mb-2">Order Summary</h2>
+                            <h1 className="text-2xl lg:text-3xl font-bold text-white mb-1 leading-tight">
+                                {tuition?.subject || "Tuition Fee"}
                             </h1>
+                            <p className="text-indigo-300 text-lg">Standard Monthly Package</p>
                         </div>
 
-                        <div className="space-y-6">
-                            <div className="flex items-center gap-4 p-4 rounded-xl bg-white/10 border border-white/5 backdrop-blur-md">
-                                <div className="p-3 bg-indigo-600 rounded-lg text-white shadow-lg shadow-indigo-900/20">
-                                    <User size={24} />
+                        <div className="space-y-4 mb-8">
+                            <div className="flex items-start gap-3 p-3 rounded-xl bg-white/5 border border-white/5 backdrop-blur-sm">
+                                <div className="p-2 bg-indigo-600 rounded-lg text-white shrink-0">
+                                    <User size={20} />
                                 </div>
                                 <div>
-                                    <p className="text-xs text-indigo-300">Tutor</p>
-                                    <p className="font-semibold">{application.tutorName || "Selected Tutor"}</p>
+                                    <p className="text-[10px] uppercase tracking-wider text-indigo-300 font-bold">Selected Tutor</p>
+                                    <p className="font-semibold text-sm">{application.tutorName || "Tutor Name"}</p>
+                                    <p className="text-xs text-indigo-200/70">{application.tutorEmail}</p>
                                 </div>
                             </div>
 
                             {tuition && (
-                                <div className="flex items-center gap-4 p-4 rounded-xl bg-white/10 border border-white/5 backdrop-blur-md">
-                                    <div className="p-3 bg-rose-500 rounded-lg text-white shadow-lg shadow-rose-900/20">
-                                        <BookOpen size={24} />
+                                <div className="flex items-start gap-3 p-3 rounded-xl bg-white/5 border border-white/5 backdrop-blur-sm">
+                                    <div className="p-2 bg-rose-500 rounded-lg text-white shrink-0">
+                                        <BookOpen size={20} />
                                     </div>
                                     <div>
-                                        <p className="text-xs text-indigo-300">Class & Medium</p>
-                                        <p className="font-semibold">{tuition.class} | {tuition.medium}</p>
+                                        <p className="text-[10px] uppercase tracking-wider text-indigo-300 font-bold">Details</p>
+                                        <p className="font-semibold text-sm">{tuition.class} | {tuition.medium}</p>
+                                        <p className="text-xs text-indigo-200/70">{tuition.daysPerWeek} days/week</p>
                                     </div>
                                 </div>
                             )}
                         </div>
                     </div>
 
-                    <div className="mt-12 pt-8 border-t border-indigo-800/50">
-                        <div className="flex items-end justify-between">
-                            <span className="text-indigo-300 text-lg">Total</span>
-                            <div className="flex items-baseline gap-1">
-                                <span className="text-xl text-indigo-300">BDT</span>
-                                <span className="text-5xl font-bold tracking-tighter">{totalAmount}</span>
+                    <div className="relative z-10 pt-6 border-t border-indigo-500/30 space-y-3">
+                        <div className="flex justify-between text-sm text-indigo-200">
+                            <span>Subtotal</span>
+                            <span>BDT {parseFloat(amount).toFixed(2)}</span>
+                        </div>
+                        <div className="flex justify-between text-sm text-indigo-200">
+                            <span>Service Fee (2%)</span>
+                            <span>BDT {(parseFloat(amount) * 0.02).toFixed(2)}</span>
+                        </div>
+                        <div className="flex items-end justify-between pt-2">
+                            <span className="text-indigo-100 font-medium">Total due</span>
+                            <div className="text-right">
+                                <p className="text-3xl font-bold tracking-tight text-white">BDT {(
+                                    parseFloat(amount) + (parseFloat(amount) * 0.02)
+                                ).toFixed(2)}</p>
                             </div>
                         </div>
                     </div>
                 </div>
 
                 {/* Right Side: Form */}
-                <div className="w-full md:w-[60%] p-8 md:p-12 lg:p-16 bg-white/50">
+                <div className="w-full md:w-[60%] bg-white/50 p-8 md:p-12 lg:p-16 relative">
                     <div className="max-w-md mx-auto">
-                        <h3 className="text-2xl font-bold text-slate-800 mb-2">Payment Details</h3>
-                        <p className="text-slate-500 text-sm mb-8">Complete your purchase safely and securely.</p>
-
-                        <form onSubmit={handlePayment} className="space-y-6">
-
-                            {/* Email Field */}
-                            <div className="space-y-2">
-                                <label className="text-xs font-semibold uppercase text-slate-500 tracking-wider">Email Address</label>
-                                <div className="relative group">
-                                    <Globe className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-indigo-500 transition-colors" size={18} />
-                                    <input
-                                        type="email"
-                                        value={user?.email || ''}
-                                        readOnly
-                                        className="w-full bg-white border border-slate-200 rounded-xl py-3 pl-11 pr-4 text-slate-700 outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all font-medium"
-                                    />
-                                    <div className="absolute right-4 top-1/2 -translate-y-1/2 text-emerald-500">
-                                        <CheckCircle size={18} />
-                                    </div>
+                        <div className="mb-8">
+                            {/* Visual Credit Card */}
+                            <div className="w-full aspect-[1.586] bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 rounded-2xl shadow-2xl p-6 text-white relative overflow-hidden mb-8 transform transition-transform hover:scale-[1.02] duration-300">
+                                {/* Card Background Texture */}
+                                <div className="absolute inset-0 opacity-20" style={{ backgroundImage: 'radial-gradient(circle at 100% 0%, rgba(255,255,255,0.2) 0%, transparent 50%)' }}></div>
+                                <div className="absolute top-0 right-0 p-6 opacity-50">
+                                    <Globe size={48} strokeWidth={1} />
                                 </div>
-                            </div>
 
-                            {/* Card Details */}
-                            <div className="space-y-2">
-                                <label className="text-xs font-semibold uppercase text-slate-500 tracking-wider">Card Information</label>
-                                <div className="bg-white border border-slate-200 rounded-xl overflow-hidden transition-all focus-within:ring-2 focus-within:ring-indigo-500/20 focus-within:border-indigo-500 shadow-sm">
-                                    <div className="relative border-b border-slate-100">
-                                        <CreditCard className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" size={18} />
-                                        <input
-                                            type="text"
-                                            placeholder="Card number"
-                                            maxLength={19}
-                                            required
-                                            className="w-full py-3.5 pl-11 pr-4 outline-none text-slate-800 placeholder:text-slate-400 font-medium"
-                                        />
-                                        <div className="absolute right-4 top-1/2 -translate-y-1/2 flex gap-2">
-                                            {/* Placeholder Card Icons */}
-                                            <div className="w-8 h-5 bg-slate-100 rounded border border-slate-200" />
-                                            <div className="w-8 h-5 bg-slate-100 rounded border border-slate-200" />
+                                <div className="flex flex-col justify-between h-full relative z-10">
+                                    <div className="flex justify-between items-start">
+                                        <ShieldCheck size={32} className="text-indigo-400" />
+                                        <span className="font-mono text-xs opacity-50 tracking-widest">DEBIT</span>
+                                    </div>
+
+                                    <div className="space-y-6">
+                                        <div className="font-mono text-2xl tracking-widest drop-shadow-md">
+                                            {cardNumber || "0000 0000 0000 0000"}
+                                        </div>
+
+                                        <div className="flex justify-between items-end">
+                                            <div>
+                                                <div className="text-[10px] uppercase tracking-wider opacity-60 mb-1">Card Holder</div>
+                                                <div className="font-medium tracking-wide uppercase truncate max-w-[180px]">
+                                                    {cardName || "YOUR NAME"}
+                                                </div>
+                                            </div>
+                                            <div className="text-right">
+                                                <div className="text-[10px] uppercase tracking-wider opacity-60 mb-1">Expires</div>
+                                                <div className="font-mono">{cardExpiry || "MM/YY"}</div>
+                                            </div>
                                         </div>
                                     </div>
-                                    <div className="flex divide-x divide-slate-100">
-                                        <input
-                                            type="text"
-                                            placeholder="MM / YY"
-                                            maxLength={5}
-                                            required
-                                            className="w-1/2 py-3.5 px-4 outline-none text-slate-800 placeholder:text-slate-400 text-center font-medium"
-                                        />
-                                        <input
-                                            type="text"
-                                            placeholder="CVC"
-                                            maxLength={3}
-                                            required
-                                            className="w-1/2 py-3.5 px-4 outline-none text-slate-800 placeholder:text-slate-400 text-center font-medium"
-                                        />
-                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <form onSubmit={handlePayment} className="space-y-5">
+                            <div className="grid gap-2">
+                                <label className="text-xs font-bold uppercase text-slate-400 tracking-wider ml-1">Card Number</label>
+                                <div className="relative">
+                                    <input
+                                        type="text"
+                                        maxLength={19}
+                                        placeholder="0000 0000 0000 0000"
+                                        className="w-full bg-white border-2 border-slate-100 rounded-xl px-4 py-3 pl-12 font-mono text-slate-600 outline-none focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/10 transition-all placeholder:text-slate-300"
+                                        value={cardNumber}
+                                        onChange={(e) => {
+                                            const v = e.target.value.replace(/\s/g, '').replace(/(\d{4})/g, '$1 ').trim();
+                                            setCardNumber(v);
+                                        }}
+                                        required
+                                    />
+                                    <CreditCard className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" size={18} />
                                 </div>
                             </div>
 
-                            {/* Name on Card */}
-                            <div className="space-y-2">
-                                <label className="text-xs font-semibold uppercase text-slate-500 tracking-wider">Cardholder Name</label>
-                                <input
-                                    type="text"
-                                    placeholder="Full name on card"
-                                    required
-                                    className="w-full bg-white border border-slate-200 rounded-xl py-3 px-4 text-slate-700 outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all font-medium uppercase"
-                                />
+                            <div className="grid gap-2">
+                                <label className="text-xs font-bold uppercase text-slate-400 tracking-wider ml-1">Card Holder Name</label>
+                                <div className="relative">
+                                    <input
+                                        type="text"
+                                        placeholder="JOHN DOE"
+                                        className="w-full bg-white border-2 border-slate-100 rounded-xl px-4 py-3 pl-12 font-medium text-slate-600 outline-none focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/10 transition-all placeholder:text-slate-300 uppercase"
+                                        value={cardName}
+                                        onChange={(e) => setCardName(e.target.value)}
+                                        required
+                                    />
+                                    <User className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" size={18} />
+                                </div>
                             </div>
 
-                            <motion.button
-                                whileHover={{ scale: 1.02, boxShadow: "0 10px 25px -5px rgba(79, 70, 229, 0.4)" }}
-                                whileTap={{ scale: 0.98 }}
-                                type="submit"
-                                disabled={processing}
-                                className="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-4 rounded-xl shadow-lg shadow-indigo-500/30 transition-all flex items-center justify-center gap-2 relative overflow-hidden"
-                            >
-                                {processing ? (
-                                    <motion.div
-                                        animate={{ rotate: 360 }}
-                                        transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
-                                        className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full"
+                            <div className="grid grid-cols-2 gap-4">
+                                <div className="grid gap-2">
+                                    <label className="text-xs font-bold uppercase text-slate-400 tracking-wider ml-1">Expiry Date</label>
+                                    <input
+                                        type="text"
+                                        maxLength={5}
+                                        placeholder="MM/YY"
+                                        className="w-full bg-white border-2 border-slate-100 rounded-xl px-4 py-3 font-mono text-center text-slate-600 outline-none focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/10 transition-all placeholder:text-slate-300"
+                                        value={cardExpiry}
+                                        onChange={(e) => {
+                                            let v = e.target.value.replace(/\D/g, '');
+                                            if (v.length >= 2) v = v.slice(0, 2) + '/' + v.slice(2);
+                                            setCardExpiry(v);
+                                        }}
+                                        required
                                     />
-                                ) : (
-                                    <>
-                                        <span>Pay BDT {totalAmount}</span>
-                                        <ShieldCheck size={18} className="text-indigo-200" />
-                                    </>
-                                )}
-                            </motion.button>
-                        </form>
+                                </div>
+                                <div className="grid gap-2">
+                                    <label className="text-xs font-bold uppercase text-slate-400 tracking-wider ml-1">CVC / CVV</label>
+                                    <input
+                                        type="text"
+                                        maxLength={4}
+                                        placeholder="123"
+                                        className="w-full bg-white border-2 border-slate-100 rounded-xl px-4 py-3 font-mono text-center text-slate-600 outline-none focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/10 transition-all placeholder:text-slate-300"
+                                        value={cardCvc}
+                                        onChange={(e) => setCardCvc(e.target.value.replace(/\D/g, ''))}
+                                        required
+                                    />
+                                </div>
+                            </div>
 
-                        <div className="mt-8 flex items-center justify-center gap-2 text-slate-400 text-xs text-center">
-                            <ShieldCheck size={14} />
-                            <p>Payments are secure and encrypted</p>
-                        </div>
+                            <div className="pt-4">
+                                <motion.button
+                                    whileHover={{ scale: 1.01 }}
+                                    whileTap={{ scale: 0.99 }}
+                                    type="submit"
+                                    disabled={processing}
+                                    className="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-4 rounded-xl shadow-lg shadow-indigo-600/30 transition-all flex items-center justify-center gap-2 relative overflow-hidden group"
+                                >
+                                    {processing ? (
+                                        <div className="flex items-center gap-2">
+                                            <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                                            <span>Processing...</span>
+                                        </div>
+                                    ) : (
+                                        <>
+                                            <span>Pay Now</span>
+                                            <ArrowRight size={18} className="group-hover:translate-x-1 transition-transform" />
+                                        </>
+                                    )}
+                                </motion.button>
+
+                                <div className="mt-6 flex items-center justify-center gap-4 opacity-50 grayscale hover:grayscale-0 transition-all duration-500">
+                                    <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/5/5e/Visa_Inc._logo.svg/2560px-Visa_Inc._logo.svg.png" className="h-4 object-contain" alt="Visa" />
+                                    <img src="https://upload.wikimedia.org/wikipedia/commons/2/2a/Mastercard-logo.svg" className="h-6 object-contain" alt="Mastercard" />
+                                    <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/3/30/American_Express_logo.svg/1200px-American_Express_logo.svg.png" className="h-4 object-contain" alt="Amex" />
+                                </div>
+                            </div>
+                        </form>
                     </div>
                 </div>
             </motion.div>

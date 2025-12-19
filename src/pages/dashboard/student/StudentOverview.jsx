@@ -16,7 +16,7 @@ const StudentOverview = () => {
         totalSpent: 0
     });
     const [recentActivity, setRecentActivity] = useState([]);
-    const [roleRequests, setRoleRequests] = useState([]); // New State
+    const [roleRequests, setRoleRequests] = useState([]);
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
@@ -28,7 +28,6 @@ const StudentOverview = () => {
                 const activityRes = await axiosSecure.get('/student/recent-activities');
                 setRecentActivity(activityRes.data);
 
-                // Fetch Role Requests
                 const roleRes = await axiosSecure.get('/role-requests/my');
                 setRoleRequests(roleRes.data);
             } catch (error) {
@@ -56,10 +55,10 @@ const StudentOverview = () => {
         <div className="space-y-6">
             <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
                 <div>
-                    <h1 className="font-heading text-3xl font-bold gradient-text mb-2">
-                        Welcome back, {user?.displayName}!
+                    <h1 className="font-heading text-2xl font-bold gradient-text mb-1">
+                        Dashboard Overview
                     </h1>
-                    <p className="text-base-content/70">Here's what's happening with your tuitions.</p>
+                    <p className="text-base-content/70">Here's a summary of your activities.</p>
                 </div>
                 <div className="badge badge-primary badge-outline gap-2 p-3">
                     <Clock size={14} />

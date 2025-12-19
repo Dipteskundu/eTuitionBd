@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom';
 import axiosInstance from '../../utils/axiosInstance';
 import { motion } from 'framer-motion';
 import Marquee from 'react-fast-marquee';
-import { Search, User, Award, CheckCircle, ArrowRight, Star, MapPin } from 'lucide-react';
+import { Search, User, Award, CheckCircle, ArrowRight, Star, MapPin, BookOpen, Monitor, Calculator, Languages, Music, Palette, Dumbbell, Code, Shield, Clock, Zap, ChevronDown, ChevronUp } from 'lucide-react';
 import Button from '../../components/ui/Button';
 import Card from '../../components/ui/Card';
 import Badge from '../../components/ui/Badge';
@@ -27,9 +27,10 @@ const Home = () => {
 
                 // Fetch Top Tutors (Just fetching all and taking first 4 for now)
                 const tutorRes = await axiosInstance.get('/tutors');
-                setTutors(tutorRes.data.slice(0, 4) || []);
-            } catch (error) {
-                console.error("Failed to fetch home data", error);
+                // The API now returns { data: [], total: number } or similar, let's verify in index.js but assuming standard structure
+                // Adjusting based on common pattern: res.data.data or res.data
+                const tutorList = Array.isArray(tutorRes.data) ? tutorRes.data : (tutorRes.data.data || tutorRes.data.result || []);
+                setTutors(tutorList.slice(0, 4));
             } finally {
                 setLoading(false);
             }
@@ -53,6 +54,37 @@ const Home = () => {
         visible: { opacity: 1, y: 0 }
     };
 
+    const SUBJECTS = [
+        { name: 'Mathematics', icon: Calculator, count: '120+ Tutors' },
+        { name: 'English', icon: Languages, count: '85+ Tutors' },
+        { name: 'Science', icon: Zap, count: '95+ Tutors' },
+        { name: 'Computer', icon: Monitor, count: '60+ Tutors' },
+        { name: 'Arts', icon: Palette, count: '40+ Tutors' },
+        { name: 'Music', icon: Music, count: '25+ Tutors' },
+        { name: 'Programming', icon: Code, count: '55+ Tutors' },
+        { name: 'Exam Prep', icon: BookOpen, count: '70+ Tutors' },
+    ];
+
+    const FEATURES = [
+        { title: 'Verified Tutors', desc: 'Every tutor passes a strict background check.', icon: Shield },
+        { title: 'Flexible Scheduling', desc: 'Book sessions that fit your busy routine.', icon: Clock },
+        { title: 'Affordable Rates', desc: 'Quality education regardless of your budget.', icon: Award },
+        { title: 'Expert Guidance', desc: 'Learn from industry professionals and scholars.', icon: User },
+    ];
+
+    const TESTIMONIALS = [
+        { name: 'Sarah Khan', role: 'Parent', content: "Found an amazing math tutor for my son within 24 hours. His grades have improved significantly!", rating: 5 },
+        { name: 'Rahim Uddin', role: 'Student', content: "The platform is so easy to use. I found a physics tutor who explains complex concepts simply.", rating: 5 },
+        { name: 'Anika Rahman', role: 'Tutor', content: "eTuitionBd helped me connect with serious students. The payment system is secure and hassle-free.", rating: 5 },
+    ];
+
+    const FAQS = [
+        { q: "How do I find a tutor?", a: "Simply create an account, post your tuition requirements, or browse our list of verified tutors and filter by subject and location." },
+        { q: "Is the platform free?", a: "Registration is free for both students and tutors. Tutors pay a small commission only on successful tuition confirmations." },
+        { q: "Are the tutors verified?", a: "Yes, we manually verify every tutor's educational background and identity to ensure safety and quality." },
+        { q: "Can I change my tutor?", a: "Absolutely. If you're not satisfied, you can efficiently search for another tutor or contact support for assistance." },
+    ];
+
     return (
         <div className="overflow-hidden">
             {/* Hero Section */}
@@ -73,24 +105,14 @@ const Home = () => {
                             transition={{ duration: 0.8 }}
                             className="text-center lg:text-left"
                         >
-                            {/* Badge */}
-                            <motion.div
-                                initial={{ opacity: 0, y: -20 }}
-                                animate={{ opacity: 1, y: 0 }}
-                                transition={{ delay: 0.2 }}
-                                className="inline-block mb-6"
-                            >
-                                <Badge variant="secondary" size="lg" className="animate-pulse">
-                                    🏆 #1 Tuition Platform in Bangladesh
-                                </Badge>
-                            </motion.div>
+
 
                             {/* Main Heading */}
                             <motion.h1
                                 initial={{ opacity: 0, y: 20 }}
                                 animate={{ opacity: 1, y: 0 }}
                                 transition={{ delay: 0.3 }}
-                                className="font-heading text-5xl lg:text-7xl font-bold mb-6 leading-tight"
+                                className="font-heading text-4xl lg:text-5xl font-bold mb-6 leading-tight mt-2"
                             >
                                 Find the Perfect{' '}
                                 <span className="gradient-text">
@@ -212,18 +234,17 @@ const Home = () => {
                                 </div>
                             </motion.div>
 
-                            {/* Floating Rating Card */}
+                            {/* Floating Round Badge */}
                             <motion.div
-                                initial={{ opacity: 0, x: 20 }}
-                                animate={{ opacity: 1, x: 0 }}
-                                transition={{ delay: 1 }}
-                                className="absolute -top-6 -right-6 glass rounded-2xl p-4 shadow-2xl"
+                                initial={{ opacity: 0, scale: 0.5 }}
+                                animate={{ opacity: 1, scale: 1 }}
+                                transition={{ delay: 0, type: 'spring', stiffness: 200 }}
+                                className="absolute -top-3 -right-4"
                             >
-                                <div className="flex items-center gap-2">
-                                    <Star className="w-6 h-6 text-warning fill-warning" />
-                                    <div>
-                                        <p className="font-heading text-xl font-bold">4.9</p>
-                                        <p className="text-xs text-base-content/60">Rating</p>
+                                <div className="w-24 h-24 rounded-full bg-yellow-400 flex items-center justify-center shadow-2xl animate-pulse ring-4 ring-white/30">
+                                    <div className="text-center text-black">
+                                        <span className="text-2xl">🏆</span>
+                                        <p className="text-[10px] font-bold leading-tight px-1">#1 Platform in BD</p>
                                     </div>
                                 </div>
                             </motion.div>
@@ -232,7 +253,62 @@ const Home = () => {
                 </div>
             </section>
 
-            {/* How It Works Section */}
+            {/* Stats Counter Section */}
+            <section className="py-12 bg-primary text-primary-content">
+                <div className="container mx-auto px-4">
+                    <div className="grid grid-cols-2 md:grid-cols-4 gap-8 text-center divide-x divide-primary-content/20">
+                        <motion.div initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ delay: 0.1 }}>
+                            <h3 className="text-4xl font-bold mb-1">5000+</h3>
+                            <p className="text-sm opacity-80">Active Tutors</p>
+                        </motion.div>
+                        <motion.div initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ delay: 0.2 }}>
+                            <h3 className="text-4xl font-bold mb-1">12000+</h3>
+                            <p className="text-sm opacity-80">Students</p>
+                        </motion.div>
+                        <motion.div initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ delay: 0.3 }}>
+                            <h3 className="text-4xl font-bold mb-1">8500+</h3>
+                            <p className="text-sm opacity-80">Tuition Jobs</p>
+                        </motion.div>
+                        <motion.div initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ delay: 0.4 }}>
+                            <h3 className="text-4xl font-bold mb-1">4.8/5</h3>
+                            <p className="text-sm opacity-80">Average Rating</p>
+                        </motion.div>
+                    </div>
+                </div>
+            </section>
+
+            {/* Browse by Subject Section */}
+            <section className="py-24 bg-base-100">
+                <div className="container mx-auto px-4">
+                    <div className="text-center mb-16">
+                        <h2 className="font-heading text-4xl lg:text-5xl font-bold mb-4 gradient-text">
+                            Browse by Subject
+                        </h2>
+                        <p className="text-base-content/70 text-lg">Find tutors specialized in your area of study</p>
+                    </div>
+
+                    <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
+                        {SUBJECTS.map((subject, idx) => (
+                            <motion.div
+                                key={idx}
+                                initial={{ opacity: 0, scale: 0.9 }}
+                                whileInView={{ opacity: 1, scale: 1 }}
+                                whileHover={{ y: -5 }}
+                                viewport={{ once: true }}
+                                transition={{ delay: idx * 0.05 }}
+                            >
+                                <Card hover className="h-full flex flex-col items-center text-center p-6 cursor-pointer border-base-200 hover:border-primary transition-colors">
+                                    <div className="w-16 h-16 bg-base-200 rounded-full flex items-center justify-center mb-4 text-primary">
+                                        <subject.icon size={32} />
+                                    </div>
+                                    <h3 className="font-bold text-lg mb-1">{subject.name}</h3>
+                                    <p className="text-xs text-base-content/50">{subject.count}</p>
+                                </Card>
+                            </motion.div>
+                        ))}
+                    </div>
+                </div>
+            </section>
             <section className="py-24 bg-base-200/30">
                 <div className="container mx-auto px-4">
                     <div className="text-center max-w-2xl mx-auto mb-16">
@@ -342,14 +418,77 @@ const Home = () => {
                 </div>
             </section>
 
+            {/* Why Choose Us Section */}
+            <section className="py-24 bg-base-200/50">
+                <div className="container mx-auto px-4">
+                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
+                        <motion.div
+                            initial={{ opacity: 0, x: -50 }}
+                            whileInView={{ opacity: 1, x: 0 }}
+                            viewport={{ once: true }}
+                        >
+                            <h2 className="font-heading text-4xl lg:text-5xl font-bold mb-6 gradient-text">
+                                Why Choose eTuitionBd?
+                            </h2>
+                            <p className="text-lg text-base-content/70 mb-8 leading-relaxed">
+                                We go beyond just connecting you. We ensure a safe, quality, and effective learning environment for everyone.
+                            </p>
+
+                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                                {FEATURES.map((feature, idx) => (
+                                    <motion.div
+                                        key={idx}
+                                        initial={{ opacity: 0, y: 20 }}
+                                        whileInView={{ opacity: 1, y: 0 }}
+                                        viewport={{ once: true }}
+                                        transition={{ delay: idx * 0.1 }}
+                                        className="flex gap-4"
+                                    >
+                                        <div className="mt-1">
+                                            <div className="w-10 h-10 bg-primary/10 rounded-lg flex items-center justify-center text-primary">
+                                                <feature.icon size={20} />
+                                            </div>
+                                        </div>
+                                        <div>
+                                            <h4 className="font-bold text-lg mb-1">{feature.title}</h4>
+                                            <p className="text-sm text-base-content/60">{feature.desc}</p>
+                                        </div>
+                                    </motion.div>
+                                ))}
+                            </div>
+                        </motion.div>
+
+                        <motion.div
+                            initial={{ opacity: 0, scale: 0.9 }}
+                            whileInView={{ opacity: 1, scale: 1 }}
+                            viewport={{ once: true }}
+                            className="relative"
+                        >
+                            <div className="absolute inset-0 bg-gradient-to-tr from-primary/20 to-secondary/20 rounded-3xl blur-3xl transform rotate-3"></div>
+                            <img
+                                src="https://images.unsplash.com/photo-1522202176988-66273c2fd55f?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80"
+                                alt="Students studying"
+                                className="relative rounded-3xl shadow-2xl w-full object-cover h-[500px]"
+                            />
+                        </motion.div>
+                    </div>
+                </div>
+            </section>
             {/* Top Tutors Section */}
             <section className="py-24 bg-base-200/30">
                 <div className="container mx-auto px-4">
-                    <div className="text-center mb-16">
-                        <h2 className="font-heading text-4xl lg:text-5xl font-bold mb-4 gradient-text">
-                            Top Rated Tutors
-                        </h2>
-                        <p className="text-base-content/70 text-lg">Meet our highly experienced and verified tutors</p>
+                    <div className="flex justify-between items-end mb-16">
+                        <div className="text-center md:text-left flex-1">
+                            <h2 className="font-heading text-4xl lg:text-5xl font-bold mb-4 gradient-text">
+                                Top Rated Tutors
+                            </h2>
+                            <p className="text-base-content/70 text-lg">Meet our highly experienced and verified tutors</p>
+                        </div>
+                        <Link to="/tutors">
+                            <Button variant="ghost" rightIcon={<ArrowRight className="w-4 h-4" />}>
+                                View All
+                            </Button>
+                        </Link>
                     </div>
 
                     <motion.div
@@ -359,28 +498,114 @@ const Home = () => {
                         viewport={{ once: true }}
                         className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6"
                     >
-                        {tutors.map((tutor) => (
-                            <Card key={tutor._id} glass hover className="text-center">
-                                <div className="avatar mb-4">
-                                    <div className="w-24 h-24 rounded-full ring-4 ring-primary ring-offset-2 ring-offset-base-100">
-                                        <img src={tutor.photoURL || 'https://i.ibb.co/5GzXkwq/user.png'} alt={tutor.displayName} />
+                        {tutors.length > 0 ? (
+                            tutors.map((tutor) => (
+                                <Card key={tutor._id} glass hover className="text-center">
+                                    <div className="avatar mb-4">
+                                        <div className="w-24 h-24 rounded-full ring-4 ring-primary ring-offset-2 ring-offset-base-100">
+                                            <img src={tutor.photoURL || 'https://i.ibb.co/5GzXkwq/user.png'} alt={tutor.displayName} className="w-full h-full object-cover rounded-full" />
+                                        </div>
+                                    </div>
+                                    <h3 className="font-heading text-xl font-bold mb-1">{tutor.displayName}</h3>
+                                    <p className="text-sm text-base-content/60 mb-3">{tutor.expertise?.[0] || 'Tutor'}</p>
+                                    <p className="text-xs text-base-content/50 mb-4">{tutor.experience || 'Experienced'}</p>
+                                    <div className="flex items-center justify-center gap-2 mb-4">
+                                        <Star size={16} className="text-warning fill-warning" />
+                                        <span className="font-heading font-bold text-warning">{tutor.rating || 'N/A'}</span>
+                                    </div>
+                                    <Link to={`/tutors/${tutor._id}`}>
+                                        <Button size="sm" variant="outline" fullWidth>
+                                            View Profile
+                                        </Button>
+                                    </Link>
+                                </Card>
+                            ))
+                        ) : (
+                            <div className="col-span-full text-center py-10">
+                                <p className="text-xl text-base-content/50">No top rated tutors found at the moment.</p>
+                            </div>
+                        )}
+                    </motion.div>
+                </div>
+            </section>
+
+
+
+            {/* Testimonials Section */}
+            <section className="py-24 bg-base-100">
+                <div className="container mx-auto px-4">
+                    <div className="text-center mb-16">
+                        <h2 className="font-heading text-4xl lg:text-5xl font-bold mb-4 gradient-text">
+                            What People Say
+                        </h2>
+                        <p className="text-base-content/70 text-lg">Real stories from our community</p>
+                    </div>
+
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+                        {TESTIMONIALS.map((testimonial, idx) => (
+                            <motion.div
+                                key={idx}
+                                initial={{ opacity: 0, y: 20 }}
+                                whileInView={{ opacity: 1, y: 0 }}
+                                viewport={{ once: true }}
+                                transition={{ delay: idx * 0.1 }}
+                            >
+                                <Card glass className="h-full relative p-8">
+                                    <div className="absolute top-6 right-8 opacity-10">
+                                        <span className="text-6xl font-serif">"</span>
+                                    </div>
+                                    <div className="flex items-center gap-1 mb-4">
+                                        {[...Array(testimonial.rating)].map((_, i) => (
+                                            <Star key={i} size={16} className="text-warning fill-warning" />
+                                        ))}
+                                    </div>
+                                    <p className="text-base-content/80 mb-6 italic">{testimonial.content}</p>
+                                    <div className="flex items-center gap-4">
+                                        <div className="w-10 h-10 rounded-full bg-base-300 flex items-center justify-center font-bold text-base-content/50">
+                                            {testimonial.name[0]}
+                                        </div>
+                                        <div>
+                                            <h4 className="font-bold">{testimonial.name}</h4>
+                                            <p className="text-xs text-base-content/50 uppercase">{testimonial.role}</p>
+                                        </div>
+                                    </div>
+                                </Card>
+                            </motion.div>
+                        ))}
+                    </div>
+                </div>
+            </section>
+
+            {/* FAQ Section */}
+            <section className="py-24 bg-base-200/30">
+                <div className="container mx-auto px-4 max-w-3xl">
+                    <div className="text-center mb-16">
+                        <h2 className="font-heading text-4xl lg:text-5xl font-bold mb-4 gradient-text">
+                            Frequently Asked Questions
+                        </h2>
+                    </div>
+
+                    <div className="space-y-4">
+                        {FAQS.map((faq, idx) => (
+                            <motion.div
+                                key={idx}
+                                initial={{ opacity: 0, y: 10 }}
+                                whileInView={{ opacity: 1, y: 0 }}
+                                viewport={{ once: true }}
+                                transition={{ delay: idx * 0.1 }}
+                            >
+                                <div className="collapse collapse-plus bg-base-100 border border-base-200 rounded-xl">
+                                    <input type="radio" name="my-accordion-3" defaultChecked={idx === 0} />
+                                    <div className="collapse-title text-xl font-medium">
+                                        {faq.q}
+                                    </div>
+                                    <div className="collapse-content">
+                                        <p className="text-base-content/70">{faq.a}</p>
                                     </div>
                                 </div>
-                                <h3 className="font-heading text-xl font-bold mb-1">{tutor.displayName}</h3>
-                                <p className="text-sm text-base-content/60 mb-3">{tutor.expertise?.[0] || 'Tutor'}</p>
-                                <p className="text-xs text-base-content/50 mb-4">{tutor.experience || 'Experienced'}</p>
-                                <div className="flex items-center justify-center gap-2 mb-4">
-                                    <Star size={16} className="text-warning fill-warning" />
-                                    <span className="font-heading font-bold text-warning">{tutor.rating || 'N/A'}</span>
-                                </div>
-                                <Link to={`/tutors/${tutor._id}`}>
-                                    <Button size="sm" variant="outline" fullWidth>
-                                        View Profile
-                                    </Button>
-                                </Link>
-                            </Card>
+                            </motion.div>
                         ))}
-                    </motion.div>
+                    </div>
                 </div>
             </section>
 
@@ -477,7 +702,7 @@ const Home = () => {
                     </div>
                 </div>
             </section>
-        </div>
+        </div >
     );
 };
 
