@@ -48,22 +48,23 @@ const Login = () => {
             const result = await signInGoogle();
             const user = result.user;
 
-            // Prepare User Data for DB
             const userData = {
                 name: user.displayName,
                 email: user.email,
                 photoURL: user.photoURL,
-                role: 'student', // Default role for Google Login
-                phone: '', // Google does not imply phone
+                role: 'student',
+                phone: '',
             };
 
-            // Save user to backend (If exists, backend handles it gracefully)
             await axiosInstance.post('/user', userData);
-            localStorage.setItem('userRole', 'student'); // Default role assumption for immediate UI
+            localStorage.setItem('userRole', 'student');
 
             toast.success('Logged in with Google successfully!');
             navigate(from, { replace: true });
         } catch (error) {
+            if (error.code === 'auth/popup-closed-by-user') {
+                return;
+            }
             console.error(error);
             toast.error('Google login failed. Please try again.');
         }
