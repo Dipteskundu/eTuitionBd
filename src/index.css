@@ -49,45 +49,72 @@ body {
   }
 
   .gradient-text {
-    @apply bg-gradient-to-r from-primary-500 to-secondary-500 bg-clip-text text-transparent;
+    @apply text-primary font-bold;
   }
 
   .gradient-text-accent {
-    @apply bg-gradient-to-r from-accent-500 to-primary-500 bg-clip-text text-transparent;
+    @apply text-accent font-bold;
   }
 
   .gradient-bg {
-    @apply bg-gradient-to-br from-primary-500/10 via-secondary-500/10 to-accent-500/10;
+    @apply bg-primary/5;
   }
 
   .gradient-border {
-    @apply border-2 border-transparent bg-clip-padding;
-    background-image: linear-gradient(white, white),
-      linear-gradient(to right, #0ea5e9, #8b5cf6);
-    background-origin: border-box;
-    background-clip: padding-box, border-box;
+    @apply border-2 border-primary/20 bg-clip-padding;
   }
 
   .dark .gradient-border {
-    background-image: linear-gradient(#0f172a, #0f172a),
-      linear-gradient(to right, #0ea5e9, #8b5cf6);
+    @apply border-primary/30;
   }
 }
 
 /* Custom Component Styles */
 @layer components {
   .btn-gradient {
-    @apply bg-gradient-to-r from-primary-500 to-secondary-500 text-white font-semibold;
-    @apply hover:shadow-glow transition-all duration-300;
+    @apply bg-primary text-white font-semibold;
+    @apply hover:bg-primary-focus hover:shadow-lg transition-all duration-300;
   }
 
   .card-hover {
-    @apply transition-all duration-300 hover:-translate-y-2 hover:shadow-xl;
+    @apply transition-all duration-500 hover:-translate-y-3 hover:shadow-2xl hover:shadow-primary/20;
   }
 
   .input-focus {
     @apply focus:ring-2 focus:ring-primary-500/50 focus:border-primary-500 transition-all duration-200;
   }
+}
+
+@keyframes float-slow {
+
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+
+  50% {
+    transform: translateY(-20px);
+  }
+}
+
+@keyframes float-medium {
+
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+
+  50% {
+    transform: translateY(-10px);
+  }
+}
+
+.animate-float-slow {
+  animation: float-slow 6s ease-in-out infinite;
+}
+
+.animate-float-medium {
+  animation: float-medium 4s ease-in-out infinite;
 }
 
 /* Animation Delays */

@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import useTitle from '../../../hooks/useTitle';
 import { FileDown, TrendingUp, TrendingDown, Users, BookOpen, DollarSign, Calendar, PieChart as PieChartIcon } from 'lucide-react';
 import { PieChart, Pie, Cell, ResponsiveContainer, LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, AreaChart, Area } from 'recharts';
 import useAxiosSecure from '../../../hooks/useAxiosSecure';
@@ -6,8 +7,11 @@ import useToast from '../../../hooks/useToast';
 import Button from '../../../components/ui/Button';
 import Spinner from '../../../components/ui/Spinner';
 import { motion } from 'framer-motion';
+import jsPDF from 'jspdf';
+import autoTable from 'jspdf-autotable';
 
 const Reports = () => {
+    useTitle('Analytics & Reports');
     const axiosSecure = useAxiosSecure();
     const toast = useToast();
     const [loading, setLoading] = useState(true);
@@ -35,12 +39,110 @@ const Reports = () => {
         fetchData();
     }, [axiosSecure]);
 
+    const exportToPDF = () => {
+        const doc = new jsPDF();
+
+        // Add Header
+        doc.setFontSize(22);
+        doc.setTextColor(59, 130, 246); // Primary blue
+        doc.text('eTuitionBd Platform Report', 14, 20);
+
+        doc.setFontSize(10);
+        doc.setTextColor(100);
+        doc.text(`Generated on: ${new Date().toLocaleString()}`, 14, 28);
+        doc.text('Confidential - Admin Only', 14, 33);
+
+        // Summary Table
+        autoTable(doc, {
+            startY: 40,
+            head: [['Platform Summary Metric', 'Value']],
+            body: [
+                ['Total Users', stats?.totalUsers || 0],
+                ['Active Students', stats?.totalStudentCount || 0],
+                ['Active Tutors', stats?.totalTutorCount || 0],
+                ['Total Tuition Posts', stats?.totalTuitions || 0],
+                ['Total Revenue', `BDT ${stats?.totalRevenue || 0}`],
+            ],
+            theme: 'striped',
+            headStyles: { fillColor: [59, 130, 246], fontStyle: 'bold' },
+            alternateRowStyles: { fillColor: [243, 244, 246] },
+        });
+
+        // Transactions Table
+        if (stats?.transactions?.length > 0) {
+            doc.setFontSize(16);
+            doc.setTextColor(31, 41, 55);
+            doc.text('Recent Financial Transactions', 14, doc.lastAutoTable.finalY + 15);
+
+            autoTable(doc, {
+                startY: doc.lastAutoTable.finalY + 20,
+                head: [['Date', 'Transaction ID', 'Student', 'Tutor', 'Amount']],
+                body: stats.transactions.map(txn => [
+                    new Date(txn.createdAt || Date.now()).toLocaleDateString(),
+                    txn.transactionId?.slice(0, 12) || 'N/A',
+                    txn.studentEmail?.split('@')[0] || 'N/A',
+                    txn.tutorEmail?.split('@')[0] || 'N/A',
+                    `BDT ${txn.amount}`
+                ]),
+                theme: 'grid',
+                headStyles: { fillColor: [16, 185, 129] },
+                styles: { fontSize: 9 },
+            });
+        }
+
+        doc.save(`eTuitionBd_Admin_Report_${new Date().toISOString().split('T')[0]}.pdf`);
+    };
+
+    const exportToCSV = () => {
+        if (!stats?.transactions) {
+            toast.error("No transaction data available to export");
+            return;
+        }
+
+        const headers = ['Date', 'Transaction ID', 'Student Email', 'Tutor Email', 'Amount', 'Status'];
+        const rows = stats.transactions.map(txn => [
+            new Date(txn.createdAt || Date.now()).toLocaleDateString(),
+            txn.transactionId || '',
+            txn.studentEmail || '',
+            txn.tutorEmail || '',
+            txn.amount || 0,
+            'Paid'
+        ]);
+
+        const csvContent = [
+            headers.join(','),
+            ...rows.map(row => row.join(','))
+        ].join('\n');
+
+        const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+        const link = document.createElement('a');
+        const url = URL.createObjectURL(blob);
+        link.setAttribute('href', url);
+        link.setAttribute('download', `eTuitionBd_Transactions_${new Date().toISOString().split('T')[0]}.csv`);
+        link.style.visibility = 'hidden';
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+    };
+
     const handleGenerateReport = (type) => {
         setIsGenerating(true);
+        // Add a slight delay for better UX (showing spinner)
         setTimeout(() => {
-            setIsGenerating(false);
-            toast.success(`${type} Report generated successfully!`);
-        }, 1500);
+            try {
+                if (type === 'PDF') {
+                    exportToPDF();
+                } else if (type === 'CSV') {
+                    exportToCSV();
+                }
+                toast.success(`${type} Report generated successfully!`);
+            } catch (error) {
+                console.error(`Export failed:`, error);
+                toast.error(`Failed to export ${type}`);
+            } finally {
+                setIsGenerating(false);
+            }
+        }, 1200);
     };
 
     if (loading) return <Spinner variant="dots" size="lg" fullScreen />;
@@ -148,7 +250,7 @@ const Reports = () => {
                         <TrendingUp className="w-5 h-5 text-primary" />
                         Revenue Trend
                     </h3>
-                    <div className="w-full h-[280px]">
+                    <div className="w-full min-w-0" style={{ height: 280 }}>
                         <ResponsiveContainer width="100%" height="100%" minWidth={0}>
                             <AreaChart data={monthlyTrend}>
                                 <defs>
@@ -188,7 +290,7 @@ const Reports = () => {
                         <PieChartIcon className="w-5 h-5 text-primary" />
                         User Distribution
                     </h3>
-                    <div className="w-full h-[280px]">
+                    <div className="w-full min-w-0" style={{ height: 280 }}>
                         <ResponsiveContainer width="100%" height="100%" minWidth={0}>
                             <PieChart>
                                 <Pie

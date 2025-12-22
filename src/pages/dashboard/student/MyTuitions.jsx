@@ -1,7 +1,8 @@
 import React, { useEffect, useState } from 'react';
+import useTitle from '../../../hooks/useTitle';
 import useAxiosSecure from '../../../hooks/useAxiosSecure';
 import useToast from '../../../hooks/useToast';
-import { Pencil, Trash2, Eye, Users, FileText, MapPin } from 'lucide-react';
+import { Pencil, Trash2, Eye, Users, FileText, MapPin, CheckCircle } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import Swal from 'sweetalert2';
 import Card from '../../../components/ui/Card';
@@ -10,6 +11,7 @@ import Spinner from '../../../components/ui/Spinner';
 import { motion } from 'framer-motion';
 
 const MyTuitions = () => {
+    useTitle('My Tuitions');
     const axiosSecure = useAxiosSecure();
     const { success, error } = useToast();
     const [tuitions, setTuitions] = useState([]);
@@ -136,24 +138,39 @@ const MyTuitions = () => {
                                                 ৳ {item.salary}
                                             </td>
                                             <td className="px-6 py-4">
-                                                <span className={`badge border-0 px-3 py-2 font-bold ${item.status === 'approved' ? 'bg-info/10 text-info' :
-                                                        item.status === 'ongoing' ? 'bg-success/10 text-success' :
-                                                            item.status === 'pending' ? 'bg-warning/10 text-warning' :
-                                                                'bg-error/10 text-error'
-                                                    } `}>
-                                                    {item.status.toUpperCase()}
-                                                </span>
+                                                <div className="flex flex-col gap-1">
+                                                    <span className={`badge border-0 px-3 py-2 font-bold ${item.status === 'approved' ? 'bg-info/10 text-info' :
+                                                        item.status === 'pending' ? 'bg-warning/10 text-warning' :
+                                                            'bg-error/10 text-error'
+                                                        } `}>
+                                                        {item.status.toUpperCase()}
+                                                    </span>
+                                                    {item.assignedTutorEmail && (
+                                                        <span className="badge bg-success/10 text-success border-0 px-3 py-2 font-bold flex items-center gap-1">
+                                                            <CheckCircle size={10} /> HIRED
+                                                        </span>
+                                                    )}
+                                                </div>
                                             </td>
                                             <td className="px-6 py-4 text-right">
                                                 <div className="flex items-center justify-end gap-2">
                                                     {(item.status === 'pending' || item.status === 'approved') && (
-                                                        <button
-                                                            onClick={() => handleDelete(item._id)}
-                                                            className="btn btn-square btn-ghost btn-sm text-error hover:bg-error/10"
-                                                            title="Delete"
-                                                        >
-                                                            <Trash2 size={18} />
-                                                        </button>
+                                                        <div className="flex gap-1">
+                                                            <Link
+                                                                to={`/dashboard/student/update-tuition/${item._id}`}
+                                                                className="btn btn-square btn-ghost btn-sm text-primary hover:bg-primary/10"
+                                                                title="Edit Tuition"
+                                                            >
+                                                                <Pencil size={18} />
+                                                            </Link>
+                                                            <button
+                                                                onClick={() => handleDelete(item._id)}
+                                                                className="btn btn-square btn-ghost btn-sm text-error hover:bg-error/10"
+                                                                title="Delete"
+                                                            >
+                                                                <Trash2 size={18} />
+                                                            </button>
+                                                        </div>
                                                     )}
                                                     <Link
                                                         to={`/tuitions/${item._id}`}

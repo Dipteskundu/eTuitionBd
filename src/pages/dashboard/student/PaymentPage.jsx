@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import useTitle from '../../../hooks/useTitle';
 import { useParams, useNavigate } from 'react-router-dom';
 import useAxiosSecure from '../../../hooks/useAxiosSecure';
 import useAuth from '../../../hooks/useAuth';
@@ -7,6 +8,7 @@ import { ArrowLeft, CreditCard, ShieldCheck, Globe, CheckCircle, Sparkles, User,
 import { motion, AnimatePresence } from 'framer-motion';
 
 const PaymentPage = () => {
+    useTitle('Secure Payment');
     const { applicationId } = useParams();
     const navigate = useNavigate();
     const { user } = useAuth();
@@ -130,7 +132,7 @@ const PaymentPage = () => {
                 className="max-w-5xl w-full bg-white/70 backdrop-blur-2xl rounded-3xl shadow-xl border border-white/50 overflow-hidden flex flex-col md:flex-row z-10"
             >
                 {/* Left Side: Summary Panel */}
-                <div className="w-full md:w-[40%] bg-gradient-to-br from-indigo-900 to-indigo-950 p-8 md:p-12 text-white relative flex flex-col justify-between overflow-hidden">
+                <div className="w-full md:w-[40%] bg-indigo-900 p-8 md:p-12 text-white relative flex flex-col justify-between overflow-hidden">
                     {/* Decorative Patterns */}
                     <div className="absolute inset-0 opacity-10" style={{ backgroundImage: 'url("data:image/svg+xml,%3Csvg width=\'60\' height=\'60\' viewBox=\'0 0 60 60\' xmlns=\'http://www.w3.org/2000/svg\'%3E%3Cg fill=\'none\' fill-rule=\'evenodd\'%3E%3Cg fill=\'%23ffffff\' fill-opacity=\'1\'%3E%3Cpath d=\'M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z\'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E")' }}></div>
 
@@ -207,7 +209,7 @@ const PaymentPage = () => {
                     <div className="max-w-md mx-auto">
                         <div className="mb-8">
                             {/* Visual Credit Card */}
-                            <div className="w-full aspect-[1.586] bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 rounded-2xl shadow-2xl p-6 text-white relative overflow-hidden mb-8 transform transition-transform hover:scale-[1.02] duration-300">
+                            <div className="w-full aspect-[1.586] bg-slate-900 rounded-2xl shadow-2xl p-6 text-white relative overflow-hidden mb-8 transform transition-transform hover:scale-[1.02] duration-300">
                                 {/* Card Background Texture */}
                                 <div className="absolute inset-0 opacity-20" style={{ backgroundImage: 'radial-gradient(circle at 100% 0%, rgba(255,255,255,0.2) 0%, transparent 50%)' }}></div>
                                 <div className="absolute top-0 right-0 p-6 opacity-50">

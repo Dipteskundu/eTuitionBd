@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
-import { useForm } from 'react-hook-form';
+import { useForm, Controller } from 'react-hook-form';
 import useAuth from '../../hooks/useAuth';
-import axiosInstance from '../../utils/axiosInstance';
+import useAxiosSecure from '../../hooks/useAxiosSecure';
 import { Camera, Save, Lock, User, Phone, Mail, UploadCloud } from 'lucide-react';
 import toast from 'react-hot-toast';
 import Card from '../../components/ui/Card';
@@ -12,18 +12,21 @@ import { motion } from 'framer-motion';
 
 const ProfileSettings = () => {
     const { user, updateUserProfile, updateUserPassword } = useAuth();
+    const axiosSecure = useAxiosSecure();
     const [loading, setLoading] = useState(true);
     const [imagePreview, setImagePreview] = useState(null);
     const [selectedImage, setSelectedImage] = useState(null);
     const [isSubmitting, setIsSubmitting] = useState(false);
 
-    const { register, handleSubmit, reset, formState: { errors } } = useForm();
+    const { register, handleSubmit, reset, control, watch, formState: { errors } } = useForm({
+        mode: 'onSubmit'
+    });
 
     useEffect(() => {
         const fetchUserData = async () => {
             try {
                 // Fetch latest data from backend as requested
-                const response = await axiosInstance.get('/user/profile');
+                const response = await axiosSecure.get('/user/profile');
                 const userData = response.data;
 
                 reset({
@@ -116,7 +119,7 @@ const ProfileSettings = () => {
                 phone: data.phoneNumber,
             };
 
-            await axiosInstance.put('/user/profile', updatePayload);
+            await axiosSecure.put('/user/profile', updatePayload);
 
             toast.success("Profile Updated Successfully!", { id: toastId });
 
@@ -182,13 +185,20 @@ const ProfileSettings = () => {
                             <User size={20} /> Personal Information
                         </h3>
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                            <Input
-                                label="Full Name"
-                                placeholder="e.g. John Doe"
-                                leftIcon={User}
-                                error={errors.displayName}
-                                fullWidth
-                                {...register("displayName", { required: "Name is required" })}
+                            <Controller
+                                name="displayName"
+                                control={control}
+                                rules={{ required: "Name is required" }}
+                                render={({ field }) => (
+                                    <Input
+                                        {...field}
+                                        label="Full Name"
+                                        placeholder="e.g. John Doe"
+                                        leftIcon={User}
+                                        error={errors.displayName?.message}
+                                        fullWidth
+                                    />
+                                )}
                             />
                             <Input
                                 label="Email Address"

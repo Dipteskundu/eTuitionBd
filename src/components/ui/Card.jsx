@@ -20,7 +20,7 @@ const Card = ({
     const variantClasses = glass
         ? "glass backdrop-blur-xl bg-white/90 dark:bg-gray-800/80 border border-white/20 dark:border-white/10 shadow-lg"
         : gradient
-            ? "gradient-border bg-base-100"
+            ? "border border-primary/20 bg-base-100"
             : `bg-base-100 ${bordered ? 'border border-base-200' : ''}`;
 
     const hoverClasses = hover
@@ -47,7 +47,7 @@ const Card = ({
                         transition={{ duration: 0.3 }}
                     />
                     {gradient && (
-                        <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent" />
+                        <div className="absolute inset-0 bg-black/40" />
                     )}
                 </figure>
             )}

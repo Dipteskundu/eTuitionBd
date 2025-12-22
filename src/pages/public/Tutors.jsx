@@ -8,8 +8,10 @@ import Button from '../../components/ui/Button';
 import Spinner from '../../components/ui/Spinner';
 import Input from '../../components/ui/Input';
 import BookmarkButton from '../../components/ui/BookmarkButton';
+import useTitle from '../../hooks/useTitle';
 
 const Tutors = () => {
+    useTitle('Tutors');
     const [tutors, setTutors] = useState([]);
     const [loading, setLoading] = useState(true);
     const [searchTerm, setSearchTerm] = useState('');

@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import useTitle from '../../hooks/useTitle';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
 import { motion } from 'framer-motion';
@@ -11,6 +12,7 @@ import Button from '../../components/ui/Button';
 import Card from '../../components/ui/Card';
 
 const Login = () => {
+    useTitle('Login');
     const { register, handleSubmit, formState: { errors } } = useForm({
         mode: 'onChange'
     });
@@ -127,9 +129,9 @@ const Login = () => {
                                     {...register("password", { required: "Password is required" })}
                                 />
                                 <div className="flex justify-end mt-2">
-                                    <a href="#" className="text-sm text-primary hover:underline">
+                                    <Link to="/forgot-password" className="text-sm text-primary hover:underline">
                                         Forgot password?
-                                    </a>
+                                    </Link>
                                 </div>
                             </div>
 
@@ -171,7 +173,7 @@ const Login = () => {
                         </p>
 
                         {/* Info Alert */}
-                        
+
                     </div>
                 </Card>
             </motion.div>

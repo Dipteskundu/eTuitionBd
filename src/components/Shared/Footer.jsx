@@ -10,7 +10,7 @@ const Footer = () => {
                     {/* Brand Info */}
                     <div className="space-y-6">
                         <Link to="/" className="inline-block">
-                            <h3 className="text-3xl font-heading font-bold bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">
+                            <h3 className="text-3xl font-heading font-bold text-primary">
                                 eTuitionBd
                             </h3>
                         </Link>
@@ -20,7 +20,11 @@ const Footer = () => {
                         </p>
                         <div className="flex gap-4 justify-center md:justify-start">
                             <a href="#" className="w-10 h-10 rounded-full bg-slate-50 dark:bg-slate-800 flex items-center justify-center text-slate-500 hover:bg-primary hover:text-white transition-all duration-300 transform hover:-translate-y-1"><Facebook size={18} /></a>
-                            <a href="#" className="w-10 h-10 rounded-full bg-slate-50 dark:bg-slate-800 flex items-center justify-center text-slate-500 hover:bg-sky-500 hover:text-white transition-all duration-300 transform hover:-translate-y-1"><Twitter size={18} /></a>
+                            <a href="#" className="w-10 h-10 rounded-full bg-slate-50 dark:bg-slate-800 flex items-center justify-center text-slate-500 hover:bg-slate-900 hover:text-white transition-all duration-300 transform hover:-translate-y-1" title="X (formerly Twitter)">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                                    <path d="M18.901 1.153h3.68l-8.04 9.19L24 22.846h-7.406l-5.8-7.584-6.638 7.584H.474l8.6-9.83L0 1.154h7.594l5.243 6.932 6.064-6.932zm-1.294 19.497h2.039L6.486 3.24H4.298L17.607 20.65z" />
+                                </svg>
+                            </a>
                             <a href="#" className="w-10 h-10 rounded-full bg-slate-50 dark:bg-slate-800 flex items-center justify-center text-slate-500 hover:bg-pink-500 hover:text-white transition-all duration-300 transform hover:-translate-y-1"><Instagram size={18} /></a>
                             <a href="#" className="w-10 h-10 rounded-full bg-slate-50 dark:bg-slate-800 flex items-center justify-center text-slate-500 hover:bg-blue-600 hover:text-white transition-all duration-300 transform hover:-translate-y-1"><Linkedin size={18} /></a>
                         </div>

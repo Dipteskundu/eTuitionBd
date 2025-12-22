@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import useTitle from '../../../hooks/useTitle';
 import useAxiosSecure from '../../../hooks/useAxiosSecure';
 import { CreditCard, Calendar, CheckCircle, DollarSign, Clock, AlertTriangle } from 'lucide-react';
 import Card from '../../../components/ui/Card';
@@ -6,6 +7,7 @@ import Spinner from '../../../components/ui/Spinner';
 import { motion } from 'framer-motion';
 
 const PaymentHistory = () => {
+    useTitle('Payment History');
     const axiosSecure = useAxiosSecure();
     const [payments, setPayments] = useState([]);
     const [loading, setLoading] = useState(true);
@@ -112,8 +114,8 @@ const PaymentHistory = () => {
                                             </td>
                                             <td className="px-6 py-4">
                                                 <div className={`badge border-0 font-bold py-3 px-3 gap-1 ${payment.status === 'paid' ? 'bg-success/10 text-success' :
-                                                        payment.status === 'pending' ? 'bg-warning/10 text-warning' :
-                                                            'bg-error/10 text-error'
+                                                    payment.status === 'pending' ? 'bg-warning/10 text-warning' :
+                                                        'bg-error/10 text-error'
                                                     }`}>
                                                     {payment.status === 'paid' ? <CheckCircle size={14} /> :
                                                         payment.status === 'pending' ? <Clock size={14} /> :

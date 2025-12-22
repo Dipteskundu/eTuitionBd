@@ -6,7 +6,7 @@ import useAuth from '../../../hooks/useAuth';
 const MyTransactions = () => {
     const axiosSecure = useAxiosSecure();
     const { user } = useAuth();
-    const { showToast } = useToast();
+    const toast = useToast();
     const [transactions, setTransactions] = useState([]);
     const [loading, setLoading] = useState(true);
 
@@ -17,7 +17,7 @@ const MyTransactions = () => {
                 setTransactions(res.data);
             } catch (error) {
                 console.error(error);
-                showToast('Failed to fetch transactions', 'error');
+                toast.error('Failed to fetch transactions');
             } finally {
                 setLoading(false);
             }

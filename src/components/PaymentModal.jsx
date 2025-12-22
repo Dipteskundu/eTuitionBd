@@ -78,12 +78,13 @@ const PaymentModal = ({ isOpen, onClose, application, tuition, onSuccess }) => {
                             <span className="text-xs">Your payment is held in escrow until the tutor accepts the assignment.</span>
                         </div>
 
-                        <div className="flex justify-end gap-3">
-                            <Button variant="ghost" onClick={onClose}>Cancel</Button>
+                        <div className="flex flex-col sm:flex-row justify-end gap-3">
+                            <Button variant="ghost" onClick={onClose} className="order-2 sm:order-1 flex-1">Cancel</Button>
                             <Button
                                 variant="primary"
                                 rightIcon={CheckCircle}
                                 onClick={() => setStep(2)}
+                                className="order-1 sm:order-2 flex-1 shadow-lg shadow-primary/20"
                             >
                                 Proceed to Payment
                             </Button>
@@ -121,7 +122,7 @@ const PaymentModal = ({ isOpen, onClose, application, tuition, onSuccess }) => {
                                 required
                             />
 
-                            <div className="grid grid-cols-2 gap-4">
+                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                                 <Input
                                     label="Expiry Date"
                                     placeholder="MM/YY"
@@ -138,12 +139,13 @@ const PaymentModal = ({ isOpen, onClose, application, tuition, onSuccess }) => {
                                 />
                             </div>
 
-                            <div className="flex justify-end gap-3 mt-6">
+                            <div className="flex flex-col sm:flex-row justify-end gap-3 mt-6">
                                 <Button
                                     type="button"
                                     variant="ghost"
                                     onClick={() => setStep(1)}
                                     disabled={loading}
+                                    className="order-2 sm:order-1 flex-1"
                                 >
                                     Back
                                 </Button>
@@ -152,7 +154,7 @@ const PaymentModal = ({ isOpen, onClose, application, tuition, onSuccess }) => {
                                     variant="success"
                                     isLoading={loading}
                                     leftIcon={Lock}
-                                    className="px-8 shadow-lg shadow-success/20"
+                                    className="order-1 sm:order-2 flex-1 px-8 shadow-lg shadow-success/20"
                                 >
                                     Pay BDT {tuition.salary}
                                 </Button>

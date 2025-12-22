@@ -1,4 +1,5 @@
 import React from 'react';
+import useTitle from '../../hooks/useTitle';
 import { motion } from 'framer-motion';
 import { Mail, Phone, MapPin, Send } from 'lucide-react';
 import Button from '../../components/ui/Button';
@@ -6,6 +7,7 @@ import Input from '../../components/ui/Input';
 import Card from '../../components/ui/Card';
 
 const Contact = () => {
+    useTitle('Contact');
     return (
         <div className="min-h-screen bg-base-100 py-12 relative overflow-hidden">
             {/* Background Elements */}

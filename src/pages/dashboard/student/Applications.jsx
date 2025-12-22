@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import useTitle from '../../../hooks/useTitle';
 import { useParams, useNavigate } from 'react-router-dom';
 import useAxiosSecure from '../../../hooks/useAxiosSecure';
 import useAuth from '../../../hooks/useAuth';
@@ -13,11 +14,12 @@ import Swal from 'sweetalert2';
 import { motion, AnimatePresence } from 'framer-motion';
 
 const Applications = () => {
+    useTitle('Applications');
     const { tuitionId } = useParams();
     const navigate = useNavigate();
     const { user } = useAuth();
     const axiosSecure = useAxiosSecure();
-    const { showToast } = useToast();
+    const toast = useToast();
 
     const [applications, setApplications] = useState([]);
     const [loading, setLoading] = useState(true);
@@ -41,7 +43,7 @@ const Applications = () => {
                 }
             } catch (error) {
                 console.error(error);
-                showToast('Failed to load applications.', 'error');
+                toast.error('Failed to load applications.');
             } finally {
                 setLoading(false);
             }
@@ -93,12 +95,12 @@ const Applications = () => {
         try {
             const res = await axiosSecure.delete(`/applications/${appId}`);
             if (res.data.deletedCount > 0) {
-                showToast('Application deleted.', 'success');
+                toast.success('Application deleted.');
                 setApplications(prev => prev.filter(app => app._id !== appId));
             }
         } catch (error) {
             console.error(error);
-            showToast('Failed to delete application.', 'error');
+            toast.error('Failed to delete application.');
         }
     };
 
@@ -128,14 +130,14 @@ const Applications = () => {
             // Updated to PATCH /applications/:id
             const res = await axiosSecure.patch(`/applications/${appId}`, { status: 'rejected' });
             if (res.data.modifiedCount > 0) {
-                showToast('Application rejected.', 'success');
+                toast.success('Application rejected.');
                 setApplications(prev => prev.map(app =>
                     app._id === appId ? { ...app, status: 'rejected' } : app
                 ));
             }
         } catch (error) {
             console.error(error);
-            showToast('Failed to reject application.', 'error');
+            toast.error('Failed to reject application.');
         }
     };
 
@@ -146,7 +148,7 @@ const Applications = () => {
             <motion.div
                 initial={{ opacity: 0, y: -20 }}
                 animate={{ opacity: 1, y: 0 }}
-                className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 bg-gradient-to-r from-primary-500/5 to-secondary-500/5 p-6 rounded-2xl border border-primary-500/10"
+                className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 bg-primary/5 p-6 rounded-2xl border border-primary-500/10"
             >
                 <div>
                     <Button
@@ -158,7 +160,7 @@ const Applications = () => {
                     >
                         Back
                     </Button>
-                    <h1 className="text-3xl font-heading font-bold gradient-text">
+                    <h1 className="text-3xl font-heading font-bold text-primary">
                         {tuitionId ? 'Review Applications' : 'All Received Applications'}
                     </h1>
                     {tuitionDetails && (
@@ -201,7 +203,7 @@ const Applications = () => {
                                     <div className="flex items-start justify-between mb-4">
                                         <div className="flex gap-4">
                                             <div className="avatar placeholder">
-                                                <div className="bg-gradient-to-br from-primary to-secondary text-white rounded-full w-12 h-12 flex items-center justify-center ring-2 ring-base-100 shadow-md">
+                                                <div className="bg-primary text-white rounded-full w-12 h-12 flex items-center justify-center ring-2 ring-base-100 shadow-md">
                                                     <span className="text-xl font-bold">
                                                         {app.tutorName ? app.tutorName[0].toUpperCase() : 'T'}
                                                     </span>

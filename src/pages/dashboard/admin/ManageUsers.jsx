@@ -1,4 +1,6 @@
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import useTitle from '../../../hooks/useTitle';
 import useAxiosSecure from '../../../hooks/useAxiosSecure';
 import useToast from '../../../hooks/useToast';
 import { Trash2, UserCheck, Shield, BookOpen, Search, User } from 'lucide-react';
@@ -10,69 +12,93 @@ import Button from '../../../components/ui/Button';
 import { motion } from 'framer-motion';
 
 const ManageUsers = () => {
+    useTitle('Manage Users');
     const axiosSecure = useAxiosSecure();
-    const { showToast } = useToast();
-    const [users, setUsers] = useState([]);
-    const [loading, setLoading] = useState(true);
+    const toast = useToast();
+    const queryClient = useQueryClient();
     const [searchTerm, setSearchTerm] = useState('');
 
-    const fetchUsers = async () => {
-        try {
+    // Fetch users with TanStack Query
+    const { data: users = [], isLoading: loading } = useQuery({
+        queryKey: ['users'],
+        queryFn: async () => {
             const res = await axiosSecure.get('/users');
-            setUsers(res.data);
-        } catch (error) {
-            console.error(error);
-            showToast('Failed to fetch users', 'error');
-        } finally {
-            setLoading(false);
-        }
-    };
+            return res.data;
+        },
+    });
 
-    useEffect(() => {
-        fetchUsers();
-    }, [axiosSecure]);
+    // Update role mutation
+    const updateRoleMutation = useMutation({
+        mutationFn: async ({ id, role }) => {
+            const res = await axiosSecure.patch(`/update-role/${id}`, { role });
+            return res.data;
+        },
+        onSuccess: (data, variables) => {
+            queryClient.invalidateQueries(['users']);
+            toast.success(`User role updated to ${variables.role}`);
+            Swal.fire({
+                title: 'Updated!',
+                text: `User role has been changed to ${variables.role}.`,
+                icon: 'success',
+                timer: 2000,
+                showConfirmButton: false
+            });
+        },
+        onError: (error) => {
+            console.error(error);
+            toast.error('Failed to update role');
+        },
+    });
+
+    // Delete user mutation
+    const deleteUserMutation = useMutation({
+        mutationFn: async (id) => {
+            const res = await axiosSecure.delete(`/user/${id}`);
+            return res.data;
+        },
+        onSuccess: () => {
+            queryClient.invalidateQueries(['users']);
+            toast.success('User deleted successfully');
+        },
+        onError: (error) => {
+            console.error(error);
+            toast.error('Failed to delete user');
+        },
+    });
 
     const handleRoleUpdate = async (id, newRole) => {
-        try {
-            const res = await axiosSecure.patch(`/update-role/${id}`, { role: newRole });
-            if (res.data.modifiedCount > 0) {
-                showToast(`User role updated to ${newRole}`, 'success');
-                fetchUsers();
-            }
-        } catch (error) {
-            console.error(error);
-            showToast('Failed to update role', 'error');
-        }
+        // Show confirmation dialog
+        const result = await Swal.fire({
+            title: 'Update User Role?',
+            text: `Are you sure you want to change this user's role to ${newRole.toUpperCase()}?`,
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#3085d6',
+            cancelButtonColor: '#d33',
+            confirmButtonText: `Yes, make ${newRole}!`,
+            cancelButtonText: 'Cancel'
+        });
+
+        if (!result.isConfirmed) return;
+
+        // Use mutation instead of manual API call
+        updateRoleMutation.mutate({ id, role: newRole });
     };
 
     const handleDeleteUser = async (id) => {
-        Swal.fire({
-            title: 'Delete User?',
-            text: "This action cannot be undone.",
+        const result = await Swal.fire({
+            title: 'Are you sure?',
+            text: "You won't be able to revert this!",
             icon: 'warning',
             showCancelButton: true,
-            confirmButtonColor: '#error',
-            cancelButtonColor: '#gray',
-            confirmButtonText: 'Yes, delete it!',
-            customClass: {
-                popup: 'rounded-xl',
-                confirmButton: 'btn btn-error text-white',
-                cancelButton: 'btn btn-ghost'
-            }
-        }).then(async (result) => {
-            if (result.isConfirmed) {
-                try {
-                    const res = await axiosSecure.delete(`/user/${id}`);
-                    if (res.data.deletedCount > 0) {
-                        showToast('User deleted successfully.', 'success');
-                        fetchUsers();
-                    }
-                } catch (error) {
-                    console.error(error);
-                    showToast('Failed to delete user', 'error');
-                }
-            }
+            confirmButtonColor: '#d33',
+            cancelButtonColor: '#3085d6',
+            confirmButtonText: 'Yes, delete it!'
         });
+
+        if (result.isConfirmed) {
+            deleteUserMutation.mutate(id);
+        }
     };
 
     const filteredUsers = users.filter(user =>
@@ -101,11 +127,15 @@ const ManageUsers = () => {
         {
             header: 'Current Role',
             accessor: 'role',
-            render: (role) => (
-                <span className={`badge ${role === 'admin' ? 'badge-primary' :
+            render: (role, user) => (
+                <span
+                    onClick={() => role !== 'admin' && handleRoleUpdate(user._id, 'admin')}
+                    className={`badge ${role === 'admin' ? 'badge-primary' :
                         role === 'tutor' ? 'badge-secondary' :
                             'badge-accent'
-                    } badge-lg gap-1 uppercase font-bold text-white text-[10px]`}>
+                        } badge-lg gap-1 uppercase font-bold text-white text-[10px] ${role !== 'admin' ? 'cursor-pointer hover:scale-110 active:scale-95 transition-all' : ''}`}
+                    title={role !== 'admin' ? "Click to make Admin" : "User is Admin"}
+                >
                     {role === 'admin' && <Shield size={12} />}
                     {role === 'tutor' && <BookOpen size={12} />}
                     {role === 'student' && <User size={12} />}

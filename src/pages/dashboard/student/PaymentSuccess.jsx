@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import useTitle from '../../../hooks/useTitle';
 import { useSearchParams, useNavigate } from 'react-router-dom';
 import useAxiosSecure from '../../../hooks/useAxiosSecure';
 import { CheckCircle, AlertCircle, Home, FileText, ArrowRight } from 'lucide-react';
@@ -8,6 +9,7 @@ import Card from '../../../components/ui/Card';
 import { motion } from 'framer-motion';
 
 const PaymentSuccess = () => {
+    useTitle('Payment Success');
     const [searchParams] = useSearchParams();
     const sessionId = searchParams.get('session_id');
     const axiosSecure = useAxiosSecure();

@@ -1,13 +1,17 @@
 import React, { useEffect, useState } from 'react';
+import useTitle from '../../../hooks/useTitle';
 import useAxiosSecure from '../../../hooks/useAxiosSecure';
 import useAuth from '../../../hooks/useAuth';
-import { LayoutDashboard, FileText, CheckCircle, DollarSign, Activity, Clock } from 'lucide-react';
-import { motion } from 'framer-motion';
+import { Link } from 'react-router-dom';
+import { LayoutDashboard, FileText, CheckCircle, DollarSign, Activity, Clock, Users, BookOpen } from 'lucide-react';
 import Card from '../../../components/ui/Card';
 import Spinner from '../../../components/ui/Spinner';
+import DashboardHeader from '../../../components/Shared/DashboardHeader';
+import BecomeTeacherModal from '../../../components/BecomeTeacherModal';
 
 const StudentOverview = () => {
-    const { user } = useAuth();
+    useTitle('Student Dashboard');
+    const { user, role } = useAuth();
     const axiosSecure = useAxiosSecure();
     const [stats, setStats] = useState({
         totalTuitions: 0,
@@ -18,6 +22,9 @@ const StudentOverview = () => {
     const [recentActivity, setRecentActivity] = useState([]);
     const [roleRequests, setRoleRequests] = useState([]);
     const [loading, setLoading] = useState(true);
+    const [showBecomeTeacherModal, setShowBecomeTeacherModal] = useState(false);
+
+    const pendingRequest = roleRequests.find(req => req.status === 'pending');
 
     useEffect(() => {
         const fetchDashboardData = async () => {
@@ -53,17 +60,26 @@ const StudentOverview = () => {
 
     return (
         <div className="space-y-6">
-            <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
-                <div>
-                    <h1 className="font-heading text-2xl font-bold gradient-text mb-1">
-                        Dashboard Overview
-                    </h1>
-                    <p className="text-base-content/70">Here's a summary of your activities.</p>
-                </div>
-                <div className="badge badge-primary badge-outline gap-2 p-3">
-                    <Clock size={14} />
-                    {new Date().toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}
-                </div>
+            <DashboardHeader />
+
+            {/* Quick Actions */}
+            <div className="flex flex-wrap gap-4 mb-6">
+                {role === 'tutor' ? (
+                    <Link to="/dashboard/tutor" className="btn btn-primary gap-2">
+                        <LayoutDashboard size={18} /> Tutor Dashboard
+                    </Link>
+                ) : pendingRequest ? (
+                    <button className="btn btn-warning gap-2" disabled>
+                        <Clock size={18} /> Tutor Application Pending
+                    </button>
+                ) : (
+                    <button onClick={() => setShowBecomeTeacherModal(true)} className="btn btn-primary gap-2">
+                        <Users size={18} /> Become a Tutor
+                    </button>
+                )}
+                <Link to="/tuitions" className="btn btn-outline gap-2">
+                    <BookOpen size={18} /> Browse Tuitions
+                </Link>
             </div>
 
             {/* Stats Cards */}
@@ -76,7 +92,7 @@ const StudentOverview = () => {
                             </div>
                             <div>
                                 <p className="text-sm text-base-content/60">{stat.title}</p>
-                                <h3 className="text-3xl font-heading font-bold gradient-text">
+                                <h3 className="text-3xl font-heading font-bold text-primary">
                                     {stat.value}
                                 </h3>
                             </div>
@@ -174,7 +190,7 @@ const StudentOverview = () => {
                 </div>
 
                 {/* Quick Actions or Tips */}
-                <div className="card bg-gradient-to-br from-primary-500 to-primary-600 text-primary-content shadow-lg">
+                <div className="card bg-primary text-primary-content shadow-lg">
                     <div className="card-body">
                         <h2 className="card-title">Need a Tutor?</h2>
                         <p>Post a tuition requirement and get connected with verified tutors in your area.</p>

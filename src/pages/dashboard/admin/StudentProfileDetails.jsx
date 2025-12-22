@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import useTitle from '../../../hooks/useTitle';
 import { useParams, useNavigate } from 'react-router-dom';
 import useAxiosSecure from '../../../hooks/useAxiosSecure';
 import { User, Phone, Mail, ArrowLeft, MapPin, Shield, GraduationCap } from 'lucide-react';
@@ -9,6 +10,7 @@ import Spinner from '../../../components/ui/Spinner';
 import { motion } from 'framer-motion';
 
 const StudentProfileDetails = () => {
+    useTitle('Student Details');
     const { email } = useParams();
     const navigate = useNavigate();
     const axiosSecure = useAxiosSecure();

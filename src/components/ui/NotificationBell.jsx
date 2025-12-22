@@ -2,10 +2,12 @@ import React, { useState, useEffect, useRef } from 'react';
 import { Bell, Check, Trash2, X } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import useAxiosSecure from '../../hooks/useAxiosSecure';
+import useRole from '../../hooks/useRole';
 import { motion, AnimatePresence } from 'framer-motion';
 
 const NotificationBell = () => {
     const axiosSecure = useAxiosSecure();
+    const { role } = useRole();
     const [notifications, setNotifications] = useState([]);
     const [isOpen, setIsOpen] = useState(false);
     const [loading, setLoading] = useState(true);
@@ -166,7 +168,9 @@ const NotificationBell = () => {
                                         </span>
                                         <div className="flex-1 min-w-0">
                                             <Link
-                                                to={notification.link || '#'}
+                                                to={notification.link?.includes('/dashboard/messages') && role
+                                                    ? notification.link.replace('/dashboard/messages', `/dashboard/${role}/messages`)
+                                                    : (notification.link || '#')}
                                                 onClick={() => {
                                                     markAsRead(notification._id);
                                                     setIsOpen(false);

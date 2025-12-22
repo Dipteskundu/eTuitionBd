@@ -23,6 +23,14 @@ const useToast = () => {
         });
     };
 
+    const warning = (message) => {
+        toast(message, {
+            icon: '⚠️',
+            duration: 4000,
+            position: 'top-right',
+        });
+    };
+
     const loading = (message) => {
         return toast.loading(message, {
             position: 'top-right',
@@ -36,6 +44,7 @@ const useToast = () => {
     return {
         success,
         error,
+        warning,
         info,
         loading,
         dismiss,

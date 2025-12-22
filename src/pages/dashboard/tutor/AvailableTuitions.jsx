@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import useTitle from '../../../hooks/useTitle';
 import useAuth from '../../../hooks/useAuth';
 import useAxiosSecure from '../../../hooks/useAxiosSecure';
 import useToast from '../../../hooks/useToast';
@@ -12,9 +13,10 @@ import Spinner from '../../../components/ui/Spinner';
 import { motion, AnimatePresence } from 'framer-motion';
 
 const AvailableTuitions = () => {
+    useTitle('Available Tuitions');
     const { user } = useAuth();
     const axiosSecure = useAxiosSecure();
-    const { showToast } = useToast();
+    const toast = useToast();
     const [tuitions, setTuitions] = useState([]);
     const [loading, setLoading] = useState(true);
     const [filters, setFilters] = useState({
@@ -46,7 +48,7 @@ const AvailableTuitions = () => {
             setTuitions(res.data);
         } catch (error) {
             console.error(error);
-            showToast('Failed to fetch tuitions', 'error');
+            toast.error('Failed to fetch tuitions');
         } finally {
             setLoading(false);
         }
@@ -116,9 +118,9 @@ const AvailableTuitions = () => {
         } catch (error) {
             console.error(error);
             if (error.response?.status === 409) {
-                showToast('You have already applied to this tuition.', 'warning');
+                toast.warning('You have already applied to this tuition.');
             } else {
-                showToast('Failed to submit application.', 'error');
+                toast.error('Failed to submit application.');
             }
         } finally {
             setIsSubmitting(false);

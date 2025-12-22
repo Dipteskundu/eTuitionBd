@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import useTitle from '../../../hooks/useTitle';
 import useAxiosSecure from '../../../hooks/useAxiosSecure';
 import toast from 'react-hot-toast';
 import { UserCheck, XCircle, CheckCircle, Clock } from 'lucide-react';
@@ -9,6 +10,7 @@ import Spinner from '../../../components/ui/Spinner';
 import { motion } from 'framer-motion';
 
 const TeacherRequests = () => {
+    useTitle('Teacher Requests');
     const axiosSecure = useAxiosSecure();
     const [requests, setRequests] = useState([]);
     const [loading, setLoading] = useState(true);

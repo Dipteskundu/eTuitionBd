@@ -54,68 +54,97 @@ const ApplicationModal = ({ isOpen, onClose, tuition, onSuccess }) => {
     };
 
     return (
-        <Modal isOpen={isOpen} onClose={onClose} title="Apply for Tuition" maxWidth="max-w-xl">
-            <div className="bg-purple-600 p-6 text-white rounded-t-2xl -mt-6 -mx-6 mb-6">
-                <h2 className="text-2xl font-bold">Apply for Tuition</h2>
-                <p className="opacity-90">{tuition.subject} | Class {tuition.class}</p>
+        <Modal isOpen={isOpen} onClose={onClose} title="Apply for Tuition" size="lg">
+            <div className="bg-primary p-8 text-white rounded-t-2xl -mt-6 -mx-6 mb-8 shadow-inner">
+                <h2 className="text-3xl font-heading font-bold mb-1">Apply for Tuition</h2>
+                <div className="flex items-center gap-2 opacity-90 text-sm font-medium bg-white/10 w-fit px-3 py-1 rounded-full backdrop-blur-sm">
+                    <FileText size={14} /> {tuition.subject} | Class {tuition.class}
+                </div>
             </div>
 
-            <form onSubmit={handleSubmit} className="space-y-4">
-                {/* Read Only Fields */}
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <form onSubmit={handleSubmit} className="space-y-6">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div className="form-control">
-                        <label className="label font-medium text-gray-700 dark:text-gray-300">Name</label>
-                        <input type="text" value={user?.displayName || ''} readOnly className="input input-bordered w-full bg-gray-100 dark:bg-gray-700 cursor-not-allowed" />
+                        <label className="label py-0 mb-2">
+                            <span className="label-text font-bold text-base-content/70">My Name</span>
+                        </label>
+                        <div className="relative group">
+                            <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-base-content/30 group-focus-within:text-primary transition-colors">
+                                <User size={18} />
+                            </div>
+                            <input type="text" value={user?.displayName || ''} readOnly className="input input-bordered w-full pl-10 bg-base-200/50 border-base-200 text-base-content/50 cursor-not-allowed font-medium" />
+                        </div>
                     </div>
                     <div className="form-control">
-                        <label className="label font-medium text-gray-700 dark:text-gray-300">Email</label>
-                        <input type="text" value={user?.email || ''} readOnly className="input input-bordered w-full bg-gray-100 dark:bg-gray-700 cursor-not-allowed" />
+                        <label className="label py-0 mb-2">
+                            <span className="label-text font-bold text-base-content/70">My Email</span>
+                        </label>
+                        <div className="relative group">
+                            <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-base-content/30 group-focus-within:text-primary transition-colors">
+                                <Mail size={18} />
+                            </div>
+                            <input type="text" value={user?.email || ''} readOnly className="input input-bordered w-full pl-10 bg-base-200/50 border-base-200 text-base-content/50 cursor-not-allowed font-medium" />
+                        </div>
                     </div>
                 </div>
 
-                {/* Inputs */}
                 <div className="form-control">
-                    <label className="label font-medium text-gray-700 dark:text-gray-300">Message to Guardian</label>
+                    <label className="label py-0 mb-2">
+                        <span className="label-text font-bold text-base-content/70">Message to Guardian</span>
+                    </label>
                     <textarea
                         required
                         value={message}
                         onChange={(e) => setMessage(e.target.value)}
                         placeholder="Why are you the best fit? (e.g. experience, approach)"
-                        className="textarea textarea-bordered w-full h-24"
+                        className="textarea textarea-bordered w-full min-h-[120px] focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all resize-none text-base leading-relaxed"
                     ></textarea>
                 </div>
 
-                <div className="form-control">
-                    <label className="label font-medium text-gray-700 dark:text-gray-300">Availability</label>
-                    <input
-                        type="text"
-                        value={availability}
-                        onChange={(e) => setAvailability(e.target.value)}
-                        placeholder="e.g. Mon, Wed, Fri (3pm - 5pm)"
-                        className="input input-bordered w-full"
-                    />
-                </div>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div className="form-control">
+                        <label className="label py-0 mb-2">
+                            <span className="label-text font-bold text-base-content/70">Availability</span>
+                        </label>
+                        <div className="relative group">
+                            <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-base-content/30 group-focus-within:text-primary transition-colors">
+                                <Clock size={18} />
+                            </div>
+                            <input
+                                type="text"
+                                value={availability}
+                                onChange={(e) => setAvailability(e.target.value)}
+                                placeholder="e.g. Mon, Wed, Fri (3pm-5pm)"
+                                className="input input-bordered w-full pl-10 focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary"
+                            />
+                        </div>
+                    </div>
 
-                <div className="form-control">
-                    <label className="label font-medium text-gray-700 dark:text-gray-300">Expected Salary (BDT)</label>
-                    <div className="relative">
-                        <span className="absolute left-3 top-3 text-gray-500">৳</span>
-                        <input
-                            required
-                            type="number"
-                            value={expectedSalary}
-                            onChange={(e) => setExpectedSalary(e.target.value)}
-                            className="input input-bordered w-full pl-8"
-                        />
+                    <div className="form-control">
+                        <label className="label py-0 mb-2">
+                            <span className="label-text font-bold text-base-content/70">Expected Salary (BDT)</span>
+                        </label>
+                        <div className="relative group">
+                            <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-base-content/30 group-focus-within:text-primary transition-colors font-bold">
+                                ৳
+                            </div>
+                            <input
+                                required
+                                type="number"
+                                value={expectedSalary}
+                                onChange={(e) => setExpectedSalary(e.target.value)}
+                                className="input input-bordered w-full pl-10 focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary font-bold"
+                            />
+                        </div>
                     </div>
                 </div>
 
-                {/* Actions */}
-                <div className="flex justify-end gap-3 mt-6">
+                <div className="flex flex-col sm:flex-row justify-end gap-3 pt-6">
                     <Button
                         type="button"
                         variant="ghost"
                         onClick={onClose}
+                        className="order-2 sm:order-1 flex-1"
                     >
                         Cancel
                     </Button>
@@ -124,6 +153,7 @@ const ApplicationModal = ({ isOpen, onClose, tuition, onSuccess }) => {
                         isLoading={loading}
                         leftIcon={Send}
                         variant="primary"
+                        className="order-1 sm:order-2 flex-1 shadow-lg shadow-primary/20"
                     >
                         Submit Application
                     </Button>

@@ -9,6 +9,7 @@ module.exports = {
         extend: {
             colors: {
                 primary: {
+                    DEFAULT: '#0ea5e9',
                     50: '#f0f9ff',
                     100: '#e0f2fe',
                     200: '#bae6fd',
@@ -22,6 +23,7 @@ module.exports = {
                     950: '#082f49',
                 },
                 secondary: {
+                    DEFAULT: '#8b5cf6',
                     50: '#faf5ff',
                     100: '#f3e8ff',
                     200: '#e9d5ff',
@@ -35,6 +37,7 @@ module.exports = {
                     950: '#3b0764',
                 },
                 accent: {
+                    DEFAULT: '#10b981',
                     50: '#f0fdf4',
                     100: '#dcfce7',
                     200: '#bbf7d0',
@@ -48,6 +51,7 @@ module.exports = {
                     950: '#052e16',
                 },
                 success: {
+                    DEFAULT: '#10b981',
                     50: '#ecfdf5',
                     100: '#d1fae5',
                     200: '#a7f3d0',
@@ -60,6 +64,7 @@ module.exports = {
                     900: '#064e3b',
                 },
                 warning: {
+                    DEFAULT: '#f59e0b',
                     50: '#fffbeb',
                     100: '#fef3c7',
                     200: '#fde68a',
@@ -72,6 +77,7 @@ module.exports = {
                     900: '#78350f',
                 },
                 error: {
+                    DEFAULT: '#ef4444',
                     50: '#fef2f2',
                     100: '#fee2e2',
                     200: '#fecaca',

@@ -8,8 +8,10 @@ import Button from '../../components/ui/Button';
 import Card from '../../components/ui/Card';
 import Badge from '../../components/ui/Badge';
 import { ThemeContext } from '../../context/ThemeContext';
+import useTitle from '../../hooks/useTitle';
 
 const Home = () => {
+    useTitle('Home');
     const { theme } = useContext(ThemeContext);
     // Mock Data
     const [tuitions, setTuitions] = React.useState([]);
@@ -50,8 +52,41 @@ const Home = () => {
     };
 
     const itemVariants = {
-        hidden: { opacity: 0, y: 20 },
-        visible: { opacity: 1, y: 0 }
+        hidden: { opacity: 0, y: 30 },
+        visible: {
+            opacity: 1,
+            y: 0,
+            transition: { duration: 0.6, ease: "easeOut" }
+        }
+    };
+
+    const Counter = ({ target, duration = 2 }) => {
+        const [count, setCount] = React.useState(0);
+        const [hasAnimated, setHasAnimated] = React.useState(false);
+
+        return (
+            <motion.span
+                whileInView={() => {
+                    if (!hasAnimated) {
+                        setHasAnimated(true);
+                        let start = 0;
+                        const end = parseInt(target.replace(/\D/g, ''));
+                        const increment = end / (duration * 60);
+                        const timer = setInterval(() => {
+                            start += increment;
+                            if (start >= end) {
+                                setCount(end);
+                                clearInterval(timer);
+                            } else {
+                                setCount(Math.floor(start));
+                            }
+                        }, 1000 / 60);
+                    }
+                }}
+            >
+                {count}{target.includes('+') ? '+' : ''}
+            </motion.span>
+        );
     };
 
     const SUBJECTS = [
@@ -88,12 +123,25 @@ const Home = () => {
     return (
         <div className="overflow-hidden">
             {/* Hero Section */}
-            <section className="relative min-h-screen flex items-center overflow-hidden gradient-bg">
+            <section className="relative min-h-screen flex items-center overflow-hidden bg-primary/5">
                 {/* Animated Background Orbs */}
-                <div className="absolute inset-0 opacity-30">
-                    <div className="absolute top-20 left-20 w-72 h-72 bg-primary rounded-full blur-3xl animate-float" />
-                    <div className="absolute bottom-20 right-20 w-96 h-96 bg-secondary rounded-full blur-3xl animate-float animation-delay-300" />
-                    <div className="absolute top-1/2 left-1/2 w-64 h-64 bg-accent rounded-full blur-3xl animate-pulse-slow" />
+                <div className="absolute inset-0 opacity-20 pointer-events-none">
+                    <motion.div
+                        animate={{
+                            y: [0, -40, 0],
+                            x: [0, 20, 0],
+                        }}
+                        transition={{ duration: 8, repeat: Infinity, ease: "easeInOut" }}
+                        className="absolute top-20 left-[10%] w-72 h-72 bg-primary/20 rounded-full blur-[100px]"
+                    />
+                    <motion.div
+                        animate={{
+                            y: [0, 40, 0],
+                            x: [0, -20, 0],
+                        }}
+                        transition={{ duration: 10, repeat: Infinity, ease: "easeInOut" }}
+                        className="absolute bottom-20 right-[10%] w-96 h-96 bg-secondary/20 rounded-full blur-[100px]"
+                    />
                 </div>
 
                 <div className="container mx-auto px-4 relative z-10">
@@ -134,30 +182,35 @@ const Home = () => {
 
                             {/* CTA Buttons */}
                             <motion.div
-                                initial={{ opacity: 0, y: 20 }}
-                                animate={{ opacity: 1, y: 0 }}
-                                transition={{ delay: 0.5 }}
+                                variants={containerVariants}
+                                initial="hidden"
+                                animate="visible"
                                 className="flex flex-wrap justify-center lg:justify-start gap-4 mb-12"
                             >
-                                <Link to="/tuitions">
-                                    <Button
-                                        variant="gradient"
-                                        size="xl"
-                                        rightIcon={<Search className="w-5 h-5" />}
-                                        className="shadow-glow"
-                                    >
-                                        Find a Tutor
-                                    </Button>
-                                </Link>
-                                <Link to="/register">
-                                    <Button
-                                        variant="outline"
-                                        size="xl"
-                                        rightIcon={<ArrowRight className="w-5 h-5" />}
-                                    >
-                                        Become a Tutor
-                                    </Button>
-                                </Link>
+                                <motion.div variants={itemVariants}>
+                                    <Link to="/tuitions">
+                                        <Button
+                                            variant="gradient"
+                                            size="xl"
+                                            rightIcon={<Search className="w-5 h-5" />}
+                                            className="shadow-glow hover:scale-105 transition-transform"
+                                        >
+                                            Find a Tutor
+                                        </Button>
+                                    </Link>
+                                </motion.div>
+                                <motion.div variants={itemVariants}>
+                                    <Link to="/register">
+                                        <Button
+                                            variant="outline"
+                                            size="xl"
+                                            rightIcon={<ArrowRight className="w-5 h-5" />}
+                                            className="hover:scale-105 transition-transform"
+                                        >
+                                            Become a Tutor
+                                        </Button>
+                                    </Link>
+                                </motion.div>
                             </motion.div>
 
                             {/* Trust Indicators */}
@@ -198,23 +251,23 @@ const Home = () => {
                             {/* Main Image Card */}
                             <Card
                                 glass
-                                className="overflow-hidden transform hover:scale-105 transition-transform duration-500"
+                                className="overflow-hidden shadow-2xl relative z-10"
                             >
                                 <motion.img
                                     src="https://images.unsplash.com/photo-1523240795612-9a054b0db644?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80"
                                     alt="Students learning together"
                                     className="w-full h-[500px] object-cover"
                                     whileHover={{ scale: 1.05 }}
-                                    transition={{ duration: 0.3 }}
+                                    transition={{ duration: 0.5 }}
                                 />
                             </Card>
 
-                            {/* Floating Stats Card */}
+                            {/* Floating Stats Card (Top Left reflex) */}
                             <motion.div
                                 initial={{ opacity: 0, x: -20 }}
                                 animate={{ opacity: 1, x: 0 }}
                                 transition={{ delay: 0.8 }}
-                                className="absolute -bottom-6 -left-6 glass rounded-2xl p-6 shadow-2xl"
+                                className="absolute -bottom-10 -left-18 glass rounded-2xl p-6 shadow-2xl animate-float-slow z-20"
                             >
                                 <div className="flex items-center gap-4">
                                     <div className="avatar">
@@ -226,20 +279,20 @@ const Home = () => {
                                         </div>
                                     </div>
                                     <div>
-                                        <h3 className="font-heading text-2xl font-bold gradient-text">
-                                            5000+
+                                        <h3 className="font-heading text-2xl font-bold text-primary">
+                                            <Counter target="5000+" />
                                         </h3>
                                         <p className="text-sm text-base-content/60">Active Tutors</p>
                                     </div>
                                 </div>
                             </motion.div>
 
-                            {/* Floating Round Badge */}
+                            {/* Floating Round Badge (Bottom Right reflex) */}
                             <motion.div
                                 initial={{ opacity: 0, scale: 0.5 }}
                                 animate={{ opacity: 1, scale: 1 }}
-                                transition={{ delay: 0, type: 'spring', stiffness: 200 }}
-                                className="absolute -top-3 -right-4"
+                                transition={{ delay: 0.4, type: 'spring', stiffness: 200 }}
+                                className="absolute -top-3 -right-4 z-20"
                             >
                                 <div className="w-24 h-24 rounded-full bg-yellow-400 flex items-center justify-center shadow-2xl animate-pulse ring-4 ring-white/30">
                                     <div className="text-center text-black">
@@ -258,15 +311,15 @@ const Home = () => {
                 <div className="container mx-auto px-4">
                     <div className="grid grid-cols-2 md:grid-cols-4 gap-8 text-center divide-x divide-primary-content/20">
                         <motion.div initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ delay: 0.1 }}>
-                            <h3 className="text-4xl font-bold mb-1">5000+</h3>
+                            <h3 className="text-4xl font-bold mb-1"><Counter target="5000+" /></h3>
                             <p className="text-sm opacity-80">Active Tutors</p>
                         </motion.div>
                         <motion.div initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ delay: 0.2 }}>
-                            <h3 className="text-4xl font-bold mb-1">12000+</h3>
+                            <h3 className="text-4xl font-bold mb-1"><Counter target="12000+" /></h3>
                             <p className="text-sm opacity-80">Students</p>
                         </motion.div>
                         <motion.div initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ delay: 0.3 }}>
-                            <h3 className="text-4xl font-bold mb-1">8500+</h3>
+                            <h3 className="text-4xl font-bold mb-1"><Counter target="8500+" /></h3>
                             <p className="text-sm opacity-80">Tuition Jobs</p>
                         </motion.div>
                         <motion.div initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ delay: 0.4 }}>
@@ -287,26 +340,32 @@ const Home = () => {
                         <p className="text-base-content/70 text-lg">Find tutors specialized in your area of study</p>
                     </div>
 
-                    <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
+                    <motion.div
+                        variants={containerVariants}
+                        initial="hidden"
+                        whileInView="visible"
+                        viewport={{ once: true, margin: "-100px" }}
+                        className="grid grid-cols-2 md:grid-cols-4 gap-6"
+                    >
                         {SUBJECTS.map((subject, idx) => (
                             <motion.div
                                 key={idx}
-                                initial={{ opacity: 0, scale: 0.9 }}
-                                whileInView={{ opacity: 1, scale: 1 }}
-                                whileHover={{ y: -5 }}
-                                viewport={{ once: true }}
-                                transition={{ delay: idx * 0.05 }}
+                                variants={itemVariants}
+                                whileHover={{ y: -10, scale: 1.02 }}
                             >
-                                <Card hover className="h-full flex flex-col items-center text-center p-6 cursor-pointer border-base-200 hover:border-primary transition-colors">
-                                    <div className="w-16 h-16 bg-base-200 rounded-full flex items-center justify-center mb-4 text-primary">
+                                <Card className="card-hover h-full flex flex-col items-center text-center p-6 cursor-pointer border-base-200 hover:border-primary transition-all duration-300">
+                                    <motion.div
+                                        whileHover={{ rotate: 15, scale: 1.1 }}
+                                        className="w-16 h-16 bg-primary/10 rounded-full flex items-center justify-center mb-4 text-primary shadow-inner"
+                                    >
                                         <subject.icon size={32} />
-                                    </div>
+                                    </motion.div>
                                     <h3 className="font-bold text-lg mb-1">{subject.name}</h3>
                                     <p className="text-xs text-base-content/50">{subject.count}</p>
                                 </Card>
                             </motion.div>
                         ))}
-                    </div>
+                    </motion.div>
                 </div>
             </section>
             <section className="py-24 bg-base-200/30">
@@ -320,37 +379,49 @@ const Home = () => {
                         </p>
                     </div>
 
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-                        <Card glass hover className="text-center">
-                            <div className="w-20 h-20 bg-primary/10 rounded-2xl flex items-center justify-center mx-auto mb-6">
-                                <User size={40} className="text-primary" />
-                            </div>
-                            <h3 className="font-heading text-2xl font-bold mb-4">Create Account</h3>
-                            <p className="text-base-content/70">
-                                Register as a Student or Tutor. Set up your profile with details about your requirements or qualifications.
-                            </p>
-                        </Card>
+                    <motion.div
+                        variants={containerVariants}
+                        initial="hidden"
+                        whileInView="visible"
+                        viewport={{ once: true, margin: "-100px" }}
+                        className="grid grid-cols-1 md:grid-cols-3 gap-8"
+                    >
+                        <motion.div variants={itemVariants}>
+                            <Card glass className="card-hover text-center p-8">
+                                <div className="w-20 h-20 bg-primary/10 rounded-2xl flex items-center justify-center mx-auto mb-6 shadow-glow-sm">
+                                    <User size={40} className="text-primary" />
+                                </div>
+                                <h3 className="font-heading text-2xl font-bold mb-4">Create Account</h3>
+                                <p className="text-base-content/70">
+                                    Register as a Student or Tutor. Set up your profile with details about your requirements or qualifications.
+                                </p>
+                            </Card>
+                        </motion.div>
 
-                        <Card glass hover className="text-center">
-                            <div className="w-20 h-20 bg-secondary/10 rounded-2xl flex items-center justify-center mx-auto mb-6">
-                                <Search size={40} className="text-secondary" />
-                            </div>
-                            <h3 className="font-heading text-2xl font-bold mb-4">Search & Post</h3>
-                            <p className="text-base-content/70">
-                                Students post tuition needs. Tutors browse available jobs. Use our advanced filters to find the best match.
-                            </p>
-                        </Card>
+                        <motion.div variants={itemVariants}>
+                            <Card glass className="card-hover text-center p-8">
+                                <div className="w-20 h-20 bg-secondary/10 rounded-2xl flex items-center justify-center mx-auto mb-6 shadow-glow-sm">
+                                    <Search size={40} className="text-secondary" />
+                                </div>
+                                <h3 className="font-heading text-2xl font-bold mb-4">Search & Post</h3>
+                                <p className="text-base-content/70">
+                                    Students post tuition needs. Tutors browse available jobs. Use our advanced filters to find the best match.
+                                </p>
+                            </Card>
+                        </motion.div>
 
-                        <Card glass hover className="text-center">
-                            <div className="w-20 h-20 bg-accent/10 rounded-2xl flex items-center justify-center mx-auto mb-6">
-                                <Award size={40} className="text-accent" />
-                            </div>
-                            <h3 className="font-heading text-2xl font-bold mb-4">Start Learning</h3>
-                            <p className="text-base-content/70">
-                                Connect, agree on terms, and start the journey. We ensure a secure and professional environment.
-                            </p>
-                        </Card>
-                    </div>
+                        <motion.div variants={itemVariants}>
+                            <Card glass className="card-hover text-center p-8">
+                                <div className="w-20 h-20 bg-accent/10 rounded-2xl flex items-center justify-center mx-auto mb-6 shadow-glow-sm">
+                                    <Award size={40} className="text-accent" />
+                                </div>
+                                <h3 className="font-heading text-2xl font-bold mb-4">Start Learning</h3>
+                                <p className="text-base-content/70">
+                                    Connect, agree on terms, and start the journey. We ensure a secure and professional environment.
+                                </p>
+                            </Card>
+                        </motion.div>
+                    </motion.div>
                 </div>
             </section>
 
@@ -375,38 +446,39 @@ const Home = () => {
                         variants={containerVariants}
                         initial="hidden"
                         whileInView="visible"
-                        viewport={{ once: true }}
+                        viewport={{ once: true, margin: "-100px" }}
                         className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"
                     >
                         {tuitions.map((job) => (
-                            <Card
-                                key={job._id}
-                                glass
-                                hover
-                                title={job.subject}
-                                subtitle={job.class}
-                            >
-                                <div className="space-y-3">
-                                    <div className="flex items-center gap-2 text-base-content/70">
-                                        <MapPin size={16} className="text-primary" />
-                                        <span className="text-sm">{job.location}</span>
+                            <motion.div key={job._id} variants={itemVariants}>
+                                <Card
+                                    glass
+                                    className="card-hover"
+                                    title={job.subject}
+                                    subtitle={job.class}
+                                >
+                                    <div className="space-y-3">
+                                        <div className="flex items-center gap-2 text-base-content/70">
+                                            <MapPin size={16} className="text-primary" />
+                                            <span className="text-sm">{job.location}</span>
+                                        </div>
+                                        <div className="flex justify-between items-center">
+                                            <span className="font-heading text-xl font-bold text-primary">৳{job.salary}</span>
+                                            <Badge variant="outline">{job.daysPerWeek} days/week</Badge>
+                                        </div>
+                                        <div className="flex gap-2">
+                                            <Badge size="sm" variant="neutral">{job.genderPreference} Tutor</Badge>
+                                        </div>
                                     </div>
-                                    <div className="flex justify-between items-center">
-                                        <span className="font-heading text-xl font-bold text-primary">৳{job.salary}</span>
-                                        <Badge variant="outline">{job.daysPerWeek} days/week</Badge>
+                                    <div className="mt-4 pt-4 border-t border-base-300">
+                                        <Link to={`/tuitions/${job._id}`} className="w-full block">
+                                            <Button variant="primary" size="sm" fullWidth className="hover:scale-105 transition-transform">
+                                                View Details
+                                            </Button>
+                                        </Link>
                                     </div>
-                                    <div className="flex gap-2">
-                                        <Badge size="sm" variant="neutral">{job.genderPreference} Tutor</Badge>
-                                    </div>
-                                </div>
-                                <div className="mt-4 pt-4 border-t border-base-300">
-                                    <Link to={`/tuitions/${job._id}`} className="w-full block">
-                                        <Button variant="primary" size="sm" fullWidth>
-                                            View Details
-                                        </Button>
-                                    </Link>
-                                </div>
-                            </Card>
+                                </Card>
+                            </motion.div>
                         ))}
                     </motion.div>
 
@@ -464,7 +536,7 @@ const Home = () => {
                             viewport={{ once: true }}
                             className="relative"
                         >
-                            <div className="absolute inset-0 bg-gradient-to-tr from-primary/20 to-secondary/20 rounded-3xl blur-3xl transform rotate-3"></div>
+                            <div className="absolute inset-0 bg-primary/10 rounded-3xl transform rotate-3"></div>
                             <img
                                 src="https://images.unsplash.com/photo-1522202176988-66273c2fd55f?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80"
                                 alt="Students studying"
@@ -495,30 +567,32 @@ const Home = () => {
                         variants={containerVariants}
                         initial="hidden"
                         whileInView="visible"
-                        viewport={{ once: true }}
+                        viewport={{ once: true, margin: "-100px" }}
                         className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6"
                     >
                         {tutors.length > 0 ? (
                             tutors.map((tutor) => (
-                                <Card key={tutor._id} glass hover className="text-center">
-                                    <div className="avatar mb-4">
-                                        <div className="w-24 h-24 rounded-full ring-4 ring-primary ring-offset-2 ring-offset-base-100">
-                                            <img src={tutor.photoURL || 'https://i.ibb.co/5GzXkwq/user.png'} alt={tutor.displayName} className="w-full h-full object-cover rounded-full" />
+                                <motion.div key={tutor._id} variants={itemVariants}>
+                                    <Card glass className="card-hover text-center p-6 h-full flex flex-col items-center">
+                                        <div className="avatar mb-4">
+                                            <div className="w-24 h-24 rounded-full ring-4 ring-primary ring-offset-2 ring-offset-base-100">
+                                                <img src={tutor.photoURL || 'https://i.ibb.co/5GzXkwq/user.png'} alt={tutor.displayName} className="w-full h-full object-cover rounded-full" />
+                                            </div>
                                         </div>
-                                    </div>
-                                    <h3 className="font-heading text-xl font-bold mb-1">{tutor.displayName}</h3>
-                                    <p className="text-sm text-base-content/60 mb-3">{tutor.expertise?.[0] || 'Tutor'}</p>
-                                    <p className="text-xs text-base-content/50 mb-4">{tutor.experience || 'Experienced'}</p>
-                                    <div className="flex items-center justify-center gap-2 mb-4">
-                                        <Star size={16} className="text-warning fill-warning" />
-                                        <span className="font-heading font-bold text-warning">{tutor.rating || 'N/A'}</span>
-                                    </div>
-                                    <Link to={`/tutors/${tutor._id}`}>
-                                        <Button size="sm" variant="outline" fullWidth>
-                                            View Profile
-                                        </Button>
-                                    </Link>
-                                </Card>
+                                        <h3 className="font-heading text-xl font-bold mb-1">{tutor.displayName}</h3>
+                                        <p className="text-sm text-base-content/60 mb-3">{tutor.expertise?.[0] || 'Tutor'}</p>
+                                        <p className="text-xs text-base-content/50 mb-4">{tutor.experience || 'Experienced'}</p>
+                                        <div className="flex items-center justify-center gap-2 mb-4 mt-auto">
+                                            <Star size={16} className="text-warning fill-warning" />
+                                            <span className="font-heading font-bold text-warning">{tutor.rating || 'N/A'}</span>
+                                        </div>
+                                        <Link to={`/tutors/${tutor._id}`} className="w-full">
+                                            <Button size="sm" variant="outline" fullWidth className="hover:scale-105 transition-transform">
+                                                View Profile
+                                            </Button>
+                                        </Link>
+                                    </Card>
+                                </motion.div>
                             ))
                         ) : (
                             <div className="col-span-full text-center py-10">
@@ -541,37 +615,47 @@ const Home = () => {
                         <p className="text-base-content/70 text-lg">Real stories from our community</p>
                     </div>
 
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-                        {TESTIMONIALS.map((testimonial, idx) => (
-                            <motion.div
-                                key={idx}
-                                initial={{ opacity: 0, y: 20 }}
-                                whileInView={{ opacity: 1, y: 0 }}
-                                viewport={{ once: true }}
-                                transition={{ delay: idx * 0.1 }}
-                            >
-                                <Card glass className="h-full relative p-8">
-                                    <div className="absolute top-6 right-8 opacity-10">
-                                        <span className="text-6xl font-serif">"</span>
+                    <div className="space-y-12 overflow-hidden">
+                        {/* Row 1: Left to Right */}
+                        <Marquee
+                            gradient={false}
+                            speed={40}
+                            direction="right"
+                            pauseOnHover={true}
+                            className="pb-4"
+                        >
+                            <div className="flex gap-8 px-4">
+                                {[...TESTIMONIALS, ...TESTIMONIALS].map((testimonial, idx) => (
+                                    <div key={`row1-${idx}`} className="w-[350px] md:w-[450px]">
+                                        <Card glass className="h-full relative p-8 card-hover hover:border-primary/50 transition-colors">
+                                            <div className="absolute top-6 right-8 opacity-10">
+                                                <span className="text-6xl font-serif">"</span>
+                                            </div>
+                                            <div className="flex items-center gap-1 mb-4">
+                                                {[...Array(testimonial.rating)].map((_, i) => (
+                                                    <Star key={i} size={16} className="text-warning fill-warning" />
+                                                ))}
+                                            </div>
+                                            <p className="text-base-content/80 mb-6 italic line-clamp-3 md:line-clamp-none">
+                                                {testimonial.content}
+                                            </p>
+                                            <div className="flex items-center gap-4 mt-auto">
+                                                <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center font-bold text-primary">
+                                                    {testimonial.name[0]}
+                                                </div>
+                                                <div>
+                                                    <h4 className="font-bold">{testimonial.name}</h4>
+                                                    <p className="text-xs text-base-content/50 uppercase">{testimonial.role}</p>
+                                                </div>
+                                            </div>
+                                        </Card>
                                     </div>
-                                    <div className="flex items-center gap-1 mb-4">
-                                        {[...Array(testimonial.rating)].map((_, i) => (
-                                            <Star key={i} size={16} className="text-warning fill-warning" />
-                                        ))}
-                                    </div>
-                                    <p className="text-base-content/80 mb-6 italic">{testimonial.content}</p>
-                                    <div className="flex items-center gap-4">
-                                        <div className="w-10 h-10 rounded-full bg-base-300 flex items-center justify-center font-bold text-base-content/50">
-                                            {testimonial.name[0]}
-                                        </div>
-                                        <div>
-                                            <h4 className="font-bold">{testimonial.name}</h4>
-                                            <p className="text-xs text-base-content/50 uppercase">{testimonial.role}</p>
-                                        </div>
-                                    </div>
-                                </Card>
-                            </motion.div>
-                        ))}
+                                ))}
+                            </div>
+                        </Marquee>
+
+                        {/* Row 2: Right to Left */}
+
                     </div>
                 </div>
             </section>
@@ -585,16 +669,19 @@ const Home = () => {
                         </h2>
                     </div>
 
-                    <div className="space-y-4">
+                    <motion.div
+                        variants={containerVariants}
+                        initial="hidden"
+                        whileInView="visible"
+                        viewport={{ once: true, margin: "-100px" }}
+                        className="space-y-4"
+                    >
                         {FAQS.map((faq, idx) => (
                             <motion.div
                                 key={idx}
-                                initial={{ opacity: 0, y: 10 }}
-                                whileInView={{ opacity: 1, y: 0 }}
-                                viewport={{ once: true }}
-                                transition={{ delay: idx * 0.1 }}
+                                variants={itemVariants}
                             >
-                                <div className="collapse collapse-plus bg-base-100 border border-base-200 rounded-xl">
+                                <div className="collapse collapse-plus bg-base-100 border border-base-200 rounded-xl card-hover">
                                     <input type="radio" name="my-accordion-3" defaultChecked={idx === 0} />
                                     <div className="collapse-title text-xl font-medium">
                                         {faq.q}
@@ -605,7 +692,7 @@ const Home = () => {
                                 </div>
                             </motion.div>
                         ))}
-                    </div>
+                    </motion.div>
                 </div>
             </section>
 
@@ -614,7 +701,7 @@ const Home = () => {
                 <div className="container mx-auto px-4 mb-8 text-center">
                     <p className="text-2xl font-semibold text-primary uppercase tracking-wider">Trusted by students from top institutions</p>
                 </div>
-                <Marquee gradient={true} gradientColor={theme === 'dark' ? [17, 24, 39] : [255, 255, 255]} speed={40}>
+                <Marquee gradient={false} speed={40}>
                     <div className="flex items-center gap-12 mx-6 opacity-60 hover:opacity-100 transition-opacity duration-300 grayscale hover:grayscale-0">
 
                         <span className="text-xl font-bold text-base-content/60">Dhaka University</span>
@@ -661,10 +748,9 @@ const Home = () => {
                 </Marquee>
             </section>
 
-            {/* Call To Action */}
             <section className="py-20">
                 <div className="container mx-auto px-4">
-                    <div className="relative overflow-hidden rounded-3xl bg-gradient-to-r from-primary-500 to-secondary-500 shadow-xl">
+                    <div className="relative overflow-hidden rounded-3xl bg-primary shadow-xl">
                         {/* Decorative Background Elements */}
                         <div className="absolute top-0 right-0 -mt-10 -mr-10 h-64 w-64 rounded-full bg-white/20 blur-3xl"></div>
                         <div className="absolute bottom-0 left-0 -mb-10 -ml-10 h-64 w-64 rounded-full bg-black/10 blur-3xl"></div>

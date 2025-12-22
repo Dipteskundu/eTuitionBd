@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import useTitle from '../../../hooks/useTitle';
 import { Link } from 'react-router-dom';
 import { Bookmark, User, BookOpen, MapPin, DollarSign, ArrowRight, Trash2 } from 'lucide-react';
 import useAxiosSecure from '../../../hooks/useAxiosSecure';
@@ -9,6 +10,7 @@ import Button from '../../../components/ui/Button';
 import useToast from '../../../hooks/useToast';
 
 const Bookmarks = () => {
+    useTitle('My Bookmarks');
     const axiosSecure = useAxiosSecure();
     const toast = useToast();
     const [activeTab, setActiveTab] = useState('tutor');

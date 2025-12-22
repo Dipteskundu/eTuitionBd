@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import useTitle from '../../../hooks/useTitle';
 import useAxiosSecure from '../../../hooks/useAxiosSecure';
 import { DollarSign, Calendar, TrendingUp } from 'lucide-react';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
@@ -6,6 +7,7 @@ import { motion } from 'framer-motion';
 import DashboardHeader from '../../../components/Shared/DashboardHeader';
 
 const Earnings = () => {
+    useTitle('Earnings & Stats');
     const axiosSecure = useAxiosSecure();
     const [payments, setPayments] = useState([]);
     const [totalEarnings, setTotalEarnings] = useState(0);
@@ -72,13 +74,13 @@ const Earnings = () => {
 
             <motion.h1
                 variants={itemVariants}
-                className="text-2xl font-bold font-heading gradient-text"
+                className="text-2xl font-bold font-heading text-primary"
             >
                 Earnings & Payments
             </motion.h1>
 
             {/* Total Earnings Card */}
-            <motion.div variants={itemVariants} className="card bg-gradient-to-br from-primary-500 to-primary-600 text-primary-content shadow-xl max-w-sm">
+            <motion.div variants={itemVariants} className="card bg-primary text-primary-content shadow-xl max-w-sm">
                 <div className="card-body">
                     <h2 className="card-title">Total Earnings</h2>
                     <div className="flex items-center gap-2 text-4xl font-bold">

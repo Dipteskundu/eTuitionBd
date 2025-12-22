@@ -26,15 +26,15 @@ const Button = ({
 
     const variants = {
         primary: "btn-primary text-white shadow-lg shadow-primary/30 hover:shadow-xl hover:shadow-primary/40",
-        secondary: "btn-secondary text-white shadow-lg shadow-secondary/30 hover:shadow-xl hover:shadow-secondary/40",
-        accent: "btn-accent text-white shadow-lg shadow-accent/30 hover:shadow-xl hover:shadow-accent/40",
-        outline: "btn-outline border-2 hover:scale-105",
-        ghost: "btn-ghost hover:bg-base-200",
-        link: "btn-link underline-offset-4 hover:underline",
-        error: "btn-error text-white shadow-lg shadow-error/30 hover:shadow-xl hover:shadow-error/40",
-        success: "btn-success text-white shadow-lg shadow-success/30 hover:shadow-xl hover:shadow-success/40",
-        gradient: "bg-gradient-to-r from-primary-500 to-secondary-500 text-white shadow-lg shadow-primary-500/30 hover:shadow-glow border-none",
-        danger: "bg-gradient-to-r from-error-500 to-warning-500 text-white shadow-lg shadow-error-500/30 hover:shadow-xl border-none",
+        secondary: 'btn-secondary text-white shadow-lg shadow-secondary/30 hover:shadow-xl hover:shadow-secondary/40',
+        accent: 'btn-accent text-white shadow-lg shadow-accent/30 hover:shadow-xl hover:shadow-accent/40',
+        outline: 'btn-outline border-2 hover:scale-105',
+        ghost: 'btn-ghost hover:bg-base-200',
+        link: 'btn-link underline-offset-4 hover:underline',
+        error: 'btn-error text-white shadow-lg shadow-error/30 hover:shadow-xl hover:shadow-error/40',
+        success: 'btn-success text-white shadow-lg shadow-success/30 hover:shadow-xl hover:shadow-success/40',
+        gradient: 'bg-primary text-white shadow-lg shadow-primary/30 hover:bg-primary-focus hover:shadow-xl border-none',
+        danger: 'bg-error text-white shadow-lg shadow-error/30 hover:bg-error-focus hover:shadow-xl border-none',
     };
 
     const sizes = {

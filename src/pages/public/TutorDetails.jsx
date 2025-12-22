@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import useTitle from '../../hooks/useTitle';
 import { useParams, useNavigate } from 'react-router-dom';
 import axiosInstance from '../../utils/axiosInstance';
 import { MapPin, Star, BadgeCheck, Book, User, Mail, Phone, ArrowLeft, GraduationCap, Award } from 'lucide-react';
@@ -16,6 +17,7 @@ import BookmarkButton from '../../components/ui/BookmarkButton';
 import { MessageCircle } from 'lucide-react';
 
 const TutorDetails = () => {
+    useTitle('Tutor Details');
     const { id } = useParams();
     const navigate = useNavigate();
     const [tutor, setTutor] = useState(null);
@@ -61,7 +63,7 @@ const TutorDetails = () => {
         try {
             // 1. Get or Create Conversation
             const convRes = await axiosSecure.post('/conversations', {
-                participantEmail: tutor.email
+                recipientEmail: tutor.email
             });
             const conversationId = convRes.data._id;
 
@@ -87,10 +89,9 @@ const TutorDetails = () => {
         const fetchTutor = async () => {
             try {
                 // Fetching all tutors to find the specific one as per current API pattern
-                const res = await axiosInstance.get('/tutors');
-                const found = res.data.find(t => t._id === id);
-                if (found) {
-                    setTutor(found);
+                const res = await axiosInstance.get(`/tutors/${id}`);
+                if (res.data) {
+                    setTutor(res.data);
                 } else {
                     toast.error("Tutor not found");
                     navigate('/tutors');
@@ -134,7 +135,7 @@ const TutorDetails = () => {
                 >
                     <Card glass className="overflow-hidden border-0 !p-0">
                         {/* Profile Header */}
-                        <div className="bg-gradient-to-br from-base-100 to-base-200 border-b border-base-200 p-8 md:p-12 relative">
+                        <div className="bg-base-200 border-b border-base-200 p-8 md:p-12 relative">
                             <div className="flex flex-col md:flex-row items-center md:items-start gap-8 relative z-10">
                                 <div className="relative">
                                     <div className="w-32 h-32 md:w-40 md:h-40 rounded-full ring-4 ring-primary/20 p-1 bg-base-100">
@@ -239,7 +240,7 @@ const TutorDetails = () => {
 
                                 {/* Sidebar */}
                                 <div className="space-y-6">
-                                    <div className="bg-gradient-to-br from-primary-500/5 to-secondary-500/5 p-6 rounded-2xl border border-primary-500/10 relative">
+                                    <div className="bg-primary/5 p-6 rounded-2xl border border-primary-500/10 relative">
                                         <div className="absolute top-4 right-4">
                                             <BookmarkButton itemId={tutor._id} type="tutor" />
                                         </div>
@@ -284,64 +285,83 @@ const TutorDetails = () => {
 
             {/* Contact Modal */}
             {isContactModalOpen && (
-                <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4">
+                <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4 sm:p-6 overflow-y-auto custom-scrollbar">
                     <motion.div
-                        initial={{ opacity: 0, scale: 0.9 }}
-                        animate={{ opacity: 1, scale: 1 }}
-                        exit={{ opacity: 0, scale: 0.9 }}
-                        className="bg-base-100 rounded-2xl shadow-xl w-full max-w-md overflow-hidden border border-base-200"
+                        initial={{ opacity: 0, y: 30, scale: 0.95 }}
+                        animate={{ opacity: 1, y: 0, scale: 1 }}
+                        exit={{ opacity: 0, y: 30, scale: 0.95 }}
+                        className="bg-base-100 rounded-3xl shadow-2xl w-full max-w-lg mx-auto border border-base-200 my-auto"
                     >
-                        <div className="bg-primary/10 p-6 border-b border-base-200">
-                            <h3 className="text-xl font-bold text-base-content">Contact Tutor</h3>
-                            <p className="text-sm text-base-content/60 mt-1">Get in touch with {tutor.displayName}</p>
+                        {/* Modal Header */}
+                        <div className="bg-base-100 p-6 sm:p-8 border-b border-base-200 text-center sm:text-left sticky top-0 z-10 backdrop-blur-md">
+                            <h3 className="text-2xl font-bold text-base-content font-heading tracking-tight">Contact Tutor</h3>
+                            <p className="text-sm text-base-content/60 mt-1">Get in touch with <span className="text-primary font-semibold">{tutor.displayName}</span></p>
                         </div>
 
-                        <div className="p-6 space-y-4">
-                            <div className="bg-base-200/50 p-4 rounded-xl space-y-3">
-                                <div className="flex items-center gap-3">
-                                    <User className="text-primary w-5 h-5" />
-                                    <div>
-                                        <p className="text-xs text-base-content/50 uppercase font-bold">Name</p>
-                                        <p className="font-medium">{tutor.displayName}</p>
+                        <div className="p-6 sm:p-8 space-y-8">
+                            {/* Contact Info Cards */}
+                            <div className="grid grid-cols-1 gap-4">
+                                <div className="flex items-center gap-4 bg-base-200/40 p-4 rounded-2xl group border border-transparent transition-all">
+                                    <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center text-primary group-hover:scale-110 transition-transform shadow-sm">
+                                        <User size={20} />
+                                    </div>
+                                    <div className="flex-1">
+                                        <p className="text-[10px] text-base-content/40 uppercase font-black tracking-widest">Full Name</p>
+                                        <p className="font-bold text-base-content leading-tight">{tutor.displayName}</p>
                                     </div>
                                 </div>
-                                <div className="flex items-center gap-3">
-                                    <Mail className="text-primary w-5 h-5" />
-                                    <div>
-                                        <p className="text-xs text-base-content/50 uppercase font-bold">Email</p>
-                                        <p className="font-medium">{tutor.email}</p>
+
+                                <a
+                                    href={`mailto:${tutor.email}`}
+                                    className="flex items-center gap-4 bg-blue-500/5 p-4 rounded-2xl hover:bg-blue-500/10 transition-all group border border-blue-500/10 hover:border-blue-500/20"
+                                >
+                                    <div className="w-10 h-10 rounded-xl bg-blue-500/10 flex items-center justify-center text-blue-500 group-hover:scale-110 transition-transform shadow-sm">
+                                        <Mail size={20} />
                                     </div>
-                                </div>
+                                    <div className="flex-1 overflow-hidden">
+                                        <p className="text-[10px] text-blue-500/60 uppercase font-black tracking-widest">Email Address</p>
+                                        <p className="font-bold text-base-content truncate group-hover:text-blue-600 transition-colors leading-tight">{tutor.email}</p>
+                                    </div>
+                                </a>
+
                                 {tutor.phone && (
-                                    <div className="flex items-center gap-3">
-                                        <Phone className="text-primary w-5 h-5" />
-                                        <div>
-                                            <p className="text-xs text-base-content/50 uppercase font-bold">Phone</p>
-                                            <p className="font-medium">{tutor.phone}</p>
+                                    <a
+                                        href={`tel:${tutor.phone}`}
+                                        className="flex items-center gap-4 bg-green-500/5 p-4 rounded-2xl hover:bg-green-500/10 transition-all group border border-green-500/10 hover:border-green-500/20"
+                                    >
+                                        <div className="w-10 h-10 rounded-xl bg-green-500/10 flex items-center justify-center text-green-500 group-hover:scale-110 transition-transform shadow-sm">
+                                            <Phone size={20} />
                                         </div>
-                                    </div>
+                                        <div className="flex-1">
+                                            <p className="text-[10px] text-green-500/60 uppercase font-black tracking-widest">Phone Number</p>
+                                            <p className="font-bold text-base-content group-hover:text-green-600 transition-colors leading-tight">{tutor.phone}</p>
+                                        </div>
+                                    </a>
                                 )}
                             </div>
 
-                            <form onSubmit={handleSendMessage}>
+                            {/* Message Form */}
+                            <form onSubmit={handleSendMessage} className="space-y-6">
                                 <div className="form-control">
-                                    <label className="label">
-                                        <span className="label-text font-medium">Message</span>
+                                    <label className="label pt-0 pb-3">
+                                        <span className="label-text font-bold text-base-content/80 flex items-center gap-2">
+                                            <MessageCircle size={16} className="text-primary" /> Send a Message
+                                        </span>
                                     </label>
                                     <textarea
-                                        className="textarea textarea-bordered h-32 focus:outline-none focus:border-primary"
-                                        placeholder="Type your message here..."
+                                        className="textarea textarea-bordered min-h-[140px] focus:outline-none focus:ring-4 focus:ring-primary/10 focus:border-primary transition-all resize-none text-base leading-relaxed bg-base-100 border-base-300 shadow-inner"
+                                        placeholder={`Hi ${tutor?.displayName?.split(' ')?.[0] || 'Tutor'}, I'm interested in your tutoring services...`}
                                         value={messageText}
                                         onChange={(e) => setMessageText(e.target.value)}
                                         required
                                     ></textarea>
                                 </div>
 
-                                <div className="flex gap-3 mt-6">
+                                <div className="flex flex-col sm:flex-row gap-4 pt-2">
                                     <Button
                                         type="button"
                                         variant="ghost"
-                                        fullWidth
+                                        className="order-2 sm:order-1 flex-1 py-4 text-base font-bold rounded-2xl hover:bg-base-200"
                                         onClick={() => setIsContactModalOpen(false)}
                                     >
                                         Cancel
@@ -349,10 +369,14 @@ const TutorDetails = () => {
                                     <Button
                                         type="submit"
                                         variant="primary"
-                                        fullWidth
+                                        className="order-1 sm:order-2 flex-[1.5] py-4 text-base font-bold rounded-2xl shadow-xl shadow-primary/20 hover:shadow-primary/40 active:scale-[0.98] transition-all"
                                         disabled={sending}
                                     >
-                                        {sending ? <Spinner size="sm" /> : 'Send Message'}
+                                        {sending ? (
+                                            <span className="flex items-center gap-2">
+                                                <Spinner size="sm" /> Sending...
+                                            </span>
+                                        ) : 'Send Message'}
                                     </Button>
                                 </div>
                             </form>

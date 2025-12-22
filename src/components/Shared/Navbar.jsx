@@ -124,7 +124,7 @@ const Navbar = () => {
                                         className="w-full h-full object-contain transition-transform duration-300 group-hover:scale-110 relative z-10"
                                     />
                                 </div>
-                                <span className="text-2xl font-heading font-bold bg-gradient-to-r from-slate-900 to-slate-700 dark:from-white dark:to-slate-300 bg-clip-text text-transparent group-hover:to-primary transition-all duration-300">
+                                <span className="text-2xl font-heading font-bold text-slate-900 dark:text-white group-hover:text-primary transition-all duration-300">
                                     eTuitionBd
                                 </span>
                             </Link>
@@ -309,11 +309,11 @@ const Navbar = () => {
                                     {/* User Card */}
                                     {user ? (
                                         <motion.div variants={itemVariants} className="mb-8">
-                                            <div className="p-5 bg-gradient-to-br from-gray-50 to-white dark:from-slate-800 dark:to-slate-900 rounded-3xl border border-gray-100 dark:border-gray-700 shadow-sm relative overflow-hidden group">
-                                                <div className="absolute inset-0 bg-gradient-to-r from-primary/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
+                                            <div className="p-5 bg-white dark:bg-slate-800 rounded-3xl border border-gray-100 dark:border-gray-700 shadow-sm relative overflow-hidden group">
+                                                <div className="absolute inset-0 bg-primary/5 opacity-0 group-hover:opacity-100 transition-opacity" />
                                                 <div className="flex items-center gap-4 relative z-10">
                                                     <div className="relative">
-                                                        <div className="w-14 h-14 rounded-full p-[2px] bg-gradient-to-br from-primary to-secondary">
+                                                        <div className="w-14 h-14 rounded-full p-[2px] bg-primary">
                                                             <div className="w-full h-full rounded-full border-2 border-white dark:border-slate-800 overflow-hidden bg-white">
                                                                 {user.photoURL ? (
                                                                     <img src={user.photoURL} alt={user.displayName} className="w-full h-full object-cover" />

@@ -25,20 +25,18 @@ const DashboardHeader = () => {
 
                 {/* Info */}
                 <div>
-                    <h2 className="font-bold text-lg leading-tight">
-                        {user?.displayName || 'User'}
-                    </h2>
-                    <span className="text-xs font-bold text-primary tracking-wider uppercase bg-primary/10 px-2 py-0.5 rounded-full">
-                        {role}
-                    </span>
+                    <div className="flex flex-col">
+                        <span className="text-sm font-medium text-base-content/60">Welcome back,</span>
+                        <h2 className="font-bold text-xl leading-tight gradient-text">
+                            {user?.displayName || 'User'}
+                        </h2>
+                    </div>
                 </div>
             </div>
 
             {/* Actions */}
             <div className="flex items-center gap-3">
                 <NotificationBell />
-                <div className="h-8 w-[1px] bg-base-300 hidden sm:block"></div>
-                <ThemeToggle />
             </div>
         </div>
     );

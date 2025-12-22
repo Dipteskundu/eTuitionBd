@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import useTitle from '../../hooks/useTitle';
 import { Link, useNavigate } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
 import { motion } from 'framer-motion';
@@ -14,7 +15,8 @@ import { uploadImage } from '../../utils/uploadImage';
 import axiosInstance from '../../utils/axiosInstance';
 
 const Register = () => {
-    const { register, handleSubmit, watch, setValue, formState: { errors } } = useForm({
+    useTitle('Register');
+    const { register, handleSubmit, watch, setValue, reset, formState: { errors } } = useForm({
         mode: 'onChange',
         defaultValues: {
             role: ROLES.STUDENT
@@ -73,8 +75,9 @@ const Register = () => {
                 // Correct Endpoint: /user
                 await axiosInstance.post('/user', userData);
                 localStorage.setItem('userRole', data.role); // Important: Persist role locally for frontend state
-                toast.success(`Welcome, ${data.name}! Registration successful.`);
-                navigate('/');
+                toast.success('Registration successful! Please login.');
+                reset(); // Clear form after successful registration
+                navigate('/login');
             } catch (backendError) {
                 console.warn("Backend registration failed (Server might be down), but Firebase Auth created.", backendError);
                 // Even if backend fails, strictly for this frontend demo, we persist role locally
@@ -295,8 +298,8 @@ const Register = () => {
                             </Link>
                         </p>
 
-                       
-                        
+
+
                     </div>
                 </Card>
             </motion.div>

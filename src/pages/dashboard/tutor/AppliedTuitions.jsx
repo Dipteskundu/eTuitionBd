@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import useTitle from '../../../hooks/useTitle';
 import useAxiosSecure from '../../../hooks/useAxiosSecure';
 import { Calendar, DollarSign, Briefcase, CheckCircle, XCircle, Clock, BookOpen } from 'lucide-react';
 import Card from '../../../components/ui/Card';
@@ -7,6 +8,7 @@ import Spinner from '../../../components/ui/Spinner';
 import { motion } from 'framer-motion';
 
 const AppliedTuitions = () => {
+    useTitle('My Applied Tuitions');
     const axiosSecure = useAxiosSecure();
     const [applications, setApplications] = useState([]);
     const [loading, setLoading] = useState(true);
@@ -67,8 +69,8 @@ const AppliedTuitions = () => {
                                         </div>
                                     </div>
                                     <span className={`badge ${app.status === 'approved' ? 'badge-success text-white' :
-                                            app.status === 'rejected' ? 'badge-error text-white' :
-                                                'badge-warning text-white'
+                                        app.status === 'rejected' ? 'badge-error text-white' :
+                                            'badge-warning text-white'
                                         } `}>
                                         {app.status}
                                     </span>

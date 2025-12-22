@@ -1,9 +1,11 @@
 import React from 'react';
+import useTitle from '../../hooks/useTitle';
 import { motion } from 'framer-motion';
 import { CheckCircle, Users, Shield, BookOpen } from 'lucide-react';
 import Card from '../../components/ui/Card';
 
 const About = () => {
+    useTitle('About');
     const features = [
         { icon: Users, text: "Verified Tutors and Students" },
         { icon: Shield, text: "Secure Payment Processing" },

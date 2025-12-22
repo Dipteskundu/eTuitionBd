@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import useTitle from '../../hooks/useTitle';
 import { useParams, useNavigate, useLocation } from 'react-router-dom';
 import useAuth from '../../hooks/useAuth';
 import useAxiosSecure from '../../hooks/useAxiosSecure';
@@ -13,6 +14,7 @@ import Button from '../../components/ui/Button';
 import { motion } from 'framer-motion';
 
 const TuitionDetails = () => {
+    useTitle('Tuition Details');
     const { id } = useParams();
     const navigate = useNavigate();
     const location = useLocation();
@@ -28,11 +30,9 @@ const TuitionDetails = () => {
     useEffect(() => {
         const fetchTuition = async () => {
             try {
-                // Fetching all for now as specific endpoint might vary
-                const res = await axiosInstance.get('/tuitions');
-                const found = res.data.data.find(t => t._id === id);
-                if (found) {
-                    setTuition(found);
+                const res = await axiosInstance.get(`/tuitions/${id}`);
+                if (res.data) {
+                    setTuition(res.data);
                 } else {
                     toast.error("Tuition not found");
                     navigate('/tuitions');
@@ -121,7 +121,7 @@ const TuitionDetails = () => {
                 >
                     <Card glass className="overflow-hidden border-0 !p-0">
                         {/* Header Banner */}
-                        <div className="bg-gradient-to-r from-primary-500 to-secondary-500 p-8 md:p-12 text-white relative overflow-hidden">
+                        <div className="bg-primary p-8 md:p-12 text-white relative overflow-hidden">
                             <div className="absolute top-0 left-0 w-full h-full bg-black/10 backdrop-blur-sm z-0"></div>
                             <div className="relative z-10">
                                 <div className="flex flex-col md:flex-row justify-between items-start gap-4">
@@ -185,8 +185,8 @@ const TuitionDetails = () => {
 
                             <div className="flex flex-col h-full">
                                 <div className="bg-base-200/30 p-8 rounded-2xl border border-base-200 flex-grow">
-                                    <h3 className="text-xl font-bold mb-4 flex items-center gap-2 gradient-text">
-                                        <BookOpen size={24} className="text-primary" />
+                                    <h3 className="text-xl font-bold mb-4 flex items-center gap-2 text-primary">
+                                        <BookOpen size={24} />
                                         Description & Requirements
                                     </h3>
                                     <p className="text-base-content/80 text-lg leading-relaxed">

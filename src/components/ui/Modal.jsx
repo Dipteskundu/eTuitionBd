@@ -10,6 +10,7 @@ const Modal = ({
     children,
     actions,
     size = 'md',
+    maxWidth,
     closeOnOverlayClick = true,
 }) => {
     const sizes = {
@@ -20,6 +21,8 @@ const Modal = ({
         '2xl': 'max-w-6xl',
         full: 'max-w-full m-4',
     };
+
+    const modalWidth = maxWidth || sizes[size] || sizes.md;
 
     // Prevent body scroll when modal is open
     useEffect(() => {
@@ -55,7 +58,7 @@ const Modal = ({
                         animate={{ opacity: 1, scale: 1, y: 0 }}
                         exit={{ opacity: 0, scale: 0.9, y: 20 }}
                         transition={{ type: 'spring', duration: 0.5 }}
-                        className={`relative w-full ${sizes[size]} bg-base-100 rounded-2xl shadow-2xl border border-base-200`}
+                        className={`relative w-fit min-w-[320px] ${modalWidth} mx-auto bg-base-100 rounded-2xl shadow-2xl border border-base-200 overflow-hidden`}
                     >
                         {/* Header */}
                         <div className="flex items-center justify-between px-6 py-4 border-b border-base-200">
@@ -73,7 +76,7 @@ const Modal = ({
                         </div>
 
                         {/* Body */}
-                        <div className="px-6 py-6 max-h-[calc(100vh-200px)] overflow-y-auto">
+                        <div className="px-6 py-6 max-h-[calc(100vh-160px)] sm:max-h-[calc(100vh-200px)] overflow-y-auto overflow-x-hidden custom-scrollbar">
                             {children}
                         </div>
 

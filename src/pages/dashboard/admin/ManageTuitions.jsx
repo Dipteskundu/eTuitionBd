@@ -1,16 +1,21 @@
 import React, { useEffect, useState } from 'react';
+import useTitle from '../../../hooks/useTitle';
 import useAxiosSecure from '../../../hooks/useAxiosSecure';
 import useToast from '../../../hooks/useToast';
-import { Eye, CheckCircle, XCircle, User, BookOpen, MapPin, DollarSign } from 'lucide-react';
+import { Eye, CheckCircle, XCircle, User, BookOpen, MapPin, DollarSign, Calendar, MoreVertical, LayoutGrid, Table as TableIcon } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import Spinner from '../../../components/ui/Spinner';
 import Button from '../../../components/ui/Button';
+import Card from '../../../components/ui/Card';
+import { motion, AnimatePresence } from 'framer-motion';
 
 const ManageTuitions = () => {
+    useTitle('Manage Tuitions');
     const axiosSecure = useAxiosSecure();
     const { success, error } = useToast();
     const [tuitions, setTuitions] = useState([]);
     const [loading, setLoading] = useState(true);
+    const [viewMode, setViewMode] = useState('table'); // 'table' or 'grid' (automatic switch based on screen too)
 
     const fetchTuitions = async () => {
         try {
@@ -43,76 +48,169 @@ const ManageTuitions = () => {
 
     if (loading) return <Spinner variant="dots" fullScreen />;
 
+    const ActionButtons = ({ item, condensed = false }) => (
+        <div className={`flex flex-wrap gap-2 ${condensed ? 'justify-start' : 'justify-end'}`}>
+            <Link
+                to={`/tuitions/${item._id}`}
+                className={`btn btn-xs btn-outline btn-info gap-1 ${condensed ? 'flex-1' : ''}`}
+                title="View Public Post"
+            >
+                <Eye size={12} />
+                {!condensed && 'View'}
+            </Link>
+
+            <Link
+                to={`/dashboard/admin/student-profile/${item.studentId}`}
+                className={`btn btn-xs btn-outline btn-primary gap-1 ${condensed ? 'flex-1' : ''}`}
+                title="View Student"
+            >
+                <User size={12} />
+                {!condensed && 'Student'}
+            </Link>
+
+            {(item.status === 'pending' || item.status === 'rejected') && (
+                <button
+                    onClick={() => handleStatusUpdate(item._id, 'approved')}
+                    className={`btn btn-xs btn-success text-white gap-1 ${condensed ? 'flex-1' : ''}`}
+                >
+                    <CheckCircle size={12} />
+                    Approve
+                </button>
+            )}
+
+            {item.status === 'approved' && (
+                <button
+                    onClick={() => handleStatusUpdate(item._id, 'rejected')}
+                    className={`btn btn-xs btn-error text-white gap-1 ${condensed ? 'flex-1' : ''}`}
+                >
+                    <XCircle size={12} />
+                    Reject
+                </button>
+            )}
+        </div>
+    );
+
     return (
-        <div className="overflow-x-auto bg-base-100 rounded-xl shadow-sm border border-base-200">
-            <table className="table w-full">
-                <thead>
-                    <tr>
-                        <th>Subject</th>
-                        <th>Class/Loc</th>
-                        <th>Salary</th>
-                        <th>Status (State)</th>
-                        <th>Moderation</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {tuitions.map((item) => (
-                        <tr key={item._id}>
-                            <td>
-                                <div className="font-bold">{item.subject}</div>
-                                <div className="text-xs opacity-50">ID: {item._id.slice(-6)}</div>
-                            </td>
-                            <td>
-                                <div className="text-sm">{item.class}</div>
-                                <div className="text-xs text-gray-500">{item.location}</div>
-                            </td>
-                            <td>BDT {item.salary}</td>
-                            <td>
-                                <span className={`badge ${item.status === 'approved' ? 'badge-success text-white' :
-                                    item.status === 'closed' ? 'badge-neutral text-white' :
-                                        item.status === 'rejected' ? 'badge-error text-white' :
-                                            'badge-warning text-white'
-                                    }`}>
-                                    {item.status ? item.status.toUpperCase() : 'UNKNOWN'}
-                                </span>
-                            </td>
-                            <td className="flex gap-2">
-                                {/* View Public Details */}
-                                <Link to={`/tuitions/${item._id}`} className="btn btn-square btn-ghost btn-sm text-info" title="View Post Details">
-                                    <Eye size={16} />
-                                </Link>
+        <div className="space-y-6">
+            <div className="flex justify-between items-center">
+                <div>
+                    <h1 className="text-2xl font-bold font-heading">Manage Tuitions</h1>
+                    <p className="text-sm text-base-content/60">Moderate and manage all tuition posts.</p>
+                </div>
+            </div>
 
-                                {/* View Student Profile */}
-                                <Link to={`/dashboard/admin/student-profile/${item.studentId}`} className="btn btn-square btn-ghost btn-sm text-primary" title="View Student Profile">
-                                    <User size={16} />
-                                </Link>
-
-                                {/* Approve Button (for Pending or Rejected) */}
-                                {(item.status === 'pending' || item.status === 'rejected') && (
-                                    <button
-                                        onClick={() => handleStatusUpdate(item._id, 'approved')}
-                                        className="btn btn-sm btn-ghost text-success"
-                                        title="Approve Post"
-                                    >
-                                        <CheckCircle size={16} />
-                                    </button>
-                                )}
-
-                                {/* Reject Button (for Approved) */}
-                                {item.status === 'approved' && (
-                                    <button
-                                        onClick={() => handleStatusUpdate(item._id, 'rejected')}
-                                        className="btn btn-sm btn-ghost text-error"
-                                        title="Reject Post"
-                                    >
-                                        <XCircle size={16} />
-                                    </button>
-                                )}
-                            </td>
+            {/* Desktop Table View */}
+            <div className="hidden lg:block overflow-hidden bg-base-100 rounded-2xl shadow-sm border border-base-200">
+                <table className="table w-full">
+                    <thead className="bg-base-200/50">
+                        <tr>
+                            <th className="rounded-none">Tuition Details</th>
+                            <th>Info</th>
+                            <th>Compensation</th>
+                            <th>Status</th>
+                            <th className="text-right rounded-none">Operations</th>
                         </tr>
-                    ))}
-                </tbody>
-            </table>
+                    </thead>
+                    <tbody>
+                        {tuitions.map((item) => (
+                            <tr key={item._id} className="hover:bg-base-200/30 transition-colors">
+                                <td>
+                                    <div className="flex flex-col">
+                                        <span className="font-bold text-primary">{item.subject}</span>
+                                        <span className="text-[10px] opacity-30 font-mono">ID: {item._id}</span>
+                                    </div>
+                                </td>
+                                <td>
+                                    <div className="flex flex-col gap-1">
+                                        <div className="flex items-center gap-1 text-xs">
+                                            <BookOpen size={12} className="text-info" />
+                                            {item.class}
+                                        </div>
+                                        <div className="flex items-center gap-1 text-xs opacity-60">
+                                            <MapPin size={12} />
+                                            {item.location}
+                                        </div>
+                                    </div>
+                                </td>
+                                <td>
+                                    <div className="font-bold text-secondary">৳ {item.salary}</div>
+                                    <div className="text-[10px] opacity-50">{item.daysPerWeek} days/week</div>
+                                </td>
+                                <td>
+                                    <div className="flex flex-col gap-1">
+                                        <span className={`badge badge-sm font-bold border-0 px-2 ${item.status === 'approved' ? 'bg-success/10 text-success' :
+                                            item.status === 'rejected' ? 'bg-error/10 text-error' :
+                                                'bg-warning/10 text-warning'
+                                            }`}>
+                                            {item.status ? item.status.toUpperCase() : 'PENDING'}
+                                        </span>
+                                        {item.assignedTutorEmail && (
+                                            <span className="text-[10px] text-info font-bold flex items-center gap-1">
+                                                <CheckCircle size={8} /> HIRED
+                                            </span>
+                                        )}
+                                    </div>
+                                </td>
+                                <td>
+                                    <ActionButtons item={item} />
+                                </td>
+                            </tr>
+                        ))}
+                    </tbody>
+                </table>
+            </div>
+
+            {/* Mobile Card View */}
+            <div className="lg:hidden grid grid-cols-1 gap-4">
+                {tuitions.map((item) => (
+                    <motion.div
+                        key={item._id}
+                        initial={{ opacity: 0, y: 10 }}
+                        animate={{ opacity: 1, y: 0 }}
+                    >
+                        <Card glass className="p-4 border border-base-200">
+                            <div className="flex justify-between items-start mb-3">
+                                <div>
+                                    <h3 className="font-bold text-lg text-primary leading-tight">{item.subject}</h3>
+                                    <span className="text-[10px] opacity-40 font-mono uppercase tracking-tighter">ID: {item._id.slice(-8)}</span>
+                                </div>
+                                <span className={`badge badge-sm font-bold border-0 ${item.status === 'approved' ? 'bg-success/10 text-success' :
+                                    item.status === 'rejected' ? 'bg-error/10 text-error' :
+                                        'bg-warning/10 text-warning'
+                                    }`}>
+                                    {item.status ? item.status.toUpperCase() : 'PENDING'}
+                                </span>
+                            </div>
+
+                            <div className="grid grid-cols-2 gap-4 mb-4 text-sm">
+                                <div className="space-y-1">
+                                    <p className="flex items-center gap-2 opacity-70">
+                                        <BookOpen size={14} className="text-info" /> {item.class}
+                                    </p>
+                                    <p className="flex items-center gap-2 opacity-70">
+                                        <MapPin size={14} className="text-error" /> {item.location}
+                                    </p>
+                                </div>
+                                <div className="space-y-1 text-right">
+                                    <p className="font-bold text-secondary">৳ {item.salary}</p>
+                                    <p className="text-xs opacity-50">{item.daysPerWeek} days/week</p>
+                                </div>
+                            </div>
+
+                            <div className="pt-3 border-t border-base-200">
+                                <p className="text-xs font-bold mb-2 opacity-40 uppercase tracking-widest">Management Operations</p>
+                                <ActionButtons item={item} condensed={true} />
+                            </div>
+                        </Card>
+                    </motion.div>
+                ))}
+            </div>
+
+            {tuitions.length === 0 && (
+                <div className="text-center py-20 bg-base-100 rounded-2xl border-2 border-dashed border-base-200 opacity-50">
+                    <p className="text-xl">No tuition posts found to manage.</p>
+                </div>
+            )}
         </div>
     );
 };

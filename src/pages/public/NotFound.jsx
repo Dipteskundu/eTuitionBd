@@ -1,10 +1,12 @@
 import React from 'react';
+import useTitle from '../../hooks/useTitle';
 import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { Home, AlertTriangle } from 'lucide-react';
 import Button from '../../components/ui/Button';
 
 const NotFound = () => {
+    useTitle('404 Not Found');
     return (
         <div className="min-h-[calc(100vh-64px)] flex items-center justify-center p-4 relative overflow-hidden">
             {/* Background Elements */}

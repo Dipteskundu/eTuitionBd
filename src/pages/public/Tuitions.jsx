@@ -1,4 +1,5 @@
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
+import { useQuery } from '@tanstack/react-query';
 import axiosInstance from '../../utils/axiosInstance';
 import { MapPin, BookOpen, DollarSign, Calendar, Search, ChevronLeft, ChevronRight, ArrowRight } from 'lucide-react';
 import { Link } from 'react-router-dom';
@@ -8,36 +9,30 @@ import Button from '../../components/ui/Button';
 import Spinner from '../../components/ui/Spinner';
 import Input from '../../components/ui/Input';
 import BookmarkButton from '../../components/ui/BookmarkButton';
+import useTitle from '../../hooks/useTitle';
 
 const Tuitions = () => {
-    const [tuitions, setTuitions] = useState([]);
-    const [loading, setLoading] = useState(true);
+    useTitle('Tuitions');
     const [searchTerm, setSearchTerm] = useState('');
     const [currentPage, setCurrentPage] = useState(1);
-    const [totalPages, setTotalPages] = useState(1);
-    const [total, setTotal] = useState(0);
     const limit = 9;
 
-    useEffect(() => {
-        const fetchTuitions = async () => {
-            setLoading(true);
-            try {
-                const res = await axiosInstance.get('/tuitions', {
-                    params: { page: currentPage, limit, search: searchTerm }
-                });
-                setTuitions(res.data.data || []);
-                setTotalPages(res.data.totalPages || 1);
-                setTotal(res.data.total || 0);
-            } catch (error) {
-                console.error("Failed to fetch tuitions", error);
-            } finally {
-                setLoading(false);
-            }
-        };
+    // Fetch tuitions with TanStack Query
+    const { data, isLoading: loading } = useQuery({
+        queryKey: ['tuitions', currentPage, searchTerm],
+        queryFn: async () => {
+            const res = await axiosInstance.get('/tuitions', {
+                params: { page: currentPage, limit, search: searchTerm }
+            });
+            return res.data;
+        },
+        keepPreviousData: true, // Keep old data while fetching new
+        staleTime: 2 * 60 * 1000, // 2 minutes
+    });
 
-        const debounceTimer = setTimeout(fetchTuitions, 300);
-        return () => clearTimeout(debounceTimer);
-    }, [currentPage, searchTerm]);
+    const tuitions = data?.data || [];
+    const totalPages = data?.totalPages || 1;
+    const total = data?.total || 0;
 
     const handlePageChange = (newPage) => {
         if (newPage >= 1 && newPage <= totalPages) {
@@ -175,54 +170,68 @@ const Tuitions = () => {
 
                         {/* Pagination */}
                         {totalPages > 1 && (
-                            <div className="flex justify-center items-center gap-2 mt-12">
-                                <Button
-                                    variant="outline"
-                                    size="sm"
-                                    onClick={() => handlePageChange(currentPage - 1)}
-                                    disabled={currentPage === 1}
-                                    leftIcon={ChevronLeft}
-                                >
-                                    Prev
-                                </Button>
-
-                                <div className="flex gap-1">
-                                    {[...Array(totalPages)].map((_, idx) => {
-                                        const pageNum = idx + 1;
-                                        if (
-                                            pageNum === 1 ||
-                                            pageNum === totalPages ||
-                                            (pageNum >= currentPage - 1 && pageNum <= currentPage + 1)
-                                        ) {
-                                            return (
-                                                <button
-                                                    key={pageNum}
-                                                    onClick={() => handlePageChange(pageNum)}
-                                                    className={`btn btn-sm ${currentPage === pageNum ? 'btn-primary' : 'btn-ghost'
-                                                        }`}
-                                                >
-                                                    {pageNum}
-                                                </button>
-                                            );
-                                        } else if (
-                                            pageNum === currentPage - 2 ||
-                                            pageNum === currentPage + 2
-                                        ) {
-                                            return <span key={pageNum} className="px-2">...</span>;
-                                        }
-                                        return null;
-                                    })}
+                            <div className="mt-12 space-y-4">
+                                {/* Page Info */}
+                                <div className="text-center">
+                                    <p className="text-sm text-base-content/60">
+                                        Showing <span className="font-semibold text-base-content">{((currentPage - 1) * limit) + 1}</span> to{' '}
+                                        <span className="font-semibold text-base-content">{Math.min(currentPage * limit, total)}</span> of{' '}
+                                        <span className="font-semibold text-base-content">{total}</span> tuitions
+                                    </p>
                                 </div>
 
-                                <Button
-                                    variant="outline"
-                                    size="sm"
-                                    onClick={() => handlePageChange(currentPage + 1)}
-                                    disabled={currentPage === totalPages}
-                                    rightIcon={ChevronRight}
-                                >
-                                    Next
-                                </Button>
+                                {/* Pagination Controls */}
+                                <div className="flex justify-center items-center gap-2">
+                                    <Button
+                                        variant="outline"
+                                        size="sm"
+                                        onClick={() => handlePageChange(currentPage - 1)}
+                                        disabled={currentPage === 1}
+                                        leftIcon={ChevronLeft}
+                                    >
+                                        Prev
+                                    </Button>
+
+                                    <div className="flex gap-1">
+                                        {[...Array(totalPages)].map((_, idx) => {
+                                            const pageNum = idx + 1;
+                                            if (
+                                                pageNum === 1 ||
+                                                pageNum === totalPages ||
+                                                (pageNum >= currentPage - 1 && pageNum <= currentPage + 1)
+                                            ) {
+                                                return (
+                                                    <button
+                                                        key={pageNum}
+                                                        onClick={() => handlePageChange(pageNum)}
+                                                        className={`btn btn-sm min-w-[2.5rem] ${currentPage === pageNum
+                                                            ? 'btn-primary'
+                                                            : 'btn-ghost hover:btn-outline'
+                                                            }`}
+                                                    >
+                                                        {pageNum}
+                                                    </button>
+                                                );
+                                            } else if (
+                                                pageNum === currentPage - 2 ||
+                                                pageNum === currentPage + 2
+                                            ) {
+                                                return <span key={pageNum} className="px-2 text-base-content/40">...</span>;
+                                            }
+                                            return null;
+                                        })}
+                                    </div>
+
+                                    <Button
+                                        variant="outline"
+                                        size="sm"
+                                        onClick={() => handlePageChange(currentPage + 1)}
+                                        disabled={currentPage === totalPages}
+                                        rightIcon={ChevronRight}
+                                    >
+                                        Next
+                                    </Button>
+                                </div>
                             </div>
                         )}
                     </>

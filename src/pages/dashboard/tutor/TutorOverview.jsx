@@ -1,12 +1,16 @@
 import React, { useEffect, useState } from 'react';
+import useTitle from '../../../hooks/useTitle';
 import useAxiosSecure from '../../../hooks/useAxiosSecure';
 import { motion } from 'framer-motion';
-import { Users, DollarSign, Briefcase, Star, Clock, CheckCircle } from 'lucide-react';
+import { Link } from 'react-router-dom';
+import { Users, DollarSign, Briefcase, Star, Clock, CheckCircle, TrendingUp, Calendar } from 'lucide-react';
 import Card from '../../../components/ui/Card';
 import Spinner from '../../../components/ui/Spinner';
 import useAuth from '../../../hooks/useAuth';
+import DashboardHeader from '../../../components/Shared/DashboardHeader';
 
 const TutorOverview = () => {
+    useTitle('Tutor Dashboard');
     const { user } = useAuth();
     const axiosSecure = useAxiosSecure();
     const [stats, setStats] = useState({
@@ -65,19 +69,16 @@ const TutorOverview = () => {
 
     return (
         <div className="space-y-6">
-            {/* Welcome Section */}
-            <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
-                <div>
-                    {/* Simplified Welcome */}
-                    <h1 className="font-heading text-2xl font-bold gradient-text mb-1">
-                        Dashboard Overview
-                    </h1>
-                    <p className="text-base-content/70">Track your earnings and job applications here.</p>
-                </div>
-                <div className="badge badge-primary badge-outline gap-2 p-3">
-                    <Clock size={14} />
-                    {new Date().toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}
-                </div>
+            <DashboardHeader />
+
+            {/* Quick Actions */}
+            <div className="flex flex-wrap gap-4 mb-2">
+                <Link to="/dashboard/tutor/available-tuitions" className="btn btn-primary gap-2">
+                    <TrendingUp size={18} /> Find New Tuitions
+                </Link>
+                <Link to="/dashboard/tutor/applied-tuitions" className="btn btn-outline gap-2">
+                    <Calendar size={18} /> My Applications
+                </Link>
             </div>
 
             {/* Stats Grid */}
@@ -90,7 +91,7 @@ const TutorOverview = () => {
                             </div>
                             <div>
                                 <p className="text-sm text-base-content/60">{stat.title}</p>
-                                <h3 className="text-3xl font-heading font-bold gradient-text">
+                                <h3 className="text-3xl font-heading font-bold text-primary">
                                     {stat.value}
                                 </h3>
                             </div>
@@ -129,7 +130,7 @@ const TutorOverview = () => {
                 {/* Profile Card */}
                 <div>
                     {/* Reusing existing card logic but with dynamic user data if needed for stats or quick links */}
-                    <Card className="h-full bg-gradient-to-br from-secondary to-purple-600 text-white border-none">
+                    <Card className="h-full bg-secondary text-white border-none">
                         <div className="flex flex-col items-center text-center h-full justify-center space-y-4 py-6">
                             <div className="avatar">
                                 <div className="w-20 rounded-full ring ring-white ring-offset-2 ring-offset-secondary">
@@ -141,8 +142,8 @@ const TutorOverview = () => {
                                 <p className="text-purple-100 text-sm">{user?.email}</p>
                             </div>
                             <div className="w-full pt-4">
-                                <a href="/dashboard/tutor/profile" className="btn btn-white w-full text-secondary hover:bg-gray-100 border-none">Update Profile</a>
-                                <a href="/dashboard/tutor/available-tuitions" className="btn btn-outline text-white hover:bg-white/20 w-full mt-3 border-white/50">Find Tuitions</a>
+                                <Link to="/dashboard/tutor/profile" className="btn btn-white w-full text-secondary hover:bg-gray-100 border-none">Update Profile</Link>
+                                <Link to="/dashboard/tutor/available-tuitions" className="btn btn-outline text-white hover:bg-white/20 w-full mt-3 border-white/50">Find Tuitions</Link>
                             </div>
                         </div>
                     </Card>

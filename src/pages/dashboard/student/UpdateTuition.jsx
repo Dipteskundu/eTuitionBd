@@ -1,52 +1,72 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import useTitle from '../../../hooks/useTitle';
 import { useForm } from 'react-hook-form';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 import useAuth from '../../../hooks/useAuth';
 import useAxiosSecure from '../../../hooks/useAxiosSecure';
 import useToast from '../../../hooks/useToast';
-import { Save, BookOpen, MapPin, DollarSign, Calendar, Clock, User, FileText } from 'lucide-react';
+import { Save, BookOpen, MapPin, DollarSign, Calendar, Clock, User, FileText, ArrowLeft } from 'lucide-react';
 import Button from '../../../components/ui/Button';
 import Input from '../../../components/ui/Input';
 import Select from '../../../components/ui/Select';
 import Card from '../../../components/ui/Card';
+import Spinner from '../../../components/ui/Spinner';
 import { motion } from 'framer-motion';
 
-const PostTuition = () => {
-    useTitle('Post Tuition');
+const UpdateTuition = () => {
+    const { id } = useParams();
+    useTitle('Update Tuition');
     const { user } = useAuth();
     const axiosSecure = useAxiosSecure();
     const { success: toastSuccess, error: toastError } = useToast();
     const navigate = useNavigate();
-    const [loading, setLoading] = useState(false);
+    const [loading, setLoading] = useState(true);
+    const [submitting, setSubmitting] = useState(false);
 
     const { register, handleSubmit, reset, formState: { errors } } = useForm();
 
+    useEffect(() => {
+        const fetchTuition = async () => {
+            try {
+                const res = await axiosSecure.get(`/tuitions/${id}`);
+                reset(res.data);
+            } catch (err) {
+                console.error(err);
+                toastError('Failed to fetch tuition details.');
+                navigate('/dashboard/student/my-tuitions');
+            } finally {
+                setLoading(false);
+            }
+        };
+        fetchTuition();
+    }, [id, axiosSecure, reset, navigate, toastError]);
+
     const onSubmit = async (data) => {
-        setLoading(true);
+        setSubmitting(true);
         try {
             const tuitionData = {
                 ...data,
-                studentName: user?.displayName,
-                studentEmail: user?.email,
-                studentPhoto: user?.photoURL,
                 salary: parseFloat(data.salary),
-                class: data.class,
+                updated_at: new Date()
             };
 
-            const res = await axiosSecure.post('/tuitions-post', tuitionData);
-            if (res.data.insertedId) {
-                toastSuccess('Tuition posted successfully!');
-                reset(); // Clear form after successful submission
+            const res = await axiosSecure.put(`/tuition/${id}`, tuitionData);
+            if (res.data.modifiedCount > 0) {
+                toastSuccess('Tuition updated successfully!');
+                navigate('/dashboard/student/my-tuitions');
+            } else {
+                toastSuccess('No changes made.');
                 navigate('/dashboard/student/my-tuitions');
             }
         } catch (error) {
             console.error(error);
-            toastError('Failed to post tuition.');
+            toastError('Failed to update tuition.');
         } finally {
-            setLoading(false);
+            setSubmitting(false);
         }
     };
+
+    if (loading) return <Spinner variant="dots" fullScreen />;
 
     return (
         <div className="max-w-4xl mx-auto space-y-6">
@@ -54,15 +74,20 @@ const PostTuition = () => {
                 initial={{ opacity: 0, y: -20 }}
                 animate={{ opacity: 1, y: 0 }}
             >
-                <div className="flex flex-col md:flex-row justify-between items-center bg-primary/5 p-6 rounded-2xl border border-primary-500/20 mb-8 backdrop-blur-sm">
+                <div className="flex flex-col md:flex-row justify-between items-center bg-secondary/5 p-6 rounded-2xl border border-secondary-500/20 mb-8 backdrop-blur-sm">
                     <div>
-                        <h1 className="text-3xl font-heading font-bold text-primary">Post a Requirement</h1>
-                        <p className="text-base-content/70 mt-1">Fill in the details to find the perfect tutor.</p>
+                        <h1 className="text-3xl font-heading font-bold text-secondary">Update Requirement</h1>
+                        <p className="text-base-content/70 mt-1">Modify your tuition details below.</p>
                     </div>
                     <div className="hidden md:block">
-                        <div className="w-16 h-16 bg-white/20 rounded-full flex items-center justify-center backdrop-blur-md shadow-inner">
-                            <BookOpen className="text-primary w-8 h-8" />
-                        </div>
+                        <Button
+                            variant="ghost"
+                            size="sm"
+                            leftIcon={ArrowLeft}
+                            onClick={() => navigate(-1)}
+                        >
+                            Back
+                        </Button>
                     </div>
                 </div>
             </motion.div>
@@ -73,9 +98,8 @@ const PostTuition = () => {
                 transition={{ delay: 0.1 }}
             >
                 <Card glass className="p-8 relative overflow-hidden">
-                    {/* Decorative Elements */}
-                    <div className="absolute top-0 right-0 w-64 h-64 bg-primary/5 rounded-full blur-3xl -z-10 translate-x-1/2 -translate-y-1/2" />
-                    <div className="absolute bottom-0 left-0 w-64 h-64 bg-secondary/5 rounded-full blur-3xl -z-10 -translate-x-1/2 translate-y-1/2" />
+                    <div className="absolute top-0 right-0 w-64 h-64 bg-secondary/5 rounded-full blur-3xl -z-10 translate-x-1/2 -translate-y-1/2" />
+                    <div className="absolute bottom-0 left-0 w-64 h-64 bg-primary/5 rounded-full blur-3xl -z-10 -translate-x-1/2 translate-y-1/2" />
 
                     <form onSubmit={handleSubmit(onSubmit)} className="space-y-8 relative z-10">
                         {/* Section 1: Academic Details */}
@@ -200,12 +224,12 @@ const PostTuition = () => {
                             <Button
                                 type="submit"
                                 variant="gradient"
-                                isLoading={loading}
+                                isLoading={submitting}
                                 size="lg"
                                 leftIcon={Save}
                                 className="px-8 shadow-lg shadow-primary/20"
                             >
-                                Post Tuition
+                                Update Changes
                             </Button>
                         </div>
                     </form>
@@ -215,4 +239,4 @@ const PostTuition = () => {
     );
 };
 
-export default PostTuition;
+export default UpdateTuition;

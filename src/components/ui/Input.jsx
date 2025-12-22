@@ -123,7 +123,9 @@ const Input = forwardRef((
                         animate={{ opacity: 1, y: 0 }}
                         className="label"
                     >
-                        <span className="label-text-alt text-error font-medium">{error}</span>
+                        <span className="label-text-alt text-error font-medium">
+                            {typeof error === 'object' ? error.message : error}
+                        </span>
                     </motion.label>
                 )}
             </div>

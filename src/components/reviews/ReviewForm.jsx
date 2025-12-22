@@ -62,8 +62,8 @@ const ReviewForm = ({ tutorEmail, tuitionId, onSuccess }) => {
                             >
                                 <Star
                                     className={`w-8 h-8 ${star <= (hover || rating)
-                                            ? 'fill-warning text-warning'
-                                            : 'text-base-300'
+                                        ? 'fill-warning text-warning'
+                                        : 'text-base-300'
                                         }`}
                                 />
                             </button>
@@ -89,7 +89,6 @@ const ReviewForm = ({ tutorEmail, tuitionId, onSuccess }) => {
                     <Button
                         type="submit"
                         disabled={loading || rating === 0}
-                        items-center
                     >
                         {loading && <Spinner size="sm" className="mr-2" />}
                         Submit Review

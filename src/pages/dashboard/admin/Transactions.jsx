@@ -1,8 +1,10 @@
 import React, { useEffect, useState } from 'react';
+import useTitle from '../../../hooks/useTitle';
 import useAxiosSecure from '../../../hooks/useAxiosSecure';
 import useToast from '../../../hooks/useToast';
 
 const Transactions = () => {
+    useTitle('Transactions');
     const axiosSecure = useAxiosSecure();
     const toast = useToast();
     const [transactions, setTransactions] = useState([]);

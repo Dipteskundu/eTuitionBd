@@ -1,12 +1,16 @@
 import React, { useEffect, useState } from 'react';
+import useTitle from '../../../hooks/useTitle';
 import useAxiosSecure from '../../../hooks/useAxiosSecure';
+import { Link } from 'react-router-dom';
 import { Users, BookOpen, DollarSign, Activity } from 'lucide-react';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
+import { motion } from 'framer-motion';
 import Card from '../../../components/ui/Card';
 import Spinner from '../../../components/ui/Spinner';
-import { motion } from 'framer-motion';
+import DashboardHeader from '../../../components/Shared/DashboardHeader';
 
 const AdminOverview = () => {
+    useTitle('Admin Dashboard');
     const axiosSecure = useAxiosSecure();
     const [stats, setStats] = useState({
         totalUsers: 0,
@@ -71,12 +75,17 @@ const AdminOverview = () => {
             initial="hidden"
             animate="visible"
         >
-            <motion.h1
-                variants={itemVariants}
-                className="font-heading text-4xl font-bold gradient-text"
-            >
-                Dashboard Overview
-            </motion.h1>
+            <DashboardHeader />
+
+            {/* Quick Actions */}
+            <div className="flex flex-wrap gap-4 mb-2">
+                <Link to="/dashboard/admin/tuitions" className="btn btn-primary gap-2">
+                    <BookOpen size={18} /> Manage Tuitions
+                </Link>
+                <Link to="/dashboard/admin/reports" className="btn btn-outline gap-2">
+                    <Activity size={18} /> System Reports
+                </Link>
+            </div>
 
             {/* Stats Cards */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
@@ -102,7 +111,7 @@ const AdminOverview = () => {
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
                 <div className="card bg-base-100 shadow-xl border border-base-200 p-6">
                     <h3 className="text-xl font-bold mb-4">Platform Distribution</h3>
-                    <div className="w-full h-[300px]">
+                    <div className="w-full min-w-0" style={{ height: 300 }}>
                         <ResponsiveContainer width="100%" height="100%" minWidth={0}>
                             <BarChart data={data}>
                                 <CartesianGrid strokeDasharray="3 3" />

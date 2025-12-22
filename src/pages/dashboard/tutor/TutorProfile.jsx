@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import useTitle from '../../../hooks/useTitle';
 import useAuth from '../../../hooks/useAuth';
 import useAxiosSecure from '../../../hooks/useAxiosSecure';
 import useToast from '../../../hooks/useToast';
@@ -11,9 +12,10 @@ import Spinner from '../../../components/ui/Spinner';
 import { motion } from 'framer-motion';
 
 const TutorProfile = () => {
+    useTitle('Professional Profile');
     const { user } = useAuth();
     const axiosSecure = useAxiosSecure();
-    const { showToast } = useToast();
+    const toast = useToast();
     const [loading, setLoading] = useState(true);
     const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -59,11 +61,11 @@ const TutorProfile = () => {
 
             const res = await axiosSecure.put('/tutor/profile', payload);
             if (res.data.modifiedCount > 0 || res.data.matchedCount > 0) {
-                showToast('Professional profile updated successfully!', 'success');
+                toast.success('Professional profile updated successfully!');
             }
         } catch (error) {
             console.error(error);
-            showToast('Failed to update professional profile.', 'error');
+            toast.error('Failed to update professional profile.');
         } finally {
             setIsSubmitting(false);
         }
