@@ -1,16 +1,44 @@
-# React + Vite
+# eTuitionBd - Frontend 🎓
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+eTuitionBd is a premium, full-stack tuition management platform designed to connect students with professional tutors. This repository contains the **Frontend** application built with modern web technologies to provide a fast, responsive, and interactive experience.
 
-Currently, two official plugins are available:
+LIve Link: https://etuitionbd-the-best-tuition-media.netlify.app
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) (or [oxc](https://oxc.rs) when used in [rolldown-vite](https://vite.dev/guide/rolldown)) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+## 🚀 Key Features
 
-## React Compiler
+- **Personalized Dashboards**: Distinct interfaces for Students, Tutors, and Admins.
+- **Tuition Posting & Management**: Students can post tuition requirements and manage applications.
+- **Tutor Discovery**: Advanced search and filtering to find the perfect tutor based on subject, location, and class.
+- **Real-time Notifications**: Instant alerts for tutors when a new tuition is posted and for students when applications are received.
+- **Integrated Chat System**: Secure messaging between students and tutors.
+- **Secure Payments**: Integrated Stripe payment flow for hiring tutors.
+- **Scheduling & Exports**: Manage study sessions and export schedules to PDF.
+- **Data Visualization**: Beautiful analytics charts for earnings and activity tracking.
+- **Dark/Light Mode**: Smooth theme switching with framer-motion animations.
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+## 🛠️ Technologies & Libraries
 
-## Expanding the ESLint configuration
+### **Core Stack**
+- **React 19**: Modern UI development with concurrent features.
+- **Vite**: Ultra-fast build tool and development server.
+- **Tailwind CSS & DaisyUI**: Utility-first styling with a premium component library.
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+### **Interactive Elements**
+- **Framer Motion**: Smooth page transitions and micro-animations.
+- **Lucide React**: Clean and consistent icon set.
+- **SweetAlert2 & React Hot Toast**: User-friendly alerts and notifications.
+
+### **State & Data Management**
+- **Axios**: Efficient API communication with interceptors for security.
+- **TanStack Query (v5)**: Robust server-state management, caching, and synchronization.
+- **React Hook Form**: Performant and flexible form validation.
+
+### **Utilities**
+- **Firebase Auth**: Secure client-side authentication.
+- **Recharts**: Interactive dashboard analytics.
+- **jsPDF & AutoTable**: Professional PDF generation for schedules.
+
+
+
+
+Built with ❤️ by [Dipto Kundu](https://github.com/Dipteskundu)
