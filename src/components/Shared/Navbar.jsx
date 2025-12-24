@@ -10,7 +10,8 @@ import useAuth from '../../hooks/useAuth';
 import useRole from '../../hooks/useRole';
 import { ThemeContext } from '../../context/ThemeContext';
 import { ROLES } from '../../utils/constants';
-import Button from '../ui/Button';
+import NotificationBell from '../ui/NotificationBell';
+import ThemeToggle from '../ui/ThemeToggle';
 import logo from '../../assets/logo.png';
 
 const Navbar = () => {
@@ -164,12 +165,12 @@ const Navbar = () => {
 
                             {/* Desktop Auth & Actions - Right Aligned */}
                             <div className="hidden md:flex items-center gap-3">
-                                <button
-                                    onClick={toggleTheme}
-                                    className="w-10 h-10 rounded-full flex items-center justify-center text-slate-500 hover:bg-slate-100 dark:text-slate-400 dark:hover:bg-slate-800 transition-all hover:scale-105 active:scale-95"
-                                >
-                                    {theme === 'light' ? <Moon size={18} /> : <Sun size={18} />}
-                                </button>
+                                {user && (
+                                    <div className="mr-1">
+                                        <NotificationBell />
+                                    </div>
+                                )}
+                                <ThemeToggle />
 
                                 {user ? (
                                     <div className="dropdown dropdown-end">
@@ -239,12 +240,8 @@ const Navbar = () => {
 
                             {/* Mobile Menu Button - Kept Exactly as Requested */}
                             <div className="md:hidden flex items-center gap-3 z-50">
-                                <button
-                                    onClick={toggleTheme}
-                                    className="w-10 h-10 rounded-full flex items-center justify-center text-slate-500 hover:bg-slate-100 dark:text-slate-400 dark:hover:bg-slate-800 transition-colors"
-                                >
-                                    {theme === 'light' ? <Moon size={20} /> : <Sun size={20} />}
-                                </button>
+                                {user && <NotificationBell />}
+                                <ThemeToggle />
 
                                 <motion.button
                                     whileTap={{ scale: 0.9 }}
