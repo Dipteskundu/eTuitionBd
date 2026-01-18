@@ -10,12 +10,14 @@ https://etuitionbd-the-best-tuition-media.netlify.app/
 
 
 ## � Screenshot
-
-<p align="center">
+Portal Home Page & Student Dashboard
+<p align="left">
   <img width="20%" src="https://i.ibb.co.com/dsbSNHmL/Screenshot-2025-12-31-185631.png" alt="Diptes Kumar Kundu Profile Picture" />
 </p> 
 
+
 <p align="center">
+  
   <img width="20%" src="https://i.ibb.co.com/7tWx2TK6/image.png" alt="Diptes Kumar Kundu Profile Picture" />
 </p>
 
