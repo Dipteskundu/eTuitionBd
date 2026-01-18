@@ -106,7 +106,7 @@ Development and tooling:
 Create a `.env` file in the project root and provide the required Vite environment variables:
 
 ```env
-VITE_API_BASE_URL=https://etuitionbd-server-dkbd.onrender.com
+VITE_API_BASE_URL=BACKEND_SERVER_API_KEY
 
 VITE_FIREBASE_API_KEY=your_firebase_api_key
 VITE_FIREBASE_AUTH_DOMAIN=your_firebase_auth_domain
