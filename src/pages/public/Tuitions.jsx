@@ -7,22 +7,35 @@ import { motion } from 'framer-motion';
 import Card from '../../components/ui/Card';
 import Button from '../../components/ui/Button';
 import Spinner from '../../components/ui/Spinner';
+import { CardSkeleton } from '../../components/ui/Skeleton';
 import Input from '../../components/ui/Input';
+import Select from '../../components/ui/Select';
 import BookmarkButton from '../../components/ui/BookmarkButton';
 import useTitle from '../../hooks/useTitle';
 
 const Tuitions = () => {
     useTitle('Tuitions');
     const [searchTerm, setSearchTerm] = useState('');
+    const [filters, setFilters] = useState({
+        class: '',
+        subject: '',
+        location: '',
+        sort: ''
+    });
     const [currentPage, setCurrentPage] = useState(1);
-    const limit = 9;
+    const limit = 9; // Changed to match grid requirement
 
     // Fetch tuitions with TanStack Query
     const { data, isLoading: loading } = useQuery({
-        queryKey: ['tuitions', currentPage, searchTerm],
+        queryKey: ['tuitions', currentPage, searchTerm, filters],
         queryFn: async () => {
             const res = await axiosInstance.get('/tuitions', {
-                params: { page: currentPage, limit, search: searchTerm }
+                params: {
+                    page: currentPage,
+                    limit,
+                    search: searchTerm,
+                    ...filters
+                }
             });
             return res.data;
         },
@@ -64,7 +77,7 @@ const Tuitions = () => {
 
             <div className="container mx-auto px-4 relative z-10">
                 {/* Header Section */}
-                <div className="text-center max-w-3xl mx-auto mb-12">
+                <div className="text-center max-w-3xl mx-auto mb-8">
                     <h1 className="text-4xl md:text-5xl font-heading font-bold gradient-text mb-4">
                         Find Your Perfect Tuition
                     </h1>
@@ -73,7 +86,7 @@ const Tuitions = () => {
                     </p>
 
                     {/* Search Bar */}
-                    <div className="max-w-xl mx-auto">
+                    <div className="max-w-xl mx-auto mb-6">
                         <Input
                             placeholder="Search by subject or location..."
                             leftIcon={<Search size={18} />}
@@ -86,9 +99,59 @@ const Tuitions = () => {
                         />
                     </div>
 
+                    {/* Filters & Sort */}
+                    <div className="flex flex-col md:flex-row gap-3 justify-center items-center mb-6">
+                        <Select
+                            className="bg-base-100/50 backdrop-blur-sm w-full md:w-auto min-w-[140px]"
+                            placeholder="All Classes"
+                            options={["Class 1", "Class 2", "Class 3", "Class 4", "Class 5", "Class 6", "Class 7", "Class 8", "Class 9", "Class 10", "SSC", "HSC", "O Level", "A Level"]}
+                            value={filters.class}
+                            onChange={(e) => { setFilters({ ...filters, class: e.target.value }); setCurrentPage(1); }}
+                        />
+                        <Select
+                            className="bg-base-100/50 backdrop-blur-sm w-full md:w-auto min-w-[140px]"
+                            placeholder="All Subjects"
+                            options={["Math", "English", "Science", "Physics", "Chemistry", "Biology", "Bangla", "ICT", "Accounting", "Higher Math"]}
+                            value={filters.subject}
+                            onChange={(e) => { setFilters({ ...filters, subject: e.target.value }); setCurrentPage(1); }}
+                        />
+                        <Select
+                            className="bg-base-100/50 backdrop-blur-sm w-full md:w-auto min-w-[140px]"
+                            placeholder="Location"
+                            options={["Dhaka", "Chattogram", "Sylhet", "Rajshahi", "Khulna", "Barishal", "Rangpur", "Mymensingh"]}
+                            value={filters.location}
+                            onChange={(e) => { setFilters({ ...filters, location: e.target.value }); setCurrentPage(1); }}
+                        />
+                        <Select
+                            className="bg-base-100/50 backdrop-blur-sm w-full md:w-auto min-w-[140px]"
+                            placeholder="Sort By"
+                            options={[
+                                { label: 'Newest First', value: 'createdAt:desc' },
+                                { label: 'Salary: High to Low', value: 'salary:desc' },
+                                { label: 'Salary: Low to High', value: 'salary:asc' }
+                            ]}
+                            value={filters.sort}
+                            onChange={(e) => { setFilters({ ...filters, sort: e.target.value }); setCurrentPage(1); }}
+                        />
+                        {(filters.class || filters.subject || filters.location || filters.sort) && (
+                            <Button
+                                variant="ghost"
+                                size="sm"
+                                className="text-error"
+                                onClick={() => {
+                                    setFilters({ class: '', subject: '', location: '', sort: '' });
+                                    setSearchTerm('');
+                                    setCurrentPage(1);
+                                }}
+                            >
+                                Clear
+                            </Button>
+                        )}
+                    </div>
+
                     {/* Results Count */}
                     {total > 0 && (
-                        <p className="text-sm text-base-content/60 mt-4">
+                        <p className="text-sm text-base-content/60">
                             Showing {tuitions.length} of {total} tuitions
                         </p>
                     )}
@@ -96,8 +159,10 @@ const Tuitions = () => {
 
                 {/* Content Section */}
                 {loading ? (
-                    <div className="flex justify-center py-20">
-                        <Spinner variant="dots" size="lg" />
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                        {[...Array(8)].map((_, i) => (
+                            <CardSkeleton key={i} />
+                        ))}
                     </div>
                 ) : tuitions.length === 0 ? (
                     <motion.div
@@ -123,46 +188,52 @@ const Tuitions = () => {
                         >
                             {tuitions.map((tuition) => (
                                 <motion.div key={tuition._id} variants={itemVariants}>
-                                    <Card className="h-full flex flex-col relative" hover glass>
+                                    <Card className="h-full flex flex-col relative overflow-hidden group" hover>
                                         <div className="absolute top-3 right-3 z-10">
                                             <BookmarkButton itemId={tuition._id} type="tuition" />
                                         </div>
-                                        <div className="flex justify-between items-start mb-4 pr-8">
-                                            <div>
+
+                                        {/* Tuition Image Placeholder */}
+                                        <div className="h-32 bg-gradient-to-r from-primary/10 to-secondary/10 flex items-center justify-center relative overflow-hidden">
+                                            <div className="absolute inset-0 bg-grid-pattern opacity-10"></div>
+                                            <div className="w-16 h-16 rounded-full bg-white/50 backdrop-blur-sm flex items-center justify-center text-primary shadow-sm group-hover:scale-110 transition-transform duration-300">
+                                                <BookOpen size={32} />
+                                            </div>
+                                        </div>
+
+                                        <div className="p-5 flex flex-col flex-grow">
+                                            <div className="mb-4">
                                                 <div className="badge badge-primary badge-outline mb-2">{tuition.class}</div>
-                                                <h2 className="text-xl font-bold text-base-content group-hover:text-primary transition-colors">
+                                                <h2 className="text-lg font-bold text-base-content line-clamp-1 group-hover:text-primary transition-colors">
                                                     {tuition.subject}
                                                 </h2>
                                             </div>
-                                            <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center">
-                                                <BookOpen className="w-5 h-5 text-primary" />
+
+                                            <p className="text-sm text-base-content/60 line-clamp-2 mb-6 flex-grow">
+                                                {tuition.description || "No specific requirements provided for this tuition."}
+                                            </p>
+
+                                            <div className="space-y-3 mb-6">
+                                                <div className="flex items-center gap-3 text-sm text-base-content/70">
+                                                    <MapPin size={16} className="text-secondary shrink-0" />
+                                                    <span className="truncate">{tuition.location}</span>
+                                                </div>
+                                                <div className="flex items-center gap-3 text-sm text-base-content/70">
+                                                    <DollarSign size={16} className="text-success shrink-0" />
+                                                    <span className="font-bold text-success/90">{tuition.salary} BDT/Month</span>
+                                                </div>
+                                                <div className="flex items-center gap-3 text-sm text-base-content/70">
+                                                    <Calendar size={16} className="text-warning shrink-0" />
+                                                    <span>{tuition.daysPerWeek} Days/Week</span>
+                                                </div>
                                             </div>
+
+                                            <Link to={`/tuitions/${tuition._id}`} className="block mt-auto">
+                                                <Button variant="outline" fullWidth rightIcon={<ArrowRight size={18} />} className="whitespace-nowrap">
+                                                    View Details
+                                                </Button>
+                                            </Link>
                                         </div>
-
-                                        <p className="text-sm text-base-content/60 line-clamp-2 mb-6 flex-grow">
-                                            {tuition.description || "No specific requirements provided for this tuition."}
-                                        </p>
-
-                                        <div className="space-y-3 mb-6">
-                                            <div className="flex items-center gap-3 text-sm text-base-content/70">
-                                                <MapPin size={16} className="text-secondary shrink-0" />
-                                                <span className="truncate">{tuition.location}</span>
-                                            </div>
-                                            <div className="flex items-center gap-3 text-sm text-base-content/70">
-                                                <DollarSign size={16} className="text-success shrink-0" />
-                                                <span className="font-bold text-success/90">{tuition.salary} BDT/Month</span>
-                                            </div>
-                                            <div className="flex items-center gap-3 text-sm text-base-content/70">
-                                                <Calendar size={16} className="text-warning shrink-0" />
-                                                <span>{tuition.daysPerWeek} Days/Week</span>
-                                            </div>
-                                        </div>
-
-                                        <Link to={`/tuitions/${tuition._id}`} className="block mt-auto">
-                                            <Button variant="outline" fullWidth rightIcon={<ArrowRight size={18} />}>
-                                                View Details
-                                            </Button>
-                                        </Link>
                                     </Card>
                                 </motion.div>
                             ))}

@@ -12,6 +12,7 @@ import { ThemeContext } from '../../context/ThemeContext';
 import { ROLES } from '../../utils/constants';
 import NotificationBell from '../ui/NotificationBell';
 import ThemeToggle from '../ui/ThemeToggle';
+import Button from '../ui/Button';
 import logo from '../../assets/logo.png';
 
 const Navbar = () => {

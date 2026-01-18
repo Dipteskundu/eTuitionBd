@@ -28,6 +28,7 @@ const TutorDetails = lazy(() => import('../pages/public/TutorDetails'));
 const NotFound = lazy(() => import('../pages/public/NotFound'));
 const About = lazy(() => import('../pages/public/About'));
 const Contact = lazy(() => import('../pages/public/Contact'));
+const Faq = lazy(() => import('../pages/public/Faq'));
 
 // Lazy-loaded Auth Pages
 const Login = lazy(() => import('../pages/Auth/Login'));
@@ -81,17 +82,20 @@ const AppRoutes = () => {
                     <Route path="/tutors" element={<Tutors />} />
                     <Route path="/about" element={<About />} />
                     <Route path="/contact" element={<Contact />} />
+                    <Route path="/faq" element={<Faq />} />
                     <Route path="/login" element={<Login />} />
                     <Route path="/register" element={<Register />} />
                     <Route path="/forgot-password" element={<ForgotPassword />} />
                     <Route path="/unauthorized" element={<div className="p-10 text-center text-red-500 font-bold text-2xl">Unauthorized Access</div>} />
-                </Route>
-
-                {/* Protected Detail Pages - Requires Login */}
-                <Route element={<PrivateRoute><MainLayout /></PrivateRoute>}>
                     <Route path="/tuitions/:id" element={<TuitionDetails />} />
                     <Route path="/tutors/:id" element={<TutorDetails />} />
                 </Route>
+
+                {/* Protected Detail Pages - Requires Login - MOVED TO PUBLIC */}
+                {/* <Route element={<PrivateRoute><MainLayout /></PrivateRoute>}>
+                    <Route path="/tuitions/:id" element={<TuitionDetails />} />
+                    <Route path="/tutors/:id" element={<TutorDetails />} />
+                </Route> */}
 
                 {/* Protected Student & Tutor Dashboard Routes */}
                 <Route element={<PrivateRoute><DashboardLayout /></PrivateRoute>}>

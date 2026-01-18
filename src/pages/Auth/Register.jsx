@@ -13,10 +13,11 @@ import Card from '../../components/ui/Card';
 import { ROLES } from '../../utils/constants';
 import { uploadImage } from '../../utils/uploadImage';
 import axiosInstance from '../../utils/axiosInstance';
+import Form from '../../components/ui/Form';
 
 const Register = () => {
     useTitle('Register');
-    const { register, handleSubmit, watch, setValue, reset, formState: { errors } } = useForm({
+    const { register, handleSubmit, watch, setValue, reset, formState: { errors, dirtyFields } } = useForm({
         mode: 'onChange',
         defaultValues: {
             role: ROLES.STUDENT
@@ -127,7 +128,7 @@ const Register = () => {
                             </motion.div>
                         </div>
 
-                        <form onSubmit={handleSubmit(onSubmit)} className="space-y-5">
+                        <Form onSubmit={handleSubmit(onSubmit)}>
                             {/* Role Selection */}
                             <div className="grid grid-cols-2 gap-4">
                                 <motion.div
@@ -181,21 +182,21 @@ const Register = () => {
                             <input type="hidden" {...register("role")} />
 
                             <Input
-                                floating
                                 label="Full Name"
                                 placeholder="Enter your full name"
                                 leftIcon={<User size={18} />}
                                 error={errors.name?.message}
+                                success={!errors.name && dirtyFields.name}
                                 {...register("name", { required: "Full Name is required" })}
                             />
 
                             <Input
-                                floating
                                 label="Email Address"
                                 type="email"
                                 placeholder="Enter your email"
                                 leftIcon={<Mail size={18} />}
                                 error={errors.email?.message}
+                                success={!errors.email && dirtyFields.email}
                                 {...register("email", {
                                     required: "Email is required",
                                     pattern: {
@@ -206,12 +207,12 @@ const Register = () => {
                             />
 
                             <Input
-                                floating
                                 label="Phone Number"
                                 type="tel"
                                 placeholder="Enter your phone number"
                                 leftIcon={<Phone size={18} />}
                                 error={errors.phone?.message}
+                                success={!errors.phone && dirtyFields.phone}
                                 {...register("phone", { required: "Phone Number is required" })}
                             />
 
@@ -222,6 +223,7 @@ const Register = () => {
                                     placeholder="Enter password"
                                     leftIcon={<Lock size={18} />}
                                     error={errors.password?.message}
+                                    success={!errors.password && dirtyFields.password}
                                     {...register("password", {
                                         required: "Password is required",
                                         minLength: {
@@ -240,6 +242,7 @@ const Register = () => {
                                     placeholder="Confirm password"
                                     leftIcon={<Lock size={18} />}
                                     error={errors.confirmPassword?.message}
+                                    success={!errors.confirmPassword && dirtyFields.confirmPassword}
                                     {...register("confirmPassword", {
                                         required: "Confirm Password is required",
                                         validate: (val) => {
@@ -288,7 +291,7 @@ const Register = () => {
                             >
                                 Create Account
                             </Button>
-                        </form>
+                        </Form>
 
                         {/* Login Link */}
                         <p className="text-center mt-6 text-sm text-base-content/70">

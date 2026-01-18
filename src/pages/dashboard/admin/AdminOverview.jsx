@@ -19,15 +19,25 @@ const AdminOverview = () => {
         totalTutorCount: 0,
         totalRevenue: 0
     });
+    const [recentUsers, setRecentUsers] = useState([]);
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
         const fetchStats = async () => {
             try {
-                const res = await axiosSecure.get('/reports/analytics');
-                setStats(res.data);
+                const [statsRes, usersRes] = await Promise.all([
+                    axiosSecure.get('/reports/analytics'),
+                    axiosSecure.get('/users?page=1&limit=5')
+                ]);
+                setStats(statsRes.data);
+                setRecentUsers(usersRes.data.users || []); // Assuming API returns { users: [], ... } for pagination
             } catch (error) {
                 console.error("Failed to fetch admin stats", error);
+                // Fallback content if API fails
+                setRecentUsers([
+                    { _id: '1', name: 'Demo Student', email: 'student@example.com', role: 'student', createdAt: new Date() },
+                    { _id: '2', name: 'Demo Tutor', email: 'tutor@example.com', role: 'tutor', createdAt: new Date() }
+                ]);
             } finally {
                 setLoading(false);
             }
@@ -57,14 +67,6 @@ const AdminOverview = () => {
             transition: {
                 staggerChildren: 0.1
             }
-        }
-    };
-
-    const itemVariants = {
-        hidden: { y: 20, opacity: 0 },
-        visible: {
-            y: 0,
-            opacity: 1
         }
     };
 
@@ -124,19 +126,53 @@ const AdminOverview = () => {
                     </div>
                 </div>
 
-                {/* Placeholder for Recent Activity Feed if API implemented later */}
+                {/* Recent Registrations Table */}
                 <div className="card bg-base-100 shadow-xl border border-base-200 p-6">
-                    <h3 className="text-xl font-bold mb-4">Recent Activities</h3>
-                    <div className="space-y-4">
-                        <div className="flex gap-4 items-center">
-                            <div className="badge badge-info badge-xs"></div>
-                            <span className="text-sm">Admin dashboard initialized.</span>
-                        </div>
-                        <div className="flex gap-4 items-center">
-                            <div className="badge badge-success badge-xs"></div>
-                            <span className="text-sm">System metrics tracking enabled.</span>
-                        </div>
-                        {/* Static since we didn't implement strict admin activity log yet */}
+                    <div className="flex justify-between items-center mb-4">
+                        <h3 className="text-xl font-bold">Recent Registrations</h3>
+                        <Link to="/dashboard/admin/users" className="btn btn-xs btn-outline">View All</Link>
+                    </div>
+                    <div className="overflow-x-auto">
+                        <table className="table w-full">
+                            <thead>
+                                <tr>
+                                    <th>Name</th>
+                                    <th>Email</th>
+                                    <th>Role</th>
+                                    <th>Date</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {recentUsers.length > 0 ? recentUsers.map((user) => (
+                                    <tr key={user._id}>
+                                        <td>
+                                            <div className="flex items-center gap-2">
+                                                <div className="avatar">
+                                                    <div className="w-8 rounded-full">
+                                                        <img src={user.photoURL || "https://i.ibb.co/MBtH413/unknown-user.jpg"} alt={user.name} />
+                                                    </div>
+                                                </div>
+                                                <span className="font-bold">{user.name}</span>
+                                            </div>
+                                        </td>
+                                        <td>{user.email}</td>
+                                        <td>
+                                            <span className={`badge ${user.role === 'admin' ? 'badge-error text-white' :
+                                                user.role === 'tutor' ? 'badge-secondary text-white' :
+                                                    'badge-primary text-white'
+                                                }`}>
+                                                {user.role}
+                                            </span>
+                                        </td>
+                                        <td>{new Date(user.createdAt || Date.now()).toLocaleDateString()}</td>
+                                    </tr>
+                                )) : (
+                                    <tr>
+                                        <td colSpan="4" className="text-center text-gray-500">No recent registrations found.</td>
+                                    </tr>
+                                )}
+                            </tbody>
+                        </table>
                     </div>
                 </div>
             </div>

@@ -4,6 +4,7 @@ import useAxiosSecure from '../../../hooks/useAxiosSecure';
 import { motion } from 'framer-motion';
 import { Link } from 'react-router-dom';
 import { Users, DollarSign, Briefcase, Star, Clock, CheckCircle, TrendingUp, Calendar } from 'lucide-react';
+import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 import Card from '../../../components/ui/Card';
 import Spinner from '../../../components/ui/Spinner';
 import useAuth from '../../../hooks/useAuth';
@@ -98,6 +99,31 @@ const TutorOverview = () => {
                         </div>
                     </Card>
                 ))}
+            </div>
+
+            {/* Earnings Chart */}
+            <div className="card bg-base-100 shadow-sm border border-base-200">
+                <div className="card-body">
+                    <h2 className="card-title text-lg mb-4">Earnings Overview</h2>
+                    <div className="h-72 w-full">
+                        <ResponsiveContainer width="100%" height="100%">
+                            <LineChart data={[
+                                { name: 'Jan', earnings: 0 },
+                                { name: 'Feb', earnings: 0 },
+                                { name: 'Mar', earnings: stats.totalEarnings * 0.2 },
+                                { name: 'Apr', earnings: stats.totalEarnings * 0.3 },
+                                { name: 'May', earnings: stats.totalEarnings * 0.5 }, // Mock trend to match total
+                                { name: 'Jun', earnings: stats.totalEarnings }
+                            ]}>
+                                <CartesianGrid strokeDasharray="3 3" />
+                                <XAxis dataKey="name" />
+                                <YAxis />
+                                <Tooltip />
+                                <Line type="monotone" dataKey="earnings" stroke="#8884d8" activeDot={{ r: 8 }} />
+                            </LineChart>
+                        </ResponsiveContainer>
+                    </div>
+                </div>
             </div>
 
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">

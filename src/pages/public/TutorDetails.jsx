@@ -27,20 +27,21 @@ const TutorDetails = () => {
     const axiosSecure = useAxiosSecure();
     const [stats, setStats] = useState({ averageRating: 0, totalReviews: 0 });
 
-    useEffect(() => {
-        if (tutor) {
-            fetchStats();
-        }
-    }, [tutor]);
-
-    const fetchStats = async () => {
+    const fetchStats = React.useCallback(async () => {
+        if (!tutor) return;
         try {
             const res = await axiosInstance.get(`/tutor-rating/${tutor.email}`);
             setStats(res.data);
         } catch (error) {
             console.error('Failed to fetch rating stats:', error);
         }
-    };
+    }, [tutor]);
+
+    useEffect(() => {
+        if (tutor) {
+            fetchStats();
+        }
+    }, [fetchStats, tutor]);
 
     const [isContactModalOpen, setIsContactModalOpen] = useState(false);
     const [messageText, setMessageText] = useState('');
@@ -235,6 +236,28 @@ const TutorDetails = () => {
                                         )}
 
                                         <ReviewsList tutorEmail={tutor.email} />
+                                    </section>
+
+                                    {/* Related Tutors Section */}
+                                    <section>
+                                        <h2 className="text-2xl font-bold mb-6 flex items-center gap-2 border-b border-base-200 pb-2">
+                                            <User className="text-accent" /> Similar Tutors
+                                        </h2>
+                                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                            {[1, 2].map((i) => (
+                                                <Card key={i} className="hover:border-accent/30 transition-colors cursor-pointer" onClick={() => toast.success("Feature coming soon!")}>
+                                                    <div className="flex items-center gap-3 p-4">
+                                                        <div className="w-12 h-12 bg-base-200 rounded-full flex items-center justify-center">
+                                                            <User size={20} className="text-base-content/50" />
+                                                        </div>
+                                                        <div>
+                                                            <h4 className="font-bold">Expert Tutor</h4>
+                                                            <p className="text-xs text-base-content/60">{tutor.subject || 'Subject'} Specialist</p>
+                                                        </div>
+                                                    </div>
+                                                </Card>
+                                            ))}
+                                        </div>
                                     </section>
                                 </div>
 

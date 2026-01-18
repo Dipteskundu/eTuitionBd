@@ -14,8 +14,10 @@ const Input = forwardRef((
         maxLength,
         showCharCount = false,
         floating = false,
-        fullWidth, // Consume fullWidth to prevent it from passing to DOM via ...props
-        togglePassword, // Destructure to prevent passing to DOM
+        // eslint-disable-next-line no-unused-vars
+        _fullWidth,
+        // eslint-disable-next-line no-unused-vars
+        _togglePassword,
         ...props
     },
     ref
@@ -78,7 +80,7 @@ const Input = forwardRef((
                             ? 'input-error focus:ring-error/50'
                             : 'focus:ring-2 focus:ring-primary/50 focus:border-primary'
                             } ${leftIcon ? 'pl-10' : ''} ${rightIcon || isPassword ? 'pr-10' : ''
-                            } ${className}`}
+                            } ${props.success ? 'input-success focus:border-success focus:ring-success/50' : ''} ${className}`}
                         onFocus={() => setIsFocused(true)}
                         onBlur={() => setIsFocused(false)}
                         onChange={handleChange}

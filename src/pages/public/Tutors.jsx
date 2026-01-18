@@ -2,44 +2,58 @@ import React, { useEffect, useState } from 'react';
 import axiosInstance from '../../utils/axiosInstance';
 import { MapPin, BadgeCheck, User, Search, ArrowRight, ChevronLeft, ChevronRight } from 'lucide-react';
 import { Link } from 'react-router-dom';
+import { useQuery } from '@tanstack/react-query';
 import { motion } from 'framer-motion';
 import Card from '../../components/ui/Card';
 import Button from '../../components/ui/Button';
-import Spinner from '../../components/ui/Spinner';
+import { CardSkeleton } from '../../components/ui/Skeleton';
 import Input from '../../components/ui/Input';
+import Select from '../../components/ui/Select';
 import BookmarkButton from '../../components/ui/BookmarkButton';
 import useTitle from '../../hooks/useTitle';
 
 const Tutors = () => {
     useTitle('Tutors');
-    const [tutors, setTutors] = useState([]);
-    const [loading, setLoading] = useState(true);
     const [searchTerm, setSearchTerm] = useState('');
+    const [filters, setFilters] = useState({
+        subject: '',
+        location: '',
+        gender: '',
+        sort: ''
+    });
     const [currentPage, setCurrentPage] = useState(1);
-    const [totalPages, setTotalPages] = useState(1);
-    const [total, setTotal] = useState(0);
-    const limit = 8;
+    const limit = 9;
+
+    // Debounce search term separately to avoid re-fetching on every keystroke
+    const [debouncedSearch, setDebouncedSearch] = useState(searchTerm);
 
     useEffect(() => {
-        const fetchTutors = async () => {
-            setLoading(true);
-            try {
-                const res = await axiosInstance.get('/tutors', {
-                    params: { page: currentPage, limit, search: searchTerm }
-                });
-                setTutors(res.data.data || []);
-                setTotalPages(res.data.totalPages || 1);
-                setTotal(res.data.total || 0);
-            } catch (error) {
-                console.error("Failed to fetch tutors", error);
-            } finally {
-                setLoading(false);
-            }
-        };
+        const timer = setTimeout(() => {
+            setDebouncedSearch(searchTerm);
+        }, 300);
+        return () => clearTimeout(timer);
+    }, [searchTerm]);
 
-        const debounceTimer = setTimeout(fetchTutors, 300);
-        return () => clearTimeout(debounceTimer);
-    }, [currentPage, searchTerm]);
+    const { data, isLoading: loading } = useQuery({
+        queryKey: ['tutors', currentPage, debouncedSearch, filters],
+        queryFn: async () => {
+            const res = await axiosInstance.get('/tutors', {
+                params: {
+                    page: currentPage,
+                    limit,
+                    search: debouncedSearch,
+                    ...filters
+                }
+            });
+            return res.data;
+        },
+        placeholderData: (previousData) => previousData
+    });
+
+    // Derived state from query data
+    const tutors = data?.data || [];
+    const totalPages = data?.totalPages || 1;
+    const total = data?.total || 0;
 
     const handlePageChange = (newPage) => {
         if (newPage >= 1 && newPage <= totalPages) {
@@ -89,21 +103,72 @@ const Tutors = () => {
                                 setSearchTerm(e.target.value);
                                 setCurrentPage(1); // Reset to page 1 on search
                             }}
-                            className="bg-base-100/50 backdrop-blur-sm"
+                            className="bg-base-100/50 backdrop-blur-sm mb-5"
                         />
+                    </div>
+
+                    {/* Filters & Sort */}
+                    <div className="flex flex-col md:flex-row gap-3 justify-center items-center mb-6">
+                        <Select
+                            className="bg-base-100/50 backdrop-blur-sm w-full md:w-auto min-w-[140px]"
+                            placeholder="Expertise"
+                            options={["Math", "English", "Physics", "Chemistry", "Biology", "Accounting", "Arts"]}
+                            value={filters.subject}
+                            onChange={(e) => { setFilters({ ...filters, subject: e.target.value }); setCurrentPage(1); }}
+                        />
+                        <Select
+                            className="bg-base-100/50 backdrop-blur-sm w-full md:w-auto min-w-[140px]"
+                            placeholder="Location"
+                            options={["Dhaka", "Chattogram", "Sylhet", "Rajshahi", "Khulna", "Barishal", "Rangpur"]}
+                            value={filters.location}
+                            onChange={(e) => { setFilters({ ...filters, location: e.target.value }); setCurrentPage(1); }}
+                        />
+                        <Select
+                            className="bg-base-100/50 backdrop-blur-sm w-full md:w-auto min-w-[140px]"
+                            placeholder="Gender"
+                            options={["Male", "Female"]}
+                            value={filters.gender}
+                            onChange={(e) => { setFilters({ ...filters, gender: e.target.value }); setCurrentPage(1); }}
+                        />
+                        <Select
+                            className="bg-base-100/50 backdrop-blur-sm w-full md:w-auto min-w-[140px]"
+                            placeholder="Sort By"
+                            options={[
+                                { label: 'Rating: High to Low', value: 'rating:desc' },
+                                { label: 'Newest Members', value: 'createdAt:desc' }
+                            ]}
+                            value={filters.sort}
+                            onChange={(e) => { setFilters({ ...filters, sort: e.target.value }); setCurrentPage(1); }}
+                        />
+                        {(filters.subject || filters.location || filters.gender || filters.sort) && (
+                            <Button
+                                variant="ghost"
+                                size="sm"
+                                className="text-error"
+                                onClick={() => {
+                                    setFilters({ subject: '', location: '', gender: '', sort: '' });
+                                    setSearchTerm('');
+                                    setCurrentPage(1);
+                                }}
+                            >
+                                Clear
+                            </Button>
+                        )}
                     </div>
 
                     {/* Results Count */}
                     {total > 0 && (
-                        <p className="text-sm text-base-content/60 mt-4">
+                        <p className="text-sm text-base-content/60">
                             Showing {tutors.length} of {total} tutors
                         </p>
                     )}
                 </div>
 
                 {loading ? (
-                    <div className="flex justify-center py-20">
-                        <Spinner variant="dots" size="lg" />
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                        {[...Array(8)].map((_, i) => (
+                            <CardSkeleton key={i} />
+                        ))}
                     </div>
                 ) : tutors.length === 0 ? (
                     <motion.div
@@ -125,7 +190,7 @@ const Tutors = () => {
                             variants={containerVariants}
                             initial="hidden"
                             animate="visible"
-                            className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6"
+                            className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"
                         >
                             {tutors.map((tutor) => (
                                 <motion.div key={tutor._id} variants={itemVariants}>
@@ -177,7 +242,7 @@ const Tutors = () => {
                                         </p>
 
                                         <Link to={`/tutors/${tutor._id}`} className="w-full mt-auto">
-                                            <Button size="sm" variant="outline" fullWidth rightIcon={ArrowRight}>
+                                            <Button size="sm" variant="outline" fullWidth rightIcon={<ArrowRight size={18} />} className="whitespace-nowrap">
                                                 View Profile
                                             </Button>
                                         </Link>

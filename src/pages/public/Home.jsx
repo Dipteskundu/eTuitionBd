@@ -1,5 +1,6 @@
-import React, { useContext } from 'react';
+import React from 'react';
 import { Link } from 'react-router-dom';
+import { useQuery } from '@tanstack/react-query';
 import axiosInstance from '../../utils/axiosInstance';
 import { motion } from 'framer-motion';
 import Marquee from 'react-fast-marquee';
@@ -12,34 +13,26 @@ import useTitle from '../../hooks/useTitle';
 
 const Home = () => {
     useTitle('Home');
-    const { theme } = useContext(ThemeContext);
-    // Mock Data
-    const [tuitions, setTuitions] = React.useState([]);
-    const [tutors, setTutors] = React.useState([]);
-    const [loading, setLoading] = React.useState(true);
+    // Data Fetching with TanStack Query
+    const { data: tuitions = [] } = useQuery({
+        queryKey: ['latestTuitions'],
+        queryFn: async () => {
+            const res = await axiosInstance.get('/tuitions');
+            return (res.data.data || []).slice(0, 3);
+        }
+    });
 
-    React.useEffect(() => {
-        const fetchData = async () => {
-            try {
-                // Fetch Latest Tuitions
-                const tuitionRes = await axiosInstance.get('/tuitions');
-                // The API returns { data: [], total: ... }
-                const tuitionData = tuitionRes.data.data || [];
-                setTuitions(tuitionData.slice(0, 3)); // Show only 3 latest
+    const { data: tutors = [] } = useQuery({
+        queryKey: ['topTutors'],
+        queryFn: async () => {
+            const res = await axiosInstance.get('/tutors');
+            return (Array.isArray(res.data) ? res.data : (res.data.data || res.data.result || [])).slice(0, 4);
+        }
+    });
 
-                // Fetch Top Tutors (Just fetching all and taking first 4 for now)
-                const tutorRes = await axiosInstance.get('/tutors');
-                // The API now returns { data: [], total: number } or similar, let's verify in index.js but assuming standard structure
-                // Adjusting based on common pattern: res.data.data or res.data
-                const tutorList = Array.isArray(tutorRes.data) ? tutorRes.data : (tutorRes.data.data || tutorRes.data.result || []);
-                setTutors(tutorList.slice(0, 4));
-            } finally {
-                setLoading(false);
-            }
-        };
+    // Combined loading state for initial render if needed, or handle individually
+    // const loading = tuitionsLoading || tutorsLoading; // Optional: if we want to block the whole page
 
-        fetchData();
-    }, []);
 
     const containerVariants = {
         hidden: { opacity: 0 },
@@ -123,7 +116,7 @@ const Home = () => {
     return (
         <div className="overflow-hidden">
             {/* Hero Section */}
-            <section className="relative min-h-screen flex items-center overflow-hidden bg-primary/5">
+            <section className="relative min-h-[70vh] flex items-center overflow-hidden bg-primary/5 py-10">
                 {/* Animated Background Orbs */}
                 <div className="absolute inset-0 opacity-20 pointer-events-none">
                     <motion.div

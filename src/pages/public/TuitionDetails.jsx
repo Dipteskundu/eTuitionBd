@@ -2,7 +2,6 @@ import React, { useEffect, useState } from 'react';
 import useTitle from '../../hooks/useTitle';
 import { useParams, useNavigate, useLocation } from 'react-router-dom';
 import useAuth from '../../hooks/useAuth';
-import useAxiosSecure from '../../hooks/useAxiosSecure';
 import axiosInstance from '../../utils/axiosInstance';
 import toast from 'react-hot-toast';
 import BecomeTeacherModal from '../../components/BecomeTeacherModal';
@@ -19,11 +18,10 @@ const TuitionDetails = () => {
     const navigate = useNavigate();
     const location = useLocation();
     const { user, role } = useAuth();
-    const axiosSecure = useAxiosSecure();
+
 
     const [tuition, setTuition] = useState(null);
     const [loading, setLoading] = useState(true);
-    const [applying, setApplying] = useState(false);
     const [showBecomeTeacherModal, setShowBecomeTeacherModal] = useState(false);
     const [showConfirmModal, setShowConfirmModal] = useState(false);
 
@@ -70,27 +68,7 @@ const TuitionDetails = () => {
         }
     };
 
-    const confirmApply = async () => {
-        setApplying(true);
-        try {
-            await axiosSecure.post('/apply-tuition', {
-                tuitionId: id,
-                expectedSalary: tuition.salary, // defaulting to posted salary
-                // We could prompt for salary negotiation but requirement says just "Apply"
-            });
-            toast.success("Application sent successfully!");
-            setShowConfirmModal(false);
-        } catch (error) {
-            console.error(error);
-            if (error.response?.status === 409) {
-                toast.error(error.response.data.message || "Already applied!");
-            } else {
-                toast.error(error.response?.data?.message || "Failed to apply.");
-            }
-        } finally {
-            setApplying(false);
-        }
-    };
+
 
     if (loading) return <Spinner fullScreen variant="dots" />;
     if (!tuition) return null;
@@ -228,6 +206,26 @@ const TuitionDetails = () => {
                         </div>
                     </Card>
                 </motion.div>
+
+                {/* Related Tuitions Section */}
+                <div className="mt-12">
+                    <h2 className="text-2xl font-bold mb-6 flex items-center gap-2">
+                        <BookOpen className="text-primary" /> Related Tuitions
+                    </h2>
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                        {/* Mock Related Items (Since API doesn't support 'related' yet) */}
+                        {[1, 2, 3].map((i) => (
+                            <Card key={i} className="hover:border-primary/50 transition-colors cursor-pointer" onClick={() => toast.success("This feature is coming soon!")}>
+                                <div className="p-4">
+                                    <div className="badge badge-outline mb-2">Class {tuition.class}</div>
+                                    <h3 className="font-bold text-lg mb-2">Need Tutor for {tuition.subject}</h3>
+                                    <p className="text-sm text-base-content/60 mb-3"><MapPin size={14} className="inline mr-1" /> {tuition.location}</p>
+                                    <Button size="sm" variant="outline" fullWidth>View Details</Button>
+                                </div>
+                            </Card>
+                        ))}
+                    </div>
+                </div>
             </div>
 
             <BecomeTeacherModal
@@ -239,7 +237,7 @@ const TuitionDetails = () => {
                 isOpen={showConfirmModal}
                 onClose={() => setShowConfirmModal(false)}
                 tuition={tuition}
-                onSuccess={() => setApplying(false)}
+                onSuccess={() => setShowConfirmModal(false)}
             />
         </div>
     );

@@ -118,8 +118,15 @@ module.exports = {
                 '128': '32rem',
             },
             borderRadius: {
-                '4xl': '2rem',
-                '5xl': '2.5rem',
+                'none': '0',
+                'sm': '0.125rem',
+                DEFAULT: '0.25rem',
+                'md': '0.375rem',
+                'lg': '0.5rem',
+                'xl': '0.75rem',
+                '2xl': '1rem',
+                '3xl': '1.5rem',
+                'full': '9999px',
             },
             boxShadow: {
                 'soft': '0 2px 15px -3px rgba(0, 0, 0, 0.07), 0 10px 20px -2px rgba(0, 0, 0, 0.04)',

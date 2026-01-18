@@ -6,7 +6,7 @@ const Footer = () => {
     return (
         <footer className="bg-white dark:bg-slate-900 border-t border-gray-100 dark:border-slate-800 transition-colors duration-300">
             <div className="container mx-auto px-6 py-16">
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-12 text-center md:text-left">
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-12 text-center md:text-left -mb-5">
                     {/* Brand Info */}
                     <div className="space-y-6">
                         <Link to="/" className="inline-block">
@@ -45,10 +45,10 @@ const Footer = () => {
                     <div>
                         <h4 className="text-lg font-bold mb-6 text-slate-900 dark:text-white">Support</h4>
                         <ul className="space-y-4 text-sm text-slate-500 dark:text-slate-400">
-                            <li><Link to="#" className="hover:text-primary transition-colors flex items-center justify-center md:justify-start gap-2 group"><span className="w-1.5 h-1.5 rounded-full bg-primary opacity-0 group-hover:opacity-100 transition-opacity" />Help Center</Link></li>
-                            <li><Link to="#" className="hover:text-primary transition-colors flex items-center justify-center md:justify-start gap-2 group"><span className="w-1.5 h-1.5 rounded-full bg-primary opacity-0 group-hover:opacity-100 transition-opacity" />Terms of Service</Link></li>
-                            <li><Link to="#" className="hover:text-primary transition-colors flex items-center justify-center md:justify-start gap-2 group"><span className="w-1.5 h-1.5 rounded-full bg-primary opacity-0 group-hover:opacity-100 transition-opacity" />Privacy Policy</Link></li>
-                            <li><Link to="#" className="hover:text-primary transition-colors flex items-center justify-center md:justify-start gap-2 group"><span className="w-1.5 h-1.5 rounded-full bg-primary opacity-0 group-hover:opacity-100 transition-opacity" />Contact Us</Link></li>
+                            <li><Link to="/faq" className="hover:text-primary transition-colors flex items-center justify-center md:justify-start gap-2 group"><span className="w-1.5 h-1.5 rounded-full bg-primary opacity-0 group-hover:opacity-100 transition-opacity" />FAQ</Link></li>
+                            <li><Link to="/about" className="hover:text-primary transition-colors flex items-center justify-center md:justify-start gap-2 group"><span className="w-1.5 h-1.5 rounded-full bg-primary opacity-0 group-hover:opacity-100 transition-opacity" />About Us</Link></li>
+                            <li><Link to="/contact" className="hover:text-primary transition-colors flex items-center justify-center md:justify-start gap-2 group"><span className="w-1.5 h-1.5 rounded-full bg-primary opacity-0 group-hover:opacity-100 transition-opacity" />Contact Us</Link></li>
+                            <li><Link to="/faq" className="hover:text-primary transition-colors flex items-center justify-center md:justify-start gap-2 group"><span className="w-1.5 h-1.5 rounded-full bg-primary opacity-0 group-hover:opacity-100 transition-opacity" />Help Center</Link></li>
                         </ul>
                     </div>
 
@@ -78,9 +78,9 @@ const Footer = () => {
                     </div>
                 </div>
 
-                <div className="h-px bg-slate-100 dark:bg-slate-800 my-10"></div>
+                <div className="h-px bg-slate-100 dark:bg-slate-800 my-10 "></div>
 
-                <div className="flex flex-col md:flex-row justify-between items-center gap-6 text-sm text-slate-500 dark:text-slate-400">
+                <div className="flex flex-col md:flex-row justify-between items-center gap-6 text-sm text-slate-500 dark:text-slate-400 -mb-10 -mt-6">
                     <p className="font-medium text-center md:text-left">&copy; {new Date().getFullYear()} eTuitionBd. Crafted with ❤️ for education.</p>
                     <div className="flex flex-wrap justify-center gap-8">
                         <Link to="#" className="hover:text-primary transition-colors font-medium">Privacy</Link>

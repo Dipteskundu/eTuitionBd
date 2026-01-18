@@ -1,13 +1,76 @@
 <!doctype html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <link rel="icon" type="image/svg+xml" href="./src/assets/logo.png" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>eTuitionBd - Find Best Tutors in Bangladesh</title>
-  </head>
-  <body>
-    <div id="root"></div>
-    <script type="module" src="/src/main.jsx"></script>
-  </body>
+
+<head>
+  <meta charset="UTF-8" />
+  <link rel="icon" type="image/svg+xml" href="./src/assets/logo.png" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>eTuitionBd - Find Best Tutors in Bangladesh</title>
+  <script>
+    // Comprehensive error suppression for browser extensions and Firebase
+    (function () {
+      const originalError = console.error;
+      const originalWarn = console.warn;
+
+      // Suppress console errors from extensions
+      console.error = function (...args) {
+        const msg = args.join(' ');
+        if (
+          msg.includes('Could not establish connection') ||
+          msg.includes('Receiving end does not exist') ||
+          msg.includes('runtime.lastError') ||
+          msg.includes('Error handling response') ||
+          msg.includes('chrome-extension://')
+        ) {
+          return; // Suppress
+        }
+        originalError.apply(console, args);
+      };
+
+      console.warn = function (...args) {
+        const msg = args.join(' ');
+        if (msg.includes('Download the React DevTools')) {
+          return; // Suppress DevTools suggestion
+        }
+        originalWarn.apply(console, args);
+      };
+
+      // Suppress global errors from extensions
+      window.addEventListener('error', function (e) {
+        if (
+          e.message && (
+            e.message.includes('Could not establish connection') ||
+            e.message.includes('Receiving end does not exist') ||
+            e.message.includes('chrome-extension')
+          )
+        ) {
+          e.stopImmediatePropagation();
+          e.preventDefault();
+          return false;
+        }
+      }, true);
+
+      // Suppress unhandled promise rejections from extensions
+      window.addEventListener('unhandledrejection', function (e) {
+        if (
+          e.reason && e.reason.message && (
+            e.reason.message.includes('Could not establish connection') ||
+            e.reason.message.includes('Receiving end does not exist') ||
+            e.reason.message.includes('chrome-extension')
+          )
+        ) {
+          e.stopImmediatePropagation();
+          e.preventDefault();
+          return false;
+        }
+      }, true);
+    })();
+  </script>
+</head>
+
+<body>
+  <div id="root"></div>
+  <script type="module" src="/src/main.jsx"></script>
+</body>
+
 </html>

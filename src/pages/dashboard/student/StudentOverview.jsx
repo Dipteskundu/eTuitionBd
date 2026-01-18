@@ -4,6 +4,7 @@ import useAxiosSecure from '../../../hooks/useAxiosSecure';
 import useAuth from '../../../hooks/useAuth';
 import { Link } from 'react-router-dom';
 import { LayoutDashboard, FileText, CheckCircle, DollarSign, Activity, Clock, Users, BookOpen } from 'lucide-react';
+import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip, Legend } from 'recharts';
 import Card from '../../../components/ui/Card';
 import Spinner from '../../../components/ui/Spinner';
 import DashboardHeader from '../../../components/Shared/DashboardHeader';
@@ -11,7 +12,7 @@ import BecomeTeacherModal from '../../../components/BecomeTeacherModal';
 
 const StudentOverview = () => {
     useTitle('Student Dashboard');
-    const { user, role } = useAuth();
+    const { role } = useAuth();
     const axiosSecure = useAxiosSecure();
     const [stats, setStats] = useState({
         totalTuitions: 0,
@@ -101,50 +102,86 @@ const StudentOverview = () => {
                 ))}
             </div>
 
-            {/* Role Request Status Section */}
-            <div className="card bg-base-100 shadow-sm border border-base-200">
-                <div className="card-body">
-                    <h2 className="card-title text-lg mb-4">Tutor Role Requests</h2>
-                    {roleRequests.length > 0 ? (
-                        <div className="overflow-x-auto">
-                            <table className="table w-full">
-                                <thead>
-                                    <tr>
-                                        <th>Requested Role</th>
-                                        <th>Date</th>
-                                        <th>Status</th>
-                                        <th>Comments</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    {roleRequests.map((req) => (
-                                        <tr key={req._id}>
-                                            <td className="capitalize">{req.requestedRole}</td>
-                                            <td>{new Date(req.created_at).toLocaleDateString()}</td>
-                                            <td>
-                                                <span className={`badge ${req.status === 'approved' ? 'badge-success text-white' :
-                                                    req.status === 'rejected' ? 'badge-error text-white' :
-                                                        'badge-warning text-white'
-                                                    }`}>
-                                                    {req.status}
-                                                </span>
-                                            </td>
-                                            <td className="text-sm text-gray-500">
-                                                {req.status === 'approved' ? 'Please refresh to access Tutor Dashboard' :
-                                                    req.status === 'rejected' ? 'Contact Admin for meaningful feedback' :
-                                                        'Under Review'}
-                                            </td>
+            {/* Charts & Tables Section */}
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                {/* Tuition Status Chart */}
+                <div className="card bg-base-100 shadow-sm border border-base-200">
+                    <div className="card-body">
+                        <h2 className="card-title text-lg mb-4">Tuition Status</h2>
+                        <div className="h-64 w-full">
+                            <ResponsiveContainer width="100%" height="100%">
+                                <PieChart>
+                                    <Pie
+                                        data={[
+                                            { name: 'Active', value: stats.activeTuitions },
+                                            { name: 'Completed', value: stats.completedTuitions },
+                                            { name: 'Pending', value: stats.totalTuitions - (stats.activeTuitions + stats.completedTuitions) }
+                                        ]}
+                                        cx="50%"
+                                        cy="50%"
+                                        innerRadius={60}
+                                        outerRadius={80}
+                                        fill="#8884d8"
+                                        paddingAngle={5}
+                                        dataKey="value"
+                                    >
+                                        <Cell fill="#3b82f6" /> {/* Active - Primary/Blue */}
+                                        <Cell fill="#10b981" /> {/* Completed - Success/Green */}
+                                        <Cell fill="#f59e0b" /> {/* Pending - Warning/Yellow */}
+                                    </Pie>
+                                    <Tooltip />
+                                    <Legend />
+                                </PieChart>
+                            </ResponsiveContainer>
+                        </div>
+                    </div>
+                </div>
+
+                {/* Recent Logs / Role Requests */}
+                <div className="lg:col-span-2 card bg-base-100 shadow-sm border border-base-200">
+                    <div className="card-body">
+                        <h2 className="card-title text-lg mb-4">Tutor Role Requests</h2>
+                        {roleRequests.length > 0 ? (
+                            <div className="overflow-x-auto">
+                                <table className="table w-full">
+                                    <thead>
+                                        <tr>
+                                            <th>Requested Role</th>
+                                            <th>Date</th>
+                                            <th>Status</th>
+                                            <th>Comments</th>
                                         </tr>
-                                    ))}
-                                </tbody>
-                            </table>
-                        </div>
-                    ) : (
-                        <div className="text-center py-4">
-                            <p className="text-gray-500 mb-2">You haven't requested to become a tutor yet.</p>
-                            <div className="text-sm text-purple-600">Apply for a tuition to start the process!</div>
-                        </div>
-                    )}
+                                    </thead>
+                                    <tbody>
+                                        {roleRequests.map((req) => (
+                                            <tr key={req._id}>
+                                                <td className="capitalize">{req.requestedRole}</td>
+                                                <td>{new Date(req.created_at).toLocaleDateString()}</td>
+                                                <td>
+                                                    <span className={`badge ${req.status === 'approved' ? 'badge-success text-white' :
+                                                        req.status === 'rejected' ? 'badge-error text-white' :
+                                                            'badge-warning text-white'
+                                                        }`}>
+                                                        {req.status}
+                                                    </span>
+                                                </td>
+                                                <td className="text-sm text-gray-500">
+                                                    {req.status === 'approved' ? 'Please refresh to access Tutor Dashboard' :
+                                                        req.status === 'rejected' ? 'Contact Admin for meaningful feedback' :
+                                                            'Under Review'}
+                                                </td>
+                                            </tr>
+                                        ))}
+                                    </tbody>
+                                </table>
+                            </div>
+                        ) : (
+                            <div className="text-center py-4">
+                                <p className="text-gray-500 mb-2">You haven't requested to become a tutor yet.</p>
+                                <div className="text-sm text-purple-600">Apply for a tuition to start the process!</div>
+                            </div>
+                        )}
+                    </div>
                 </div>
             </div>
 
@@ -202,6 +239,11 @@ const StudentOverview = () => {
                     </div>
                 </div>
             </div>
+
+            <BecomeTeacherModal
+                isOpen={showBecomeTeacherModal}
+                onClose={() => setShowBecomeTeacherModal(false)}
+            />
         </div>
     );
 };

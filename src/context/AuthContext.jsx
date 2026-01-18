@@ -3,6 +3,7 @@ import {
     createUserWithEmailAndPassword,
     signInWithEmailAndPassword,
     signInWithPopup,
+    getRedirectResult,
     signOut,
     onAuthStateChanged,
     updateProfile,
@@ -30,6 +31,7 @@ export const AuthProvider = ({ children }) => {
 
             // Allow role fetching even if no token yet (public endpoint or user just logged in)
             const res = await axiosInstance.get(`/users/${email}`);
+            // console.log('User role fetch success:', res.data?.role); // Debug log
             if (res.data) {
                 const backendRole = res.data.role;
                 if (backendRole) {
@@ -49,6 +51,7 @@ export const AuthProvider = ({ children }) => {
             }
         } catch (error) {
             console.error("Error fetching user role:", error);
+            console.error("Backend URL used:", import.meta.env.VITE_API_BASE_URL); // Debug log for environment config
             // Fallback to localStorage if backend fails
             const cachedRole = localStorage.getItem('userRole');
             if (cachedRole) {
@@ -91,6 +94,25 @@ export const AuthProvider = ({ children }) => {
     };
 
     useEffect(() => {
+        // Handle redirect result from Google OAuth
+        const handleRedirectResult = async () => {
+            try {
+                const result = await getRedirectResult(auth);
+                if (result?.user) {
+                    // User successfully signed in via redirect
+                    const token = await result.user.getIdToken();
+                    localStorage.setItem('token', token);
+                    setUser(result.user);
+                    await fetchUserRole(result.user.email);
+                }
+            } catch (error) {
+                console.error("Error handling redirect result:", error);
+                setLoading(false);
+            }
+        };
+
+        handleRedirectResult();
+
         const unsubscribe = onAuthStateChanged(auth, async (currentUser) => {
             if (currentUser) {
                 // 1. Get Token FIRST
@@ -101,8 +123,8 @@ export const AuthProvider = ({ children }) => {
                     // 2. Set User (triggers PrivateRoute check, but token is now ready)
                     setUser(currentUser);
 
-                    // 3. Fetch Role (non-blocking for auth, but good to have)
-                    await fetchUserRole(currentUser.email);
+                    // 3. Fetch Role - Optimized to be non-blocking if cache exists
+                    fetchUserRole(currentUser.email);
                 } catch (error) {
                     console.error("Error setting up auth:", error);
                     localStorage.removeItem('token');
@@ -117,7 +139,7 @@ export const AuthProvider = ({ children }) => {
                 setDbUser(null);
             }
 
-            // 4. Finally stop loading
+            // 4. Finally stop loading - Move this outside if/else to ensure it always runs
             setLoading(false);
         });
 

@@ -34,7 +34,7 @@ const Card = ({
             viewport={{ once: true }}
             transition={{ duration: 0.4 }}
             whileHover={hover ? { y: -8, transition: { duration: 0.2 } } : {}}
-            className={`${baseClasses} ${variantClasses} ${hoverClasses} ${compact ? 'card-compact' : ''} ${className}`}
+            className={`${baseClasses} ${variantClasses} ${hoverClasses} rounded-xl ${compact ? 'card-compact' : ''} ${className}`}
             {...props}
         >
             {image && (
